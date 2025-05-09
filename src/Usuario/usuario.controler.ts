@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express' 
 import { UsuarioRepository } from './Usuario.repository.js'
 import { Usuario } from './Usuario.entity.js'
-
+ 
 const repository = new UsuarioRepository()
 
 function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
