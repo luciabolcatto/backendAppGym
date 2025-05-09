@@ -1,0 +1,48 @@
+### obtener todos los usuarios
+GET http://localhost:3000/api/usuarios
+
+
+### obtener un usuario
+GET http://localhost:3000/api/usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+
+### crear un nuevo usuario
+POST http://localhost:3000/api/usuarios
+Content-Type: application/json
+
+{
+  "name": "Atila",
+  "usuarioClass": "warrior",
+  "items": ["bow","arrow"],
+  "attack": 10,
+  "mana": 10,
+  "hp": 10,
+  "level": 1
+}
+
+### modificar un usuario (PUT - recurso completo e idempotente)
+PUT http://localhost:3000/api/usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+Content-Type: application/json
+
+{
+  "name": "Anakin Skywalker",
+  "usuarioClass": "Fallen Jedi",
+  "items": ["Lightsaber", "Death Star"],
+  "attack": 110,
+  "mana": 500,
+  "hp": 100,
+  "level": 11    
+}
+
+### modificar un usuario (PATCH - recurso parcial)
+PATCH http://localhost:3000/api/usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+Content-Type: application/json
+
+{
+  "name": "Anakin Skywalker",
+  "usuarioClass": "Fallen Jedi",
+  "items": ["Lightsaber", "X-Wing"],
+  "level": 12    
+}
+
+### borrar un usuario
+DELETE http://localhost:3000/api/usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
