@@ -1,5 +1,5 @@
 import { Repository } from '../shared/repository.js'
-import { Usuario } from './Usuario.entity.js' 
+import { Usuario } from './usuario.entity.js' 
 
 const Usuarios  = [
   new Usuario(
@@ -7,6 +7,7 @@ const Usuarios  = [
     'Juares',
     340145226,
     'facundo@gmail.com',
+    'a02b91bc-3769-4221-beb1-d7a3aeba7dad'
   ),
 ]
 

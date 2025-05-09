@@ -18,5 +18,8 @@
     "@types/node": "^22.15.17",
     "tsc-watch": "6.2.1",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "express": "5.1.0"
   }
 }

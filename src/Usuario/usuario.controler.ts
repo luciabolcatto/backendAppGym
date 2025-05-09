@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express' 
-import { UsuarioRepository } from './Usuario.repository.js'
-import { Usuario } from './Usuario.entity.js'             
+import { UsuarioRepository } from './usuario.repository.js'
+import { Usuario } from './usuario.entity.js'             
  
 const repository = new UsuarioRepository()
 
@@ -30,9 +30,11 @@ function findOne(req: Request, res: Response) {
   const id = req.params.id
   const usuario = repository.findOne({ id })
   if (!usuario) {
-    return res.status(404).send({ message: 'Usuario not found' })
+    res.status(404).send({ message: 'Usuario not found' })
   }
+  else{
   res.json({ data: usuario })
+  }
 }
 
 function add(req: Request, res: Response) {
@@ -47,7 +49,7 @@ function add(req: Request, res: Response) {
   )
 
   const usuario = repository.add(usuarioInput)
-  return res.status(201).send({ message: 'Usuario created', data: usuario })
+  res.status(201).send({ message: 'Usuario created', data: usuario })
 }
 
 function update(req: Request, res: Response) {
@@ -55,10 +57,11 @@ function update(req: Request, res: Response) {
   const usuario = repository.update(req.body.sanitizedInput)
 
   if (!usuario) {
-    return res.status(404).send({ message: 'Usuario not found' })
+    res.status(404).send({ message: 'Usuario not found' })
   }
-
-  return res.status(200).send({ message: 'Usuario updated successfully', data: usuario })
+else {
+   res.status(200).send({ message: 'Usuario updated successfully', data: usuario })
+  }
 }
 
 function remove(req: Request, res: Response) {

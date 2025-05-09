@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { sanitizeUsuarioInput, findAll, findOne, add, update, remove } from './Usuario.controler.js'
+import { sanitizeUsuarioInput, findAll, findOne, add, update, remove } from './usuario.controler.js'
 
 export const UsuarioRouter = Router()
 
