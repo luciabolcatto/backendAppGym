@@ -1,17 +1,17 @@
-### obtener todos los usuarios
-GET http://localhost:3000/api/usuarios
+### obtener todos los Usuarios
+GET http://localhost:3000/api/Usuarios
 
 
-### obtener un usuario
-GET http://localhost:3000/api/usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+### obtener un Usuario
+GET http://localhost:3000/api/Usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
 
-### crear un nuevo usuario
-POST http://localhost:3000/api/usuarios
+### crear un nuevo Usuario
+POST http://localhost:3000/api/Usuarios
 Content-Type: application/json
 
 {
   "name": "Atila",
-  "usuarioClass": "warrior",
+  "UsuarioClass": "warrior",
   "items": ["bow","arrow"],
   "attack": 10,
   "mana": 10,
@@ -19,13 +19,13 @@ Content-Type: application/json
   "level": 1
 }
 
-### modificar un usuario (PUT - recurso completo e idempotente)
-PUT http://localhost:3000/api/usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+### modificar un Usuario (PUT - recurso completo e idempotente)
+PUT http://localhost:3000/api/Usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
 Content-Type: application/json
 
 {
   "name": "Anakin Skywalker",
-  "usuarioClass": "Fallen Jedi",
+  "UsuarioClass": "Fallen Jedi",
   "items": ["Lightsaber", "Death Star"],
   "attack": 110,
   "mana": 500,
@@ -33,16 +33,16 @@ Content-Type: application/json
   "level": 11    
 }
 
-### modificar un usuario (PATCH - recurso parcial)
-PATCH http://localhost:3000/api/usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+### modificar un Usuario (PATCH - recurso parcial)
+PATCH http://localhost:3000/api/Usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
 Content-Type: application/json
 
 {
   "name": "Anakin Skywalker",
-  "usuarioClass": "Fallen Jedi",
+  "UsuarioClass": "Fallen Jedi",
   "items": ["Lightsaber", "X-Wing"],
   "level": 12    
 }
 
-### borrar un usuario
-DELETE http://localhost:3000/api/usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+### borrar un Usuario
+DELETE http://localhost:3000/api/Usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad

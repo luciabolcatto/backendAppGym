@@ -1,13 +1,13 @@
-import { Request, Response, NextFunction } from 'express'
-import { UsuarioRepository } from './usuario.repository.js'
-import { Usuario } from './usuario.entity.js'
+import { Request, Response, NextFunction } from 'express' 
+import { UsuarioRepository } from './Usuario.repository.js'
+import { Usuario } from './Usuario.entity.js'
 
 const repository = new UsuarioRepository()
 
-function sanitizeusuarioInput(req: Request, res: Response, next: NextFunction) {
+function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     name: req.body.name,
-    usuarioClass: req.body.usuarioClass,
+    UsuarioClass: req.body.UsuarioClass,
     level: req.body.level,
     hp: req.body.hp,
     mana: req.body.mana,
@@ -30,50 +30,47 @@ function findAll(req: Request, res: Response) {
 
 function findOne(req: Request, res: Response) {
   const id = req.params.id
-  const usuario = repository.findOne({ id })
-  if (!usuario) {
-    return res.status(404).send({ message: 'usuario not found' })
+  const Usuario = repository.findOne({ id })
+  if (!Usuario) {
+    return res.status(404).send({ message: 'Usuario not found' })
   }
-  res.json({ data: usuario })
+  res.json({ data: Usuario })
 }
 
 function add(req: Request, res: Response) {
   const input = req.body.sanitizedInput
 
-  const usuarioInput = new usuario(
-    input.name,
-    input.usuarioClass,
-    input.level,
-    input.hp,
-    input.mana,
-    input.attack,
-    input.items
+  const UsuarioInput = new Usuario(
+    input.nombre,
+    input.apellido,
+    input.tel,
+    input.mail,
   )
 
-  const usuario = repository.add(usuarioInput)
-  return res.status(201).send({ message: 'usuario created', data: usuario })
+  const Usuario = repository.add(UsuarioInput)
+  return res.status(201).send({ message: 'Usuario created', data: Usuario })
 }
 
 function update(req: Request, res: Response) {
   req.body.sanitizedInput.id = req.params.id
-  const usuario = repository.update(req.body.sanitizedInput)
+  const Usuario = repository.update(req.body.sanitizedInput)
 
-  if (!usuario) {
-    return res.status(404).send({ message: 'usuario not found' })
+  if (!Usuario) {
+    return res.status(404).send({ message: 'Usuario not found' })
   }
 
-  return res.status(200).send({ message: 'usuario updated successfully', data: usuario })
+  return res.status(200).send({ message: 'Usuario updated successfully', data: Usuario })
 }
 
 function remove(req: Request, res: Response) {
   const id = req.params.id
-  const usuario = repository.delete({ id })
+  const Usuario = repository.delete({ id })
 
-  if (!usuario) {
-    res.status(404).send({ message: 'usuario not found' })
+  if (!Usuario) {
+    res.status(404).send({ message: 'Usuario not found' })
   } else {
-    res.status(200).send({ message: 'usuario deleted successfully' })
+    res.status(200).send({ message: 'Usuario deleted successfully' })
   }
 }
 
-export { sanitizeusuarioInput, findAll, findOne, add, update, remove }
+export { sanitizeUsuarioInput, findAll, findOne, add, update, remove }
