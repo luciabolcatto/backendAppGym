@@ -3,14 +3,10 @@ import { Usuario } from './Usuario.entity.js'
 
 const Usuarios = [
   new Usuario(
-    /*'Darth Vader',
-    'Sith',
-    11,
-    101,
-    22,
-    11,
-    ['Lightsaber', 'Death Star'],
-    'a02b91bc-3769-4221-beb1-d7a3aeba7dad'*/
+    'Facundo',
+    'Juares',
+    340145226,
+    'facundo@gmail.com',
   ),
 ]
 

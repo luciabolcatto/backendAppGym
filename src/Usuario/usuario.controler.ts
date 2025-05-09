@@ -1,18 +1,16 @@
 import { Request, Response, NextFunction } from 'express' 
 import { UsuarioRepository } from './Usuario.repository.js'
-import { Usuario } from './Usuario.entity.js'
+import { Usuario } from './Usuario.entity.js'             
  
 const repository = new UsuarioRepository()
 
 function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
-    name: req.body.name,
-    UsuarioClass: req.body.UsuarioClass,
-    level: req.body.level,
-    hp: req.body.hp,
-    mana: req.body.mana,
-    attack: req.body.attack,
-    items: req.body.items,
+    nombre: req.body.nombre,
+    apellido: req.body.apellido,
+    tel: req.body.tel,
+    mail: req.body.mail,
+   
   }
   //more checks here
 
