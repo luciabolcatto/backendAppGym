@@ -14,6 +14,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.8.0",
   "devDependencies": {
+    "@types/express": "^5.0.1",
     "tsc-watch": "6.2.1"
   }
 }
