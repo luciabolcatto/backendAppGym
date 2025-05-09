@@ -28,43 +28,44 @@ function findAll(req: Request, res: Response) {
 
 function findOne(req: Request, res: Response) {
   const id = req.params.id
-  const Usuario = repository.findOne({ id })
-  if (!Usuario) {
+  const usuario = repository.findOne({ id })
+  if (!usuario) {
     return res.status(404).send({ message: 'Usuario not found' })
   }
-  res.json({ data: Usuario })
+  res.json({ data: usuario })
 }
 
 function add(req: Request, res: Response) {
   const input = req.body.sanitizedInput
 
-  const UsuarioInput = new Usuario(
+  const usuarioInput = new Usuario(
     input.nombre,
     input.apellido,
     input.tel,
     input.mail,
+    
   )
 
-  const Usuario = repository.add(UsuarioInput)
-  return res.status(201).send({ message: 'Usuario created', data: Usuario })
+  const usuario = repository.add(usuarioInput)
+  return res.status(201).send({ message: 'Usuario created', data: usuario })
 }
 
 function update(req: Request, res: Response) {
   req.body.sanitizedInput.id = req.params.id
-  const Usuario = repository.update(req.body.sanitizedInput)
+  const usuario = repository.update(req.body.sanitizedInput)
 
-  if (!Usuario) {
+  if (!usuario) {
     return res.status(404).send({ message: 'Usuario not found' })
   }
 
-  return res.status(200).send({ message: 'Usuario updated successfully', data: Usuario })
+  return res.status(200).send({ message: 'Usuario updated successfully', data: usuario })
 }
 
 function remove(req: Request, res: Response) {
   const id = req.params.id
-  const Usuario = repository.delete({ id })
+  const usuario = repository.delete({ id })
 
-  if (!Usuario) {
+  if (!usuario) {
     res.status(404).send({ message: 'Usuario not found' })
   } else {
     res.status(200).send({ message: 'Usuario deleted successfully' })

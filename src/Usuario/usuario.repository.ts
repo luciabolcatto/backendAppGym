@@ -1,7 +1,7 @@
 import { Repository } from '../shared/repository.js'
-import { Usuario } from './Usuario.entity.js'
+import { Usuario } from './Usuario.entity.js' 
 
-const Usuarios = [
+const Usuarios  = [
   new Usuario(
     'Facundo',
     'Juares',
@@ -16,7 +16,7 @@ export class UsuarioRepository implements Repository<Usuario> {
   }
 
   public findOne(item: { id: string }): Usuario | undefined {
-    return Usuarios.find((Usuario) => Usuario.id_u === item.id)
+    return Usuarios.find((Usuario) => Usuario.id === item.id)
   }
 
   public add(item: Usuario): Usuario | undefined {
@@ -25,7 +25,7 @@ export class UsuarioRepository implements Repository<Usuario> {
   }
 
   public update(item: Usuario): Usuario | undefined {
-    const UsuarioIdx = Usuarios.findIndex((Usuario) => Usuario.id_u === item.id_u)
+    const UsuarioIdx = Usuarios.findIndex((Usuario) => Usuario.id === item.id)
 
     if (UsuarioIdx !== -1) {
       Usuarios[UsuarioIdx] = { ...Usuarios[UsuarioIdx], ...item }
@@ -34,7 +34,7 @@ export class UsuarioRepository implements Repository<Usuario> {
   }
 
   public delete(item: { id: string }): Usuario | undefined {
-    const UsuarioIdx = Usuarios.findIndex((Usuario) => Usuario.id_u === item.id)
+    const UsuarioIdx = Usuarios.findIndex((Usuario) => Usuario.id === item.id)
 
     if (UsuarioIdx !== -1) {
       const deletedUsuarios = Usuarios[UsuarioIdx]
