@@ -15,6 +15,8 @@
   "packageManager": "pnpm@10.8.0",
   "devDependencies": {
     "@types/express": "^5.0.1",
-    "tsc-watch": "6.2.1"
+    "@types/node": "^22.15.17",
+    "tsc-watch": "6.2.1",
+    "typescript": "^5.8.3"
   }
 }

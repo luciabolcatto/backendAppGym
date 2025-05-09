@@ -10,9 +10,15 @@ importers:
       '@types/express':
         specifier: ^5.0.1
         version: 5.0.1
+      '@types/node':
+        specifier: ^22.15.17
+        version: 22.15.17
       tsc-watch:
         specifier: 6.2.1
         version: 6.2.1(typescript@5.8.3)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
 
 packages:
   '@types/body-parser@1.19.5':
