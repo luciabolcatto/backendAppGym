@@ -1,7 +1,8 @@
 import { Repository } from '../shared/repository.js'
 import { Usuario } from './usuario.entity.js' 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 
-const Usuarios  = [
+const usuarios  = [
   new Usuario(
     'Facundo',
     'Juares',
@@ -13,33 +14,33 @@ const Usuarios  = [
 
 export class UsuarioRepository implements Repository<Usuario> {
   public findAll(): Usuario[] | undefined {
-    return Usuarios
+    return usuarios
   }
 
   public findOne(item: { id: string }): Usuario | undefined {
-    return Usuarios.find((Usuario) => Usuario.id === item.id)
+    return usuarios.find((usuario) => usuario.id === item.id)
   }
 
   public add(item: Usuario): Usuario | undefined {
-    Usuarios.push(item)
+    usuarios.push(item)
     return item
   }
 
   public update(item: Usuario): Usuario | undefined {
-    const UsuarioIdx = Usuarios.findIndex((Usuario) => Usuario.id === item.id)
+    const usuarioIdx = usuarios.findIndex((usuario) => usuario.id === item.id)
 
-    if (UsuarioIdx !== -1) {
-      Usuarios[UsuarioIdx] = { ...Usuarios[UsuarioIdx], ...item }
+    if (usuarioIdx !== -1) {
+      usuarios[usuarioIdx] = { ...usuarios[usuarioIdx], ...item }
     }
-    return Usuarios[UsuarioIdx]
+    return usuarios[usuarioIdx]
   }
 
   public delete(item: { id: string }): Usuario | undefined {
-    const UsuarioIdx = Usuarios.findIndex((Usuario) => Usuario.id === item.id)
+    const usuarioIdx = usuarios.findIndex((usuario) => usuario.id === item.id)
 
-    if (UsuarioIdx !== -1) {
-      const deletedUsuarios = Usuarios[UsuarioIdx]
-      Usuarios.splice(UsuarioIdx, 1)
+    if (usuarioIdx !== -1) {
+      const deletedUsuarios = usuarios[usuarioIdx]
+      usuarios.splice(usuarioIdx, 1)
       return deletedUsuarios
     }
   }
