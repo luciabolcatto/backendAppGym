@@ -30,7 +30,7 @@ function findOne(req: Request, res: Response) {
   const id = req.params.id
   const usuario = repository.findOne({ id })
   if (!usuario) {
-    res.status(404).send({ message: 'Usuario not found' })
+    res.status(404).send({ message: 'Usuario no encontrado' })
   }
   else{
   res.json({ data: usuario })
@@ -49,7 +49,7 @@ function add(req: Request, res: Response) {
   )
 
   const usuario = repository.add(usuarioInput)
-  res.status(201).send({ message: 'Usuario created', data: usuario })
+  res.status(201).send({ message: 'Usuario creado', data: usuario })
 }
 
 function update(req: Request, res: Response) {
@@ -57,10 +57,10 @@ function update(req: Request, res: Response) {
   const usuario = repository.update(req.body.sanitizedInput)
 
   if (!usuario) {
-    res.status(404).send({ message: 'Usuario not found' })
+    res.status(404).send({ message: 'Usuario no encontrado' })
   }
 else {
-   res.status(200).send({ message: 'Usuario updated successfully', data: usuario })
+   res.status(200).send({ message: 'Usuario actualizado correctamente', data: usuario })
   }
 }
 
@@ -69,10 +69,11 @@ function remove(req: Request, res: Response) {
   const usuario = repository.delete({ id })
 
   if (!usuario) {
-    res.status(404).send({ message: 'Usuario not found' })
+    res.status(404).send({ message: 'Usuario no encontrado' })
   } else {
-    res.status(200).send({ message: 'Usuario deleted successfully' })
+    res.status(200).send({ message: 'Usuario borrado correctamente' })
   }
 }
 
 export { sanitizeUsuarioInput, findAll, findOne, add, update, remove }
+

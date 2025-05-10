@@ -10,10 +10,10 @@ POST http://localhost:5500/api/Usuarios
 Content-Type: application/json
 
 {
-  "nombre": "Atila",
-  "apellido": "warrior",
+  "nombre": "Juan",
+  "apellido": "Perez",
   "tel": 41231234,
-  "mail": "aaaaa@gmail.com"
+  "mail": "JuanPerez@gmail.com"
 }
 
 ### modificar un Usuario (PUT - recurso completo e idempotente)
@@ -21,10 +21,10 @@ PUT http://localhost:5500/api/Usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
 Content-Type: application/json
 
 {
-  "nombre": "Atila",
-  "apellido": "apellido",
+  "nombre": "Facundo",
+  "apellido": "juarez",
   "tel": 3232323,
-  "mail": "aa32323aaa@gmail.com"   
+  "mail": "facundo@gmail.com"   
 }
 
 ### modificar un Usuario (PATCH - recurso parcial)
@@ -32,8 +32,8 @@ PATCH http://localhost:5500/api/Usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
 Content-Type: application/json
 
 {
-  "nombre": "Atila",
-  "apellido": "apellido222"    
+  "tel": 341897666,
+  "mail" : "facundoj@gmail.com"   
 }
 
 ### borrar un Usuario
