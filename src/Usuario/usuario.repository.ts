@@ -1,6 +1,13 @@
 import { Repository } from '../shared/repository.js'
+<<<<<<< Updated upstream
 import { Usuario } from './usuario.entity.js' 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+<<<<<<< Updated upstream
+=======
+=======
+import { Usuario } from './usuario.entity.js'
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
 const usuarios  = [
   new Usuario(
