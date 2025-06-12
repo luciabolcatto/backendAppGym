@@ -6,6 +6,6 @@ export class Usuario {
     public apellido: string,
     public tel: number,
     public mail: string,
-    public id = crypto.randomUUID()
+    public id = crypto.randomUUID() //genera el id unico
   ) {}
 }
