@@ -1,7 +1,15 @@
+import 'reflect-metadata';
 import express from 'express';
 import { UsuarioRouter } from './usuario/usuario.routes.js';
+import { orm } from './shared/db/orm.js';
+import { RequestContext } from '@mikro-orm/core';
 const app = express();
 app.use(express.json());
+//luego de los middlewares base
+app.use((req, res, next) => {
+    RequestContext.create(orm.em, next);
+});
+//antes de las rutas y middlewares de negocio
 app.use('/api/Usuarios', UsuarioRouter);
 app.use((_, res, __) => {
     res.status(404).send({ message: 'Resource not found' });

@@ -7,28 +7,32 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Entity, Property, } from '@mikro-orm/core';
-import { BaseEntity } from '../shared/db/baseEntity.entity.js';
-let Usuario = class Usuario extends BaseEntity {
-};
+var _a;
+import { PrimaryKey, SerializedPrimaryKey } from '@mikro-orm/core';
+import { ObjectId } from '@mikro-orm/mongodb';
+export class BaseEntity {
+    constructor() {
+        this._id = new ObjectId();
+        /*
+      
+        @Property({ type: DateTimeType })
+        createdAt? = new Date()
+      
+        @Property({
+          type: DateTimeType,
+          onUpdate: () => new Date(),
+        })
+        updatedAt? = new Date()
+      
+        */
+    }
+}
 __decorate([
-    Property({ nullable: false }),
+    PrimaryKey(),
+    __metadata("design:type", typeof (_a = typeof ObjectId !== "undefined" && ObjectId) === "function" ? _a : Object)
+], BaseEntity.prototype, "_id", void 0);
+__decorate([
+    SerializedPrimaryKey(),
     __metadata("design:type", String)
-], Usuario.prototype, "nombre", void 0);
-__decorate([
-    Property({ nullable: false }),
-    __metadata("design:type", String)
-], Usuario.prototype, "apellido", void 0);
-__decorate([
-    Property({ nullable: false }),
-    __metadata("design:type", Number)
-], Usuario.prototype, "tel", void 0);
-__decorate([
-    Property({ nullable: false }),
-    __metadata("design:type", String)
-], Usuario.prototype, "mail", void 0);
-Usuario = __decorate([
-    Entity()
-], Usuario);
-export { Usuario };
-//# sourceMappingURL=usuario.entity.js.map
+], BaseEntity.prototype, "id", void 0);
+//# sourceMappingURL=baseEntity.entity.js.map
