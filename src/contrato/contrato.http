@@ -12,7 +12,7 @@ Content-Type: application/json
 {
   "fecha_hora_fin": "2023-12-31T23:59:59.999Z",
   "estado": "activo",
-  "usuario": 1
+  "usuario": "685ebe3def6340644c0f27bd"
 }
  
 
@@ -30,7 +30,7 @@ Content-Type: application/json
 {
   "fecha_hora_fin": "2025-12-31T23:59:59.999Z",
   "estado": "activo",
-  "usuario": 1
+  "usuario": "685ebe3def6340644c0f27bd"
 }
 
 ### crear un nuevo Contrato
@@ -40,7 +40,7 @@ Content-Type: application/json
 {
   "fecha_hora_fin": "2025-11-30T23:59:59.999Z",
   "estado": "activo",
-  "usuario": 1
+  "usuario": "685ebe3def6340644c0f27bd"
 }
 
 ### crear un nuevo  Contrato
@@ -51,7 +51,7 @@ Content-Type: application/json
 {
  "fecha_hora_fin": "2025-10-31T23:59:59.999Z",
   "estado": "activo",
-  "usuario": 1  
+  "usuario": "685ebe3def6340644c0f27bd"
 }
 
 ### modificar un Contrato (PATCH - recurso parcial)
