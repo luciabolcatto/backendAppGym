@@ -1,3 +1,4 @@
+/*
 import { Router } from 'express'
 import { sanitizeUsuarioInput, findAll, findOne, add, update, remove } from './usuario.controler.js'
 
@@ -9,3 +10,5 @@ UsuarioRouter.post('/', sanitizeUsuarioInput, add)
 UsuarioRouter.put('/:id', sanitizeUsuarioInput, update)
 UsuarioRouter.patch('/:id', sanitizeUsuarioInput, update)
 UsuarioRouter.delete('/:id', remove)
+
+*/
