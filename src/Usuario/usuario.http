@@ -16,7 +16,7 @@ Content-Type: application/json
   "mail": "JuanPerez@gmail.com"
 }
 
-### ID
+### ID - Debe ejecutarse después de crearJuanPerez
 @id = {{crearJuanPerez.response.body.data.id}}
 
 ### obtener un Usuario

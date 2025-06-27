@@ -18,7 +18,7 @@ function sanitizeUsuarioInput(req, res, next) {
 }
 async function findAll(req, res) {
     try {
-        const usuarios = await em.find(Usuario, {});
+        const usuarios = await em.find(Usuario, {}, { populate: ['contratos'] });
         res.status(200).json({ message: 'se encotraron todos los usuarios', data: usuarios });
     }
     catch (error) {
@@ -28,7 +28,7 @@ async function findAll(req, res) {
 async function findOne(req, res) {
     try {
         const id = req.params.id;
-        const usuario = await em.findOneOrFail(Usuario, { id });
+        const usuario = await em.findOneOrFail(Usuario, { id }, { populate: ['contratos'] });
         res.status(200).json({ message: 'usuario encontrado', data: usuario });
     }
     catch (error) {

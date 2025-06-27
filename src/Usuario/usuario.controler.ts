@@ -24,7 +24,7 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const usuarios = await em.find(Usuario, {})
+    const usuarios = await em.find(Usuario, {}, { populate: ['contratos'] })
     res.status(200).json({ message: 'se encotraron todos los usuarios', data: usuarios })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
@@ -34,7 +34,7 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const usuario = await em.findOneOrFail(Usuario, { id })
+    const usuario = await em.findOneOrFail(Usuario, { id }, { populate: ['contratos'] })
     res.status(200).json({ message: 'usuario encontrado', data: usuario })
   } catch (error: any) {
     res.status(500).json({ message: error.message })

@@ -7,7 +7,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
 import { PrimaryKey, SerializedPrimaryKey } from '@mikro-orm/core';
 import { ObjectId } from '@mikro-orm/mongodb';
 export class BaseEntity {
@@ -29,7 +28,7 @@ export class BaseEntity {
 }
 __decorate([
     PrimaryKey(),
-    __metadata("design:type", typeof (_a = typeof ObjectId !== "undefined" && ObjectId) === "function" ? _a : Object)
+    __metadata("design:type", ObjectId)
 ], BaseEntity.prototype, "_id", void 0);
 __decorate([
     SerializedPrimaryKey(),

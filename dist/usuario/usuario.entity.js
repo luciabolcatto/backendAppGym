@@ -7,9 +7,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Entity, Property, } from '@mikro-orm/core';
+import { Collection, Entity, OneToMany, Property, Cascade, } from '@mikro-orm/core';
 import { BaseEntity } from '../shared/db/baseEntity.entity.js';
+import { Contrato } from '../contrato/contrato.entity.js';
 let Usuario = class Usuario extends BaseEntity {
+    constructor() {
+        super(...arguments);
+        this.contratos = new Collection(this);
+    }
 };
 __decorate([
     Property({ nullable: false }),
@@ -27,6 +32,10 @@ __decorate([
     Property({ nullable: false }),
     __metadata("design:type", String)
 ], Usuario.prototype, "mail", void 0);
+__decorate([
+    OneToMany(() => Contrato, (contrato) => contrato.usuario, { cascade: [Cascade.ALL], }),
+    __metadata("design:type", Object)
+], Usuario.prototype, "contratos", void 0);
 Usuario = __decorate([
     Entity()
 ], Usuario);
