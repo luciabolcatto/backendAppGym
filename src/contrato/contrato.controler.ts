@@ -26,7 +26,7 @@ function sanitizeContratoInput(
 
 async function findAll(req: Request, res: Response) {
   try {
-    const contratos = await em.find(Contrato, {})
+    const contratos = await em.find(Contrato, {}, { populate: ['usuario'] })
     res
       .status(200)
       .json({ message: 'se encotraron todos los contratos', data: contratos })
@@ -38,7 +38,7 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const contrato = await em.findOneOrFail(Contrato, { id })
+    const contrato = await em.findOneOrFail(Contrato, { id }, { populate: ['usuario'] })
     res
       .status(200)
       .json({ message: 'contrato encontrado', data: contrato })
@@ -65,7 +65,7 @@ async function update(req: Request, res: Response) {
     const contrato = em.getReference(Contrato, id)
     em.assign(contrato, req.body)
     await em.flush()
-    res.status(200).json({ message: 'contrato actualizado' })
+    res.status(200).json({ message: 'contrato actualizado',data: contrato})
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
@@ -76,7 +76,7 @@ async function remove(req: Request, res: Response) {
     const id = req.params.id
     const contrato = em.getReference(Contrato, id)
     await em.removeAndFlush(contrato)
-    res.status(200).send({ message: 'contrato eliminado' })
+    res.status(200).send({ message: 'contrato eliminado' ,data: contrato})
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }

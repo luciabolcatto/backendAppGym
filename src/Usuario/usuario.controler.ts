@@ -59,7 +59,7 @@ async function update(req: Request, res: Response) {
     await em.flush()
     res
       .status(200)
-      .json({ message: 'usuario creado', data: usuario })
+      .json({ message: 'usuario actualizado', data: usuario })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
@@ -72,7 +72,7 @@ async function remove(req: Request, res: Response) {
     await em.removeAndFlush(usuario)
     res
     .status(200)
-    .json({ message: 'usuario borrado'})
+    .json({ message: 'usuario borrado', data: usuario })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
