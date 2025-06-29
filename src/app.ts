@@ -1,6 +1,8 @@
 import 'reflect-metadata'
 import express from 'express'
 import { UsuarioRouter } from './usuario/usuario.routes.js'
+import {ContratoRouter} from './contrato/contrato.routes.js'
+import{ReservaRouter} from './reserva/reserva.routes.js'
 import { orm } from './shared/db/orm.js'
 import { RequestContext } from '@mikro-orm/core'
 
@@ -16,6 +18,10 @@ app.use((req, res, next) => {
 
 
 app.use('/api/Usuarios', UsuarioRouter)
+app.use('/api/Contratos', ContratoRouter)
+app.use('/api/Reservas', ReservaRouter)
+
+
 
 app.use((_, res, __) => {
   res.status(404).send({ message: 'Resource not found' })
