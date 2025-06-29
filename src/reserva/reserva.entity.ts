@@ -7,10 +7,10 @@ export class Reserva extends BaseEntity {
   @Property({ nullable: false })
   fecha_hora: Date = new Date()
 
-  @Property({ nullable: false , default:'pendiente'})
-  estado!: string
+  @Property({ nullable: false} )
+  estado: string = 'pendiente'
 
-  @ManyToOne(() => Usuario , { nullable: false  })
+  @ManyToOne(() => Usuario , { nullable: false })
   usuario!: Rel <Usuario>
 
 

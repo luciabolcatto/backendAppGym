@@ -13,6 +13,7 @@ function sanitizeContratoInput(
     fecha_hora_ini: req.body.fecha_hora_ini,
     fecha_hora_fin: req.body.fecha_hora_fin,
     estado: req.body.estado,
+    usuario:req.body.usuario,
   }
 
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -65,7 +66,7 @@ async function update(req: Request, res: Response) {
     const contrato = em.getReference(Contrato, id)
     em.assign(contrato, req.body)
     await em.flush()
-    res.status(200).json({ message: 'contrato actualizado',data: contrato})
+    res.status(200).json({ message: 'contrato actualizado'})
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }

@@ -72,4 +72,4 @@ DELETE http://localhost:5500/api/Usuarios/{{id}}
 ### borrar un Usuario
 
 
-DELETE http://localhost:5500/api/Usuarios/{{{{idParaBorrar}}}}
+DELETE http://localhost:5500/api/Usuarios/{{idParaBorrar}}

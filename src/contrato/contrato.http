@@ -12,7 +12,7 @@ Content-Type: application/json
 {
   "fecha_hora_fin": "2023-12-31T23:59:59.999Z",
   "estado": "activo",
-  "usuario": "686055022dfbb2c4c674c30d"
+  "usuario": "6861b98ee84a812628ec450e"
 }
  
 
@@ -30,7 +30,7 @@ Content-Type: application/json
 {
   "fecha_hora_fin": "2025-12-31T23:59:59.999Z",
   "estado": "activo",
-  "usuario": "6860552d2dfbb2c4c674c30e"
+  "usuario": "6861b98ee84a812628ec450e"
 }
 
 ### crear un nuevo Contrato
@@ -40,7 +40,7 @@ Content-Type: application/json
 {
   "fecha_hora_fin": "2025-11-30T23:59:59.999Z",
   "estado": "activo",
-  "usuario": "6860552d2dfbb2c4c674c30e"
+  "usuario": "6861b98ee84a812628ec450e"
 }
 
 ### crear un nuevo  Contrato
@@ -51,7 +51,7 @@ Content-Type: application/json
 {
  "fecha_hora_fin": "2025-10-31T23:59:59.999Z",
   "estado": "activo",
-  "usuario": "6860552d2dfbb2c4c674c30e"
+  "usuario": "6861b98ee84a812628ec450e"
 }
 
 ### modificar un Contrato (PATCH - recurso parcial)
@@ -60,7 +60,7 @@ PATCH http://localhost:5500/api/Contratos/{{idConParaBorrar}}
 Content-Type: application/json
 
 {
-  "estado": "activo"
+  "estado": "vencido"
 }
 
 

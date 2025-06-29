@@ -24,7 +24,7 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const usuarios = await em.find(Usuario, {}, { populate: ['contratos'] })
+    const usuarios = await em.find(Usuario, {}, { populate: ['contratos','reservas'] })
     res.status(200).json({ message: 'se encotraron todos los usuarios', data: usuarios })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
@@ -34,7 +34,7 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const usuario = await em.findOneOrFail(Usuario, { id }, { populate: ['contratos'] })
+    const usuario = await em.findOneOrFail(Usuario, { id }, { populate: ['contratos','reservas'] })
     res.status(200).json({ message: 'usuario encontrado', data: usuario })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
@@ -72,7 +72,7 @@ async function remove(req: Request, res: Response) {
     await em.removeAndFlush(usuario)
     res
     .status(200)
-    .json({ message: 'usuario borrado', data: usuario })
+    .json({ message: 'usuario borrado' })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }

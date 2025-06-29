@@ -11,7 +11,7 @@ export class Contrato extends BaseEntity {
   fecha_hora_fin!: Date
 
   @Property({ nullable: false })
-  estado!: string
+  estado: string='activo'
 
   @ManyToOne(() => Usuario , { nullable: false  })
   usuario!: Rel <Usuario>
