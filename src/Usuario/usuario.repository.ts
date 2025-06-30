@@ -1,4 +1,4 @@
-import { Repository } from '../shared/repository.js'
+/*import { Repository } from '../shared/repository.js'
 import { Usuario } from './usuario.entity.js' 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
 
@@ -45,3 +45,4 @@ export class UsuarioRepository implements Repository<Usuario> {
     }
   }
 }
+*/
