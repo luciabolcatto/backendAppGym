@@ -1,0 +1,71 @@
+### obtener todos los  Contratos
+GET http://localhost:5500/api/Contratos
+
+
+
+
+### crear un nuevo Contrato
+# @name crearContrato
+POST http://localhost:5500/api/Contratos
+Content-Type: application/json
+
+{
+  "fecha_hora_fin": "2023-12-31T23:59:59.999Z",
+  "estado": "activo",
+  "usuario": "6861b98ee84a812628ec450e"
+}
+ 
+
+
+### ID
+@id = {{crearContrato.response.body.data.id}}
+
+### obtener un Contrato
+GET http://localhost:5500/api/Contratos/{{id}}
+
+### modificar un Contrato (PUT - recurso completo e idempotente)
+PUT http://localhost:5500/api/Contratos/{{id}}
+Content-Type: application/json
+
+{
+  "fecha_hora_fin": "2025-12-31T23:59:59.999Z",
+  "estado": "activo",
+  "usuario": "6861b98ee84a812628ec450e"
+}
+
+### crear un nuevo Contrato
+POST http://localhost:5500/api/Contratos
+Content-Type: application/json
+
+{
+  "fecha_hora_fin": "2025-11-30T23:59:59.999Z",
+  "estado": "activo",
+  "usuario": "6861b98ee84a812628ec450e"
+}
+
+### crear un nuevo  Contrato
+# @name crearContratoParaBorrar
+POST http://localhost:5500/api/Contratos
+Content-Type: application/json
+
+{
+ "fecha_hora_fin": "2025-10-31T23:59:59.999Z",
+  "estado": "activo",
+  "usuario": "6861b98ee84a812628ec450e"
+}
+
+### modificar un Contrato (PATCH - recurso parcial)
+@idConParaBorrar = {{crearContratoParaBorrar.response.body.data.id}}
+PATCH http://localhost:5500/api/Contratos/{{idConParaBorrar}}
+Content-Type: application/json
+
+{
+  "estado": "vencido"
+}
+
+
+### borrar un Contrato
+DELETE http://localhost:5500/api/Contratos/{{idConParaBorrar}}
+
+### borrar un Contrato
+DELETE http://localhost:5500/api/Contratos/{{id}}

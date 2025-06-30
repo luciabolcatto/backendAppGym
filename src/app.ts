@@ -1,9 +1,12 @@
 import 'reflect-metadata'
 import express from 'express'
-//import { UsuarioRouter } from './usuario/usuario.routes.js'
+import { UsuarioRouter } from './usuario/usuario.routes.js'
+import {ContratoRouter} from './contrato/contrato.routes.js'
+import{ReservaRouter} from './reserva/reserva.routes.js'
 import { actividadRouter } from './actividad/actividad.routes.js'
 import { orm } from './shared/db/orm.js'
 import { RequestContext } from '@mikro-orm/core'
+
 
 
 const app = express()
@@ -16,7 +19,9 @@ app.use((req, res, next) => {
 //antes de las rutas y middlewares de negocio
 
 
-//app.use('/api/Usuarios', UsuarioRouter)
+app.use('/api/Usuarios', UsuarioRouter)
+app.use('/api/Contratos', ContratoRouter)
+app.use('/api/Reservas', ReservaRouter)
 app.use('/api/actividad', actividadRouter)
 
 

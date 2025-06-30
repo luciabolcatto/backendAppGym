@@ -2,10 +2,10 @@
 GET http://localhost:5500/api/Usuarios
 
 
-### obtener un Usuario
-GET http://localhost:5500/api/Usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+
 
 ### crear un nuevo Usuario
+# @name crearJuanPerez
 POST http://localhost:5500/api/Usuarios
 Content-Type: application/json
 
@@ -16,8 +16,25 @@ Content-Type: application/json
   "mail": "JuanPerez@gmail.com"
 }
 
+### ID - Debe ejecutarse después de crearJuanPerez
+@id = {{crearJuanPerez.response.body.data.id}}
+
+### obtener un Usuario
+GET http://localhost:5500/api/Usuarios/{{id}}
+
 ### modificar un Usuario (PUT - recurso completo e idempotente)
-PUT http://localhost:5500/api/Usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+PUT http://localhost:5500/api/Usuarios/{{id}}
+Content-Type: application/json
+
+{
+  "nombre": "Juan",
+  "apellido": "Perez",
+  "tel": 41234321,
+  "mail": "jp@gmail.com"  
+}
+
+### crear un nuevo Usuario
+POST http://localhost:5500/api/Usuarios
 Content-Type: application/json
 
 {
@@ -27,14 +44,32 @@ Content-Type: application/json
   "mail": "facundo@gmail.com"   
 }
 
+### crear un nuevo Usuario
+# @name crearUsuarioParaBorrar
+POST http://localhost:5500/api/Usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Pedro",
+  "apellido": "Sanchez",
+  "tel": 1234567,
+  "mail": "PedroSanchezo@gmail.com"   
+}
+
 ### modificar un Usuario (PATCH - recurso parcial)
-PATCH http://localhost:5500/api/Usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+@idParaBorrar = {{crearUsuarioParaBorrar.response.body.data.id}}
+PATCH http://localhost:5500/api/Usuarios/{{idParaBorrar}}
 Content-Type: application/json
 
 {
   "tel": 341897666,
-  "mail" : "facundoj@gmail.com"   
+  "mail" : "ps@gmail.com"   
 }
 
 ### borrar un Usuario
-DELETE http://localhost:5500/api/Usuarios/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+DELETE http://localhost:5500/api/Usuarios/{{id}}
+
+### borrar un Usuario
+
+
+DELETE http://localhost:5500/api/Usuarios/{{idParaBorrar}}

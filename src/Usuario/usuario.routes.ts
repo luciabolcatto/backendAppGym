@@ -10,5 +10,8 @@ UsuarioRouter.post('/', sanitizeUsuarioInput, add)
 UsuarioRouter.put('/:id', sanitizeUsuarioInput, update)
 UsuarioRouter.patch('/:id', sanitizeUsuarioInput, update)
 UsuarioRouter.delete('/:id', remove)
+<<<<<<< HEAD
 
 */
+=======
+>>>>>>> origin/develop
