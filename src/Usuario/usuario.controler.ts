@@ -1,12 +1,6 @@
-<<<<<<< HEAD
-/*import { Request, Response, NextFunction } from 'express' 
-import { UsuarioRepository } from './usuario.repository.js'
-import { Usuario } from './usuario.entity.js'             
-=======
 import { Request, Response, NextFunction } from 'express' 
 import { Usuario } from './usuario.entity.js'
 import { orm } from '../shared/db/orm.js'            
->>>>>>> origin/develop
  
 const em = orm.em
 
@@ -85,5 +79,3 @@ async function remove(req: Request, res: Response) {
 }
 
 export { sanitizeUsuarioInput, findAll, findOne, add, update, remove }
-
-*/
