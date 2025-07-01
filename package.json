@@ -14,16 +14,19 @@
   "license": "ISC",
   "packageManager": "pnpm@10.8.0",
   "devDependencies": {
+    "@mikro-orm/cli": "^6.4.16",
     "@types/express": "^5.0.1",
     "@types/node": "^22.15.17",
     "tsc-watch": "6.2.1",
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@mikro-orm/core": "5.8.10",
-    "@mikro-orm/mongo-highlighter": "1.0.0",
-    "@mikro-orm/mongodb": "5.8.10",
+    "@mikro-orm/core": "^6.4.16",
+    "@mikro-orm/mongodb": "^6.4.16",
+    "@mikro-orm/reflection": "^6.4.16",
+    "@mikro-orm/sql-highlighter": "^1.0.1",
     "express": "5.1.0",
-    "reflect-metadata": "0.1.13"
+    "mongodb": "6.17.0",
+    "reflect-metadata": "^0.2.2"
   }
 }
