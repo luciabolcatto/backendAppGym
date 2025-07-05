@@ -7,6 +7,7 @@ import { actividadRouter } from './actividad/actividad.routes.js'
 import { EntrenadorRouter } from './entrenador/entrenador.routes.js'
 import { orm } from './shared/db/orm.js'
 import { RequestContext } from '@mikro-orm/core'
+import { MembresiaRouter } from './membresia/membresia.routes.js';
 
 
 
@@ -33,3 +34,4 @@ app.use((_, res, __) => {
 app.listen(5500, () => {
   console.log('Server runnning on http://localhost:5500/')
 })
+app.use('/api/membresias', MembresiaRouter);
