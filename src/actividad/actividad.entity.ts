@@ -1,8 +1,7 @@
 import {
-  Entity,
-  Property
-} from '@mikro-orm/core'
+  Entity, Property, ManyToMany, Collection} from '@mikro-orm/core'
 import { BaseEntity } from '../shared/db/baseEntity.entity.js'
+import { Entrenador } from '../entrenador/entrenador.entity.js'
 
 @Entity()
 export class Actividad extends BaseEntity {
@@ -15,4 +14,7 @@ export class Actividad extends BaseEntity {
   @Property()
   cupo!: number
  
+  @ManyToMany(() => Entrenador, (entrenador) => entrenador.actividades)
+  entrenadores = new Collection<Entrenador>(this)
+
 }
