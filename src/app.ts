@@ -4,6 +4,7 @@ import { UsuarioRouter } from './usuario/usuario.routes.js'
 import {ContratoRouter} from './contrato/contrato.routes.js'
 import{ReservaRouter} from './reserva/reserva.routes.js'
 import { actividadRouter } from './actividad/actividad.routes.js'
+import { EntrenadorRouter } from './entrenador/entrenador.routes.js'
 import { orm } from './shared/db/orm.js'
 import { RequestContext } from '@mikro-orm/core'
 
@@ -23,7 +24,7 @@ app.use('/api/Usuarios', UsuarioRouter)
 app.use('/api/Contratos', ContratoRouter)
 app.use('/api/Reservas', ReservaRouter)
 app.use('/api/actividad', actividadRouter)
-
+app.use('/api/entrenadores', EntrenadorRouter)
 
 app.use((_, res, __) => {
   res.status(404).send({ message: 'Resource not found' })

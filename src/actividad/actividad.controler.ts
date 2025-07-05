@@ -1,12 +1,36 @@
-import { Request, Response } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import { orm } from '../shared/db/orm.js'
 import { Actividad } from './actividad.entity.js'
 
 const em = orm.em
 
+
+function sanitizeActividadInput(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  req.body.sanitizedInput = {
+    nombre: req.body.nombre,
+    descripcion: req.body.descripcion,
+    cupo: req.body.cupo,
+    entrenadores: req.body.entrenadores
+  }
+  //more checks here
+
+  Object.keys(req.body.sanitizedInput).forEach((key) => {
+    if (req.body.sanitizedInput[key] === undefined) {
+      delete req.body.sanitizedInput[key]
+    }
+  })
+  next()
+}
+
+
+
 async function findAll(req: Request, res: Response) {
   try {
-    const actividades = await em.find(Actividad, {})
+    const actividades = await em.find(Actividad, {}, { populate: ['entrenadores'] })
     res
       .status(200)
       .json({ message: 'found all activities', data: actividades })
@@ -18,7 +42,7 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const actividad = await em.findOneOrFail(Actividad, { id })
+    const actividad = await em.findOneOrFail(Actividad, { id }, { populate: ['entrenadores'] })
     res
       .status(200)
       .json({ message: 'found actividad', data: actividad })
@@ -62,4 +86,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { findAll, findOne, add, update, remove }
+export { sanitizeActividadInput, findAll, findOne, add, update, remove }

@@ -1,0 +1,80 @@
+### obtener todos los Entrenadores
+GET http://localhost:5500/api/Entrenadores
+
+### crear un nuevo Entrenador
+# @name crearEntrenador
+POST http://localhost:5500/api/Entrenadores
+Content-Type: application/json
+
+{
+  "nombre": "Lucas",
+  "apellido": "Martinez",
+  "tel": 341123456,
+  "mail": "lucas.martinez@gmail.com"
+}
+
+### ID - Debe ejecutarse después de crearEntrenador
+@id = {{crearEntrenador.response.body.data.id}}
+
+### obtener un Entrenador
+GET http://localhost:5500/api/Entrenadores/{{id}}
+
+### modificar un Entrenador (PUT - recurso completo e idempotente)
+PUT http://localhost:5500/api/Entrenadores/{{id}}
+Content-Type: application/json
+
+{
+  "nombre": "Lucas",
+  "apellido": "Martinez",
+  "tel": 341654321,
+  "mail": "lucas.martinez@update.com"
+}
+
+### crear un nuevo Entrenador
+POST http://localhost:5500/api/Entrenadores
+Content-Type: application/json
+
+{
+  "nombre": "Sofia",
+  "apellido": "Gomez",
+  "tel": 32222333,
+  "mail": "sofia.gomez@gmail.com"
+}
+
+### crear un nuevo Entrenador
+# @name crearEntrenadorParaBorrar
+POST http://localhost:5500/api/Entrenadores
+Content-Type: application/json
+
+{
+  "nombre": "Pablo",
+  "apellido": "Sanchez",
+  "tel": 1234567,
+  "mail": "pablo.sanchez@gmail.com"
+}
+
+### modificar un Entrenador (PATCH - recurso parcial)
+@idParaBorrar = {{crearEntrenadorParaBorrar.response.body.data.id}}
+PATCH http://localhost:5500/api/Entrenadores/{{idParaBorrar}}
+Content-Type: application/json
+
+{
+  "tel": 341897666,
+  "mail": "ps@gmail.com",
+  "actividades": ["ID_ACTIVIDAD_ACA"]
+}
+
+### añadir una actividad a un Entrenador
+# Cambia el valor de "actividadId" por el id real de una actividad existente
+PATCH http://localhost:5500/api/Entrenadores/{{id}} 
+Content-Type: application/json
+
+{
+  "actividades": ["ID_ACTIVIDAD_ACA"]
+}
+
+### borrar un Entrenador
+DELETE http://localhost:5500/api/Entrenadores/{{id}}
+
+### borrar un Entrenador
+DELETE http://localhost:5500/api/Entrenadores/{{idParaBorrar}}
