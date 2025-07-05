@@ -15,9 +15,9 @@
   "packageManager": "pnpm@10.8.0",
   "devDependencies": {
     "@mikro-orm/cli": "^6.4.16",
-    "@types/express": "^5.0.1",
-    "@types/node": "^22.15.17",
-    "tsc-watch": "6.2.1",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.10",
+    "tsc-watch": "7.1.1",
     "typescript": "^5.8.3"
   },
   "dependencies": {
