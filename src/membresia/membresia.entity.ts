@@ -19,8 +19,8 @@ export class Membresia extends BaseEntity {
   @Property({ nullable: false })
   precio!: number;
 
-  @Property({ nullable: false })
-  fechaDesde!: Date;
+  // @Property({ nullable: false })
+  //fechaDesde!: Date;
 
   @OneToMany(() => Contrato, (contrato) => contrato.membresia, {
     cascade: [Cascade.ALL],
