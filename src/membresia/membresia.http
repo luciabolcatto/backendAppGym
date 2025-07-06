@@ -1,9 +1,9 @@
-### 📋 Obtener todas las membresías
+###  Obtener todas las membresías
 GET http://localhost:5500/api/membresias
 Content-Type: application/json
 
 
-### ➕ Crear una nueva membresía
+### Crear una nueva membresía
 POST http://localhost:5500/api/membresias
 Content-Type: application/json
 
@@ -15,12 +15,12 @@ Content-Type: application/json
 }
 
 
-### 🔍 Buscar una membresía por ID
+### Buscar una membresía por ID
 GET http://localhost:5500/api/membresias/ID_AQUI
 Content-Type: application/json
 
 
-### ✏️ Actualizar una membresía
+###  Actualizar una membresía
 PUT http://localhost:5500/api/membresias/ID_AQUI
 Content-Type: application/json
 
@@ -29,6 +29,6 @@ Content-Type: application/json
 }
 
 
-### ❌ Eliminar una membresía
+### Eliminar una membresía
 DELETE http://localhost:5500/api/membresias/ID_AQUI
 Content-Type: application/json

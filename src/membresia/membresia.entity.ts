@@ -1,30 +1,29 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/mongodb';
+import {
+  Entity,
+  Property,
+  OneToMany,
+  Collection,
+  Cascade,
+} from '@mikro-orm/core';
+import { BaseEntity } from '../shared/db/baseEntity.entity.js';
+import { Contrato } from '../contrato/contrato.entity.js';
 
 @Entity()
-export class Membresia {
-  @PrimaryKey()
-  _id!: string;  
-
-  @Property()
-  nro!: string;
-
-  @Property()
+export class Membresia extends BaseEntity {
+  @Property({ nullable: false })
   nombre!: string;
 
-  @Property()
+  @Property({ nullable: false })
   descripcion!: string;
 
-  @Property()
+  @Property({ nullable: false })
   precio!: number;
 
-  @Property()
+  @Property({ nullable: false })
   fechaDesde!: Date;
 
-  constructor(nro: string, nombre: string, descripcion: string, precio: number, fechaDesde: Date) {
-    this.nro = nro;
-    this.nombre = nombre;
-    this.descripcion = descripcion;
-    this.precio = precio;
-    this.fechaDesde = fechaDesde;
-  }
+  @OneToMany(() => Contrato, (contrato) => contrato.membresia, {
+    cascade: [Cascade.ALL],
+  })
+  contratos = new Collection<Contrato>(this);
 }

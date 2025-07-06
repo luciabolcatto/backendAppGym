@@ -1,53 +1,82 @@
-import { Request, Response } from 'express';
-import { MembresiaRepository } from './membresia.repository.js';
+import { Request, Response, NextFunction } from 'express';
+import { Membresia } from './membresia.entity.js';
+import { orm } from '../shared/db/orm.js';
 
-// Instanciamos el repositorio
-const repo = new MembresiaRepository();
+const em = orm.em;
 
-export class MembresiaController {
+function sanitizeMembresiaInput(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  req.body.sanitizedInput = {
+    nombre: req.body.nombre,
+    descripcion: req.body.descripcion,
+    precio: req.body.precio,
+    fechaDesde: req.body.fechaDesde ? new Date(req.body.fechaDesde) : undefined,
+  };
 
-  // GET /api/membresias
-  async getAll(req: Request, res: Response) {
-    const lista = await repo.findAll();
-    res.json(lista);
-  }
-
-  // GET /api/membresias/:id
-  async getById(req: Request, res: Response) {
-    const id = req.params.id;
-    const membresia = await repo.findOne(id);
-    if (membresia) {
-      res.json(membresia);
-    } else {
-      res.status(404).json({ message: 'Membresía no encontrada' });
+  Object.keys(req.body.sanitizedInput).forEach((key) => {
+    if (req.body.sanitizedInput[key] === undefined) {
+      delete req.body.sanitizedInput[key];
     }
-  }
+  });
+  next();
+}
 
-  // POST /api/membresias
-  async create(req: Request, res: Response) {
-    const nueva = await repo.add(req.body);
-    res.status(201).json(nueva);
-  }
-
-  // PUT /api/membresias/:id
-  async update(req: Request, res: Response) {
-    const id = req.params.id;
-    const actualizada = await repo.update(id, req.body);
-    if (actualizada) {
-      res.json(actualizada);
-    } else {
-      res.status(404).json({ message: 'Membresía no encontrada' });
-    }
-  }
-
-  // DELETE /api/membresias/:id
-  async delete(req: Request, res: Response) {
-    const id = req.params.id;
-    const borrada = await repo.delete(id);
-    if (borrada) {
-      res.json({ message: 'Membresía eliminada' });
-    } else {
-      res.status(404).json({ message: 'Membresía no encontrada' });
-    }
+async function findAll(req: Request, res: Response) {
+  try {
+    const membresias = await em.find(Membresia, {});
+    res.status(200).json({
+      message: 'Se encontraron todas las membresías',
+      data: membresias,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
   }
 }
+
+async function findOne(req: Request, res: Response) {
+  try {
+    const id = req.params.id;
+    const membresia = await em.findOneOrFail(Membresia, { id });
+    res.status(200).json({ message: 'Membresía encontrada', data: membresia });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+async function add(req: Request, res: Response) {
+  try {
+    const membresia = em.create(Membresia, req.body.sanitizedInput);
+    await em.flush();
+    res.status(201).json({ message: 'Membresía creada', data: membresia });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+async function update(req: Request, res: Response) {
+  try {
+    const id = req.params.id;
+    const membresia = await em.findOneOrFail(Membresia, { id });
+    em.assign(membresia, req.body.sanitizedInput);
+    await em.flush();
+    res.status(200).json({ message: 'Membresía actualizada', data: membresia });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+async function remove(req: Request, res: Response) {
+  try {
+    const id = req.params.id;
+    const membresia = await em.findOneOrFail(Membresia, { id });
+    await em.removeAndFlush(membresia);
+    res.status(200).json({ message: 'Membresía eliminada' });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export { sanitizeMembresiaInput, findAll, findOne, add, update, remove };
