@@ -1,6 +1,8 @@
 import { MikroORM } from '@mikro-orm/core';
+import { MongoDriver } from '@mikro-orm/mongodb';
 
 export const orm = await MikroORM.init({
+  driver: MongoDriver,
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
   dbName: 'gym',
