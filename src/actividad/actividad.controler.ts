@@ -14,7 +14,7 @@ function sanitizeActividadInput(
     nombre: req.body.nombre,
     descripcion: req.body.descripcion,
     cupo: req.body.cupo,
-    entrenadores: req.body.entrenadores
+    
   }
   //more checks here
 
