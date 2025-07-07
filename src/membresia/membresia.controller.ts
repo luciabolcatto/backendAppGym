@@ -71,9 +71,9 @@ async function update(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
   try {
     const id = req.params.id;
-    const membresia =  em.findOneOrFail(Membresia, id );
-    await em.removeAndFlush(membresia);
-    res.status(200).json({ message: 'Membresía eliminada' });
+    const membresia = em.getReference(Membresia, id);
+    await em.removeAndFlush(membresia); 
+    res.status(200).json({ message: 'membresía borrada' });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

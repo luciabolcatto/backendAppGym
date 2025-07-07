@@ -12,10 +12,10 @@ Content-Type: application/json
 {
   "fecha_hora_fin": "2023-12-31T23:59:59.999Z",
   "estado": "activo",
-  "usuario": "6861b98ee84a812628ec450e"
-}
+  "usuario": "686b27fb0aeef9e35fa909b5",
+  "membresia": "686b27950aeef9e35fa909b4"
  
-
+}
 
 ### ID
 @id = {{crearContrato.response.body.data.id}}
@@ -29,8 +29,8 @@ Content-Type: application/json
 
 {
   "fecha_hora_fin": "2025-12-31T23:59:59.999Z",
-  "estado": "activo",
-  "usuario": "6861b98ee84a812628ec450e"
+  "estado": "vencido",
+
 }
 
 ### crear un nuevo Contrato
