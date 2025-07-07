@@ -5,7 +5,6 @@ export const orm = await MikroORM.init({
   driver: MongoDriver,
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
-  type: 'mongo',
   dbName: 'gym',
   clientUrl: 'mongodb://localhost:27017',
   debug: true,

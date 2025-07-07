@@ -12,8 +12,8 @@ Content-Type: application/json
 {
   "fecha_hora_fin": "2023-12-31T23:59:59.999Z",
   "estado": "activo",
-  "usuario": "686b27fb0aeef9e35fa909b5",
-  "membresia": "686b27950aeef9e35fa909b4"
+  "usuario": "686bebe4e82647ef4bac46c9",
+  "membresia": "686becd5e82647ef4bac46cb"
  
 }
 
@@ -29,7 +29,7 @@ Content-Type: application/json
 
 {
   "fecha_hora_fin": "2025-12-31T23:59:59.999Z",
-  "estado": "vencido",
+  "estado": "vencido"
 
 }
 
