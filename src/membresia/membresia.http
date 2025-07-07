@@ -1,34 +1,79 @@
-###  Obtener todas las membresías
-GET http://localhost:5500/api/membresias
-Content-Type: application/json
+### Obtener todas las membresías
+GET http://localhost:5500/api/Membresias
 
 
 ### Crear una nueva membresía
-POST http://localhost:5500/api/membresias
+# @name crearMembresiaBasica
+POST http://localhost:5500/api/Membresias
 Content-Type: application/json
 
 {
-  "nro": "001",
+  "nombre": "Básica",
+  "descripcion": "Acceso al gimnasio de lunes a viernes",
+  "precio": 12000,
+  "meses": 1
+}
+
+
+### Guardar ID creado
+@id = {{crearMembresiaBasica.response.body.data.id}}
+
+
+### Obtener una membresía por ID
+GET http://localhost:5500/api/Membresias/{{id}}
+
+
+### Modificar una membresía (PUT - recurso completo e idempotente)
+PUT http://localhost:5500/api/Membresias/{{id}}
+Content-Type: application/json
+
+{
+  "nombre": "Básica Actualizada",
+  "descripcion": "Acceso completo de lunes a sábado",
+  "precio": 13500,
+  "meses": 1
+}
+
+
+### Crear otra membresía (para pruebas múltiples)
+POST http://localhost:5500/api/Membresias
+Content-Type: application/json
+
+{
   "nombre": "Premium",
-  "descripcion": "Acceso full al gym",
-  "precio": 2500
+  "descripcion": "Acceso todos los días con entrenador personal",
+  "precio": 30000,
+  "meses": 3
 }
 
 
-### Buscar una membresía por ID
-GET http://localhost:5500/api/membresias/ID_AQUI
-Content-Type: application/json
-
-
-###  Actualizar una membresía
-PUT http://localhost:5500/api/membresias/ID_AQUI
+### Crear una membresía para ser borrada
+# @name crearMembresiaParaBorrar
+POST http://localhost:5500/api/Membresias
 Content-Type: application/json
 
 {
-  "precio": 3000
+  "nombre": "Temporal",
+  "descripcion": "Membresía de prueba para borrar",
+  "precio": 5000,
+  "meses": 1
 }
 
 
-### Eliminar una membresía
-DELETE http://localhost:5500/api/membresias/ID_AQUI
+### Actualizar parcialmente una membresía (PATCH - recurso parcial)
+@idParaBorrar = {{crearMembresiaParaBorrar.response.body.data.id}}
+PATCH http://localhost:5500/api/Membresias/{{idParaBorrar}}
 Content-Type: application/json
+
+{
+  "precio": 4500,
+  "descripcion": "Actualización parcial de prueba"
+}
+
+
+### Eliminar una membresía por ID (la creada primero)
+DELETE http://localhost:5500/api/Membresias/{{id}}
+
+
+### Eliminar la membresía creada para borrar
+DELETE http://localhost:5500/api/Membresias/{{idParaBorrar}}

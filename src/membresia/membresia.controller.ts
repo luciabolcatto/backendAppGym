@@ -13,7 +13,7 @@ function sanitizeMembresiaInput(
     nombre: req.body.nombre,
     descripcion: req.body.descripcion,
     precio: req.body.precio,
-    fechaDesde: req.body.fechaDesde ? new Date(req.body.fechaDesde) : undefined,
+    meses: req.body.meses,
   };
 
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -26,7 +26,7 @@ function sanitizeMembresiaInput(
 
 async function findAll(req: Request, res: Response) {
   try {
-    const membresias = await em.find(Membresia, {});
+    const membresias = await em.find(Membresia, {},{populate:['contratos']});
     res.status(200).json({
       message: 'Se encontraron todas las membresías',
       data: membresias,
@@ -39,7 +39,7 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id;
-    const membresia = await em.findOneOrFail(Membresia, { id });
+    const membresia = await em.findOneOrFail(Membresia, { id },{populate:['contratos']});
     res.status(200).json({ message: 'Membresía encontrada', data: membresia });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -71,7 +71,7 @@ async function update(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
   try {
     const id = req.params.id;
-    const membresia = await em.findOneOrFail(Membresia, { id });
+    const membresia =  em.findOneOrFail(Membresia, id );
     await em.removeAndFlush(membresia);
     res.status(200).json({ message: 'Membresía eliminada' });
   } catch (error: any) {

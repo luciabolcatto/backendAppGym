@@ -18,5 +18,5 @@ export class Contrato extends BaseEntity {
   usuario!: Rel<Usuario>;
 
   @ManyToOne(() => Membresia, { nullable: false })
-  membresia!: Rel<Membresia>;
+  membresia!: Rel<Membresia>
 }

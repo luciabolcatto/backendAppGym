@@ -32,5 +32,5 @@ export class Usuario extends BaseEntity {
   @OneToMany(() => Reserva, (reserva) => reserva.usuario, {
     cascade: [Cascade.ALL],
   })
-  reservas = new Collection<Reserva>(this);
+  reservas = new Collection<Reserva>(this)
 }

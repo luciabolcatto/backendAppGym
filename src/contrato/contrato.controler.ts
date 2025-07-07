@@ -13,7 +13,8 @@ function sanitizeContratoInput(
     fecha_hora_ini: req.body.fecha_hora_ini,
     fecha_hora_fin: req.body.fecha_hora_fin,
     estado: req.body.estado,
-    usuario:req.body.usuario,
+    usuario: req.body.usuario,
+    membresia: req.body.membresia,
   }
 
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -27,7 +28,7 @@ function sanitizeContratoInput(
 
 async function findAll(req: Request, res: Response) {
   try {
-    const contratos = await em.find(Contrato, {}, { populate: ['usuario'] })
+    const contratos = await em.find(Contrato, {}, { populate: ['usuario','membresia'] })
     res
       .status(200)
       .json({ message: 'se encotraron todos los contratos', data: contratos })
@@ -39,7 +40,7 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const contrato = await em.findOneOrFail(Contrato, { id }, { populate: ['usuario'] })
+    const contrato = await em.findOneOrFail(Contrato, { id }, { populate: ['usuario','membresia'] })
     res
       .status(200)
       .json({ message: 'contrato encontrado', data: contrato })
@@ -63,7 +64,7 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const contrato = em.getReference(Contrato, id)
+    const contrato = await em.getReference(Contrato, id)
     em.assign(contrato, req.body)
     await em.flush()
     res.status(200).json({ message: 'contrato actualizado'})
