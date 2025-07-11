@@ -54,7 +54,7 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const usuario = await em.findOneOrFail(Usuario, { id })
+    const usuario = await em.getReference(Usuario, id )
     em.assign(usuario, req.body.sanitizedInput)
     await em.flush()
     res

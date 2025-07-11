@@ -6,6 +6,7 @@ import { ReservaRouter } from './reserva/reserva.routes.js';
 import { actividadRouter } from './actividad/actividad.routes.js';
 import { EntrenadorRouter } from './entrenador/entrenador.routes.js';
 import { MembresiaRouter } from './membresia/membresia.routes.js';
+import {ClaseRouter} from './clase/clase.routes.js';
 import { orm } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 
@@ -24,6 +25,7 @@ app.use('/api/Reservas', ReservaRouter);
 app.use('/api/actividad', actividadRouter);
 app.use('/api/entrenadores', EntrenadorRouter);
 app.use('/api/membresias', MembresiaRouter);
+app.use('/api/clases',ClaseRouter);
 
 app.use((_, res, __) => {
   res.status(404).send({ message: 'Resource not found' });

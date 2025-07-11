@@ -1,6 +1,7 @@
-import { Collection, Entity, OneToMany, Property, Cascade, Rel, ManyToMany } from '@mikro-orm/core'
+import { Collection, Entity, OneToMany, Property, Cascade, ManyToMany } from '@mikro-orm/core'
 import { BaseEntity } from '../shared/db/baseEntity.entity.js'
 import { Actividad } from '../actividad/actividad.entity.js'
+import {Clase} from '../clase/clase.entity.js'
 
 @Entity()
 export class Entrenador extends BaseEntity {
@@ -22,7 +23,10 @@ export class Entrenador extends BaseEntity {
   })
   actividades = new Collection<Actividad>(this)
 
-
+  @OneToMany(() => Clase, (clase) => clase.entrenador, {
+    cascade: [Cascade.ALL],
+  })
+  clases = new Collection<Clase>(this)
 
 
 

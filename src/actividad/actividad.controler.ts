@@ -30,7 +30,7 @@ function sanitizeActividadInput(
 
 async function findAll(req: Request, res: Response) {
   try {
-    const actividades = await em.find(Actividad, {}, { populate: ['entrenadores'] })
+    const actividades = await em.find(Actividad, {}, { populate: ['entrenadores','clases'] })
     res
       .status(200)
       .json({ message: 'found all activities', data: actividades })
@@ -42,7 +42,7 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const actividad = await em.findOneOrFail(Actividad, { id }, { populate: ['entrenadores'] })
+    const actividad = await em.findOneOrFail(Actividad, { id }, { populate: ['entrenadores','clases'] })
     res
       .status(200)
       .json({ message: 'found actividad', data: actividad })

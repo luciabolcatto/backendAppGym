@@ -1,6 +1,7 @@
 import {  Entity, ManyToOne, Property,  Rel} from '@mikro-orm/core'
 import { BaseEntity } from '../shared/db/baseEntity.entity.js'
 import { Usuario } from '../usuario/usuario.entity.js'
+import {Clase} from '../clase/clase.entity.js'
 
 @Entity()
 export class Reserva extends BaseEntity {
@@ -14,6 +15,7 @@ export class Reserva extends BaseEntity {
   usuario!: Rel <Usuario>
 
 
-
+  @ManyToOne(() =>  Clase , { nullable: false })
+  clase!: Rel<Clase>;
 
 }

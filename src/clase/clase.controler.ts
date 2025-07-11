@@ -1,20 +1,21 @@
 import { Request, Response ,  NextFunction} from 'express'
 import { orm } from '../shared/db/orm.js'
-import { Reserva} from './reserva.entity.js'
+import { Clase} from './clase.entity.js'
 
 const em = orm.em
-
-function sanitizeReservaInput(
+function sanitizeClaseInput(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   req.body.sanitizedInput = {
-    fecha_hora: req.body.fecha_hora_ini,
-    estado: req.body.estado,
-    usuario:req.body.usuario,
-    clase: req.body.clase,
+    fecha_hora_ini: req.body.fecha_hora_ini,
+    fecha_hora_fin: req.body.fecha_hora_fin,
+    cupo_disp: req.body.cupo_disp,
+    entrenador: req.body.entrenador,
+    actividad: req.body.membresia,
   }
+  
 
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
@@ -25,12 +26,14 @@ function sanitizeReservaInput(
 }
 
 
+
+
 async function findAll(req: Request, res: Response) {
   try {
-    const reservas = await em.find(Reserva, {}, { populate: ['usuario','clase'] })
+    const clases = await em.find(Clase, {}, { populate: ['entrenador', 'actividad', 'reservas'] })
     res
       .status(200)
-      .json({ message: 'se encotraron todos los reservas', data: reservas })
+      .json({ message: 'se encotraron todas las clases', data: clases })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
@@ -39,10 +42,10 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const reserva = await em.findOneOrFail(Reserva, { id }, { populate: ['usuario','clase'] })
+    const clase = await em.findOneOrFail(Clase, { id }, { populate: ['entrenador', 'actividad', 'reservas'] })
     res
       .status(200)
-      .json({ message: 'reserva encontrada', data: reserva })
+      .json({ message: 'clase encontrada', data: clase })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
@@ -50,11 +53,11 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
-    const reserva = em.create(  Reserva , req.body)
+    const clase = em.create(Clase, req.body)
     await em.flush()
     res
       .status(201)
-      .json({ message: 'reserva creada', data: reserva })
+      .json({ message: 'clase creada', data: clase })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
@@ -63,10 +66,10 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const reserva = await em.findOneOrFail(Reserva, {id})
-    em.assign(reserva, req.body)
+    const clase = await em.findOneOrFail(Clase, {id})
+    em.assign(clase, req.body)
     await em.flush()
-    res.status(200).json({ message: 'reserva actualizada',data: reserva})
+    res.status(200).json({ message: 'clase actualizada',  data: clase})
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
@@ -75,12 +78,12 @@ async function update(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const reserva = em.getReference(Reserva, id)
-    await em.removeAndFlush(reserva)
-    res.status(200).send({ message: 'reserva eliminada' })
+    const clase = em.getReference(Clase, id)
+    await em.removeAndFlush(clase)
+    res.status(200).send({ message: 'clase eliminada' })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
 }
 
-export {sanitizeReservaInput,  findAll, findOne, add, update, remove }
+export {sanitizeClaseInput,  findAll, findOne, add, update, remove }

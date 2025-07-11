@@ -22,7 +22,7 @@ function sanitizedEntrenadorInput(req: Request, res: Response, next: NextFunctio
 
 async function findAll(req: Request, res: Response) {
   try {
-    const entrenadores = await em.find(Entrenador, {}, { populate: ['actividades'] })
+    const entrenadores = await em.find(Entrenador, {}, { populate: ['actividades','clases'] })
     res.status(200).json({ message: 'se encotraron todos los entrenadores', data: entrenadores })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
@@ -32,7 +32,7 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const entrenador = await em.findOneOrFail(Entrenador, { id }, { populate: ['actividades'] })
+    const entrenador = await em.findOneOrFail(Entrenador, { id }, { populate: ['actividades','clases'] })
     res.status(200).json({ message: 'entrenador encontrado', data: entrenador })
   } catch (error: any) {
     res.status(500).json({ message: error.message })

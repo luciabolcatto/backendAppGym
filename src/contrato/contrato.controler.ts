@@ -64,10 +64,10 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const contrato = await em.getReference(Contrato, id)
+    const contrato = await em.findOneOrFail(Contrato, {id})
     em.assign(contrato, req.body)
     await em.flush()
-    res.status(200).json({ message: 'contrato actualizado'})
+    res.status(200).json({ message: 'contrato actualizado',  data: contrato})
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
@@ -78,7 +78,7 @@ async function remove(req: Request, res: Response) {
     const id = req.params.id
     const contrato = em.getReference(Contrato, id)
     await em.removeAndFlush(contrato)
-    res.status(200).send({ message: 'contrato eliminado' ,data: contrato})
+    res.status(200).send({ message: 'contrato eliminado' })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }

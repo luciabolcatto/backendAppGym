@@ -59,7 +59,7 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = req.params.id;
-    const membresia = await em.findOneOrFail(Membresia, { id });
+    const membresia = await em.getReference(Membresia,  id );
     em.assign(membresia, req.body.sanitizedInput);
     await em.flush();
     res.status(200).json({ message: 'Membresía actualizada', data: membresia });
