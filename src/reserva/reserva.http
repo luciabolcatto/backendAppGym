@@ -1,0 +1,71 @@
+### obtener todos las reservas
+GET http://localhost:5500/api/Reservas
+
+
+
+
+### crear una nueva reserva
+# @name crearReserva
+POST http://localhost:5500/api/Reservas
+Content-Type: application/json
+
+{
+  "estado": "pendiente",
+  "usuario": "6870344d4de2d6060e081890",
+  "clase":"687074f1a244472f752dbbe3"
+}
+ 
+
+
+### ID
+@id = {{crearReserva.response.body.data.id}}
+
+### obtener una reserva
+GET http://localhost:5500/api/Reservas/{{id}}
+
+### modificar una reserva (PUT - recurso completo e idempotente)
+PUT http://localhost:5500/api/Reservas/{{id}}
+Content-Type: application/json
+
+{
+  "estado": "cerrada",
+  "usuario": "6870344d4de2d6060e081890",
+   "clase":"687074f1a244472f752dbbe3"
+}
+
+### crear una nueva reserva
+POST http://localhost:5500/api/Reservas
+Content-Type: application/json
+
+{
+  "estado": "activo",
+  "usuario": "6861b98ee84a812628ec450e",
+   "clase":"687074f1a244472f752dbbe3"
+}
+
+### crear una nueva reserva
+# @name crearReservaParaBorrar
+POST http://localhost:5500/api/Reservas
+Content-Type: application/json
+
+{
+  "estado": "activo",
+  "usuario": "6861b98ee84a812628ec450e",
+   "clase":"687074f1a244472f752dbbe3"
+}
+
+### modificar un Contrato (PATCH - recurso parcial)
+@idResParaBorrar = {{crearReservaParaBorrar.response.body.data.id}}
+PATCH http://localhost:5500/api/Reservas/{{idResParaBorrar}}
+Content-Type: application/json
+
+{
+  "estado": "cerrada"
+}
+
+
+### borrar un Contrato
+DELETE http://localhost:5500/api/Reservas/{{idResParaBorrar}}
+
+### borrar un Contrato
+DELETE http://localhost:5500/api/Reservas/{{id}}
