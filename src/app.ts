@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import express from 'express';
+import cors from 'cors';
 import { UsuarioRouter } from './usuario/usuario.routes.js';
 import { ContratoRouter } from './contrato/contrato.routes.js';
 import { ReservaRouter } from './reserva/reserva.routes.js';
@@ -12,6 +13,8 @@ import { RequestContext } from '@mikro-orm/core';
 
 const app = express();
 app.use(express.json());
+
+app.use(cors({ origin: "http://localhost:5173" }));
 
 //luego de los middlewares base
 app.use((req, res, next) => {
