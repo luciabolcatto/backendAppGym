@@ -14,7 +14,9 @@ import { RequestContext } from '@mikro-orm/core';
 const app = express();
 app.use(express.json());
 
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: "http://localhost:5173", credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], //se pueden agregar mas metodos aca
+    allowedHeaders: ['Content-Type', 'Authorization'],}));
 
 //luego de los middlewares base
 app.use((req, res, next) => {
