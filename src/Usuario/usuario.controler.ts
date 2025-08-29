@@ -5,12 +5,26 @@ import { orm } from '../shared/db/orm.js'
 const em = orm.em
 
 function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
+  const { nombre, apellido, tel, mail, contraseña, fotoPerfil } = req.body;
+
+  // Validaciones mínimas
+  if (!mail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) {
+    res.status(400).json({ message: 'El mail no es válido' });
+    return;
+  }
+
+  if (!contraseña || contraseña.length < 6) {
+    res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
+    return;
+  }
+  
   req.body.sanitizedInput = {
     nombre: req.body.nombre,
     apellido: req.body.apellido,
     tel: req.body.tel,
     mail: req.body.mail,
-   
+    contraseña: req.body.contraseña, 
+      fotoPerfil:  req.body.fotoPerfil,
   }
   //more checks here
 

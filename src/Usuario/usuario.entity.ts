@@ -24,6 +24,12 @@ export class Usuario extends BaseEntity {
   @Property({ nullable: false })
   mail!: string;
 
+  @Property({ nullable: false })
+  contraseña!: string;
+
+  @Property({ nullable: true })
+  fotoPerfil?: string;
+
   @OneToMany(() => Contrato, (contrato) => contrato.usuario, {
     cascade: [Cascade.ALL],
   })
