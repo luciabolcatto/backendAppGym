@@ -14,7 +14,7 @@ function sanitizeActividadInput(
     nombre: req.body.nombre,
     descripcion: req.body.descripcion,
     cupo: req.body.cupo,
-    
+    imagenUrl: req.body.imagenUrl, // <-- Nuevo
   }
   //more checks here
 
@@ -53,7 +53,7 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
-    const actividad = em.create(Actividad, req.body)
+    const actividad = em.create(Actividad, req.body.sanitizedInput)
     await em.flush()
     res
       .status(201)
@@ -67,7 +67,7 @@ async function update(req: Request, res: Response) {
   try {
     const id = req.params.id
     const actividad = em.getReference(Actividad, id)
-    em.assign(actividad, req.body)
+    em.assign(actividad, req.body.sanitizedInput)
     await em.flush()
     res.status(200).json({ message: 'actividad updated' })
   } catch (error: any) {

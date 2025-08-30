@@ -31,6 +31,7 @@ app.use('/api/actividad', actividadRouter);
 app.use('/api/entrenadores', EntrenadorRouter);
 app.use('/api/membresias', MembresiaRouter);
 app.use('/api/clases',ClaseRouter);
+app.use('/uploads', express.static('public/uploads'));
 
 app.use((_, res, __) => {
   res.status(404).send({ message: 'Resource not found' });

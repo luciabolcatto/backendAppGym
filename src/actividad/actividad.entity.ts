@@ -13,7 +13,11 @@ export class Actividad extends BaseEntity {
 
   @Property()
   cupo!: number
- 
+
+  // Nueva propiedad: URL pública de la imagen
+  @Property({ nullable: true })
+  imagenUrl?: string
+
   @ManyToMany(() => Entrenador, (entrenador) => entrenador.actividades)
   entrenadores = new Collection<Entrenador>(this)
 
@@ -21,6 +25,4 @@ export class Actividad extends BaseEntity {
     cascade: [Cascade.ALL],
   })
   clases = new Collection<Clase>(this)
-
-
 }

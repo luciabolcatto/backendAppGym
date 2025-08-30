@@ -5,12 +5,13 @@ import {
   add,
   update,
   remove,
+  sanitizeActividadInput,
 } from './actividad.controler.js'
 
 export const actividadRouter = Router()
 
 actividadRouter.get('/', findAll)
 actividadRouter.get('/:id', findOne)
-actividadRouter.post('/', add)
-actividadRouter.put('/:id', update)
+actividadRouter.post('/', sanitizeActividadInput, add)
+actividadRouter.put('/:id', sanitizeActividadInput, update)
 actividadRouter.delete('/:id', remove)
