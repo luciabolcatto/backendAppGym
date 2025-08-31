@@ -1,13 +1,12 @@
-import { MikroORM } from '@mikro-orm/core'
-import { MongoHighlighter } from '@mikro-orm/mongo-highlighter'
+import { MikroORM } from '@mikro-orm/core';
+import { MongoDriver } from '@mikro-orm/mongodb';
 
 export const orm = await MikroORM.init({
+  driver: MongoDriver,
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
   dbName: 'gym',
-  type: 'mongo',
   clientUrl: 'mongodb://localhost:27017',
-  highlighter: new MongoHighlighter(),
   debug: true,
   schemaGenerator: {
     //never in production
@@ -15,13 +14,13 @@ export const orm = await MikroORM.init({
     createForeignKeyConstraints: true,
     ignoreSchema: [],
   },
-})
+});
 
 export const syncSchema = async () => {
-  const generator = orm.getSchemaGenerator()
+  const generator = orm.getSchemaGenerator();
   /*   
   await generator.dropSchema()
   await generator.createSchema()
   */
-  await generator.updateSchema()
-}
+  await generator.updateSchema();
+};

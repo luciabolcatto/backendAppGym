@@ -12,10 +12,11 @@ Content-Type: application/json
 {
   "fecha_hora_fin": "2023-12-31T23:59:59.999Z",
   "estado": "activo",
-  "usuario": "6861b98ee84a812628ec450e"
-}
- 
+  "usuario":"6870344d4de2d6060e081890",
+  "membresia": "6870354f4de2d6060e081894"
 
+ 
+}
 
 ### ID
 @id = {{crearContrato.response.body.data.id}}
@@ -29,8 +30,10 @@ Content-Type: application/json
 
 {
   "fecha_hora_fin": "2025-12-31T23:59:59.999Z",
-  "estado": "activo",
-  "usuario": "6861b98ee84a812628ec450e"
+   "usuario":"6870344d4de2d6060e081891",
+  "membresia": "6870354f4de2d6060e081894",
+  "estado": "vencido"
+
 }
 
 ### crear un nuevo Contrato
@@ -51,7 +54,8 @@ Content-Type: application/json
 {
  "fecha_hora_fin": "2025-10-31T23:59:59.999Z",
   "estado": "activo",
-  "usuario": "6861b98ee84a812628ec450e"
+   "usuario":"6870344d4de2d6060e081891",
+  "membresia": "6870354f4de2d6060e081894"
 }
 
 ### modificar un Contrato (PATCH - recurso parcial)

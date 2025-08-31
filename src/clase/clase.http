@@ -1,0 +1,61 @@
+### obtener todas las Clases
+GET http://localhost:5500/api/Clases
+
+### crear una nueva Clase
+# @name crearClase
+POST http://localhost:5500/api/Clases
+Content-Type: application/json
+
+{
+  "fecha_hora_ini": "2025-07-20T10:00:00.000Z",
+  "fecha_hora_fin": "2025-07-20T11:00:00.000Z",
+  "cupo_disp": 15,
+  "entrenador": "68703e50ca9b4506cc0263a7",
+  "actividad": "686d811b6b04936970d34947"
+}
+
+### ID de Clase
+@idClase = {{crearClase.response.body.data.id}}
+
+### obtener una Clase
+GET http://localhost:5500/api/Clases/{{idClase}}
+
+### modificar una Clase (PUT - recurso completo)
+PUT http://localhost:5500/api/Clases/{{idClase}}
+Content-Type: application/json
+
+{
+  "fecha_hora_ini": "2025-07-21T09:00:00.000Z",
+  "fecha_hora_fin": "2025-07-21T10:30:00.000Z",
+  "cupo_disp": 10,
+  "entrenador": "68703e50ca9b4506cc0263a7",
+  "actividad": "68703a4492f989cfb52764ec"
+}
+
+### crear una Clase para eliminar
+# @name crearClaseParaBorrar
+POST http://localhost:5500/api/Clases
+Content-Type: application/json
+
+{
+  "fecha_hora_ini": "2025-07-25T18:00:00.000Z",
+  "fecha_hora_fin": "2025-07-25T19:00:00.000Z",
+  "cupo_disp": 20,
+  "entrenador": "68703e50ca9b4506cc0263a7",
+  "actividad": "686d811b6b04936970d34947"
+}
+
+### modificar parcialmente una Clase (PATCH)
+@idClaseParaBorrar = {{crearClaseParaBorrar.response.body.data.id}}
+PATCH http://localhost:5500/api/Clases/{{idClaseParaBorrar}}
+Content-Type: application/json
+
+{
+  "cupo_disp": 5
+}
+
+### eliminar una Clase
+DELETE http://localhost:5500/api/Clases/{{idClaseParaBorrar}}
+
+### eliminar otra Clase
+DELETE http://localhost:5500/api/Clases/{{idClase}}
