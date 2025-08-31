@@ -12,7 +12,7 @@ Content-Type: application/json
 {
   "fecha_hora_fin": "2023-12-31T23:59:59.999Z",
   "estado": "activo",
-  "usuario":"6870344d4de2d6060e081890",
+  "usuario":"68b38556522c191d4af508dc",
   "membresia": "6870354f4de2d6060e081894"
 
  

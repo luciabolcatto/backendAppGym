@@ -1,10 +1,12 @@
 import { Request, Response, NextFunction } from 'express' 
 import { Usuario } from './usuario.entity.js'
-import { orm } from '../shared/db/orm.js'            
+import { orm } from '../shared/db/orm.js'   
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"         
  
 const em = orm.em
 
-function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
+function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction): void{
   const { nombre, apellido, tel, mail, contraseña, fotoPerfil } = req.body;
 
   // Validaciones mínimas
@@ -36,7 +38,7 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
   next()
 }
 
-async function findAll(req: Request, res: Response) {
+async function findAll(req: Request, res: Response) : Promise<void>{
   try {
     const usuarios = await em.find(Usuario, {}, { populate: ['contratos','reservas'] })
     res.status(200).json({ message: 'se encotraron todos los usuarios', data: usuarios })
@@ -45,7 +47,7 @@ async function findAll(req: Request, res: Response) {
   }
 }
 
-async function findOne(req: Request, res: Response) {
+async function findOne(req: Request, res: Response): Promise<void> {
   try {
     const id = req.params.id
     const usuario = await em.findOneOrFail(Usuario, { id }, { populate: ['contratos','reservas'] })
@@ -55,31 +57,48 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
-async function add(req: Request, res: Response) {
+async function add(req: Request, res: Response): Promise<void> {
   try {
-    const usuario = em.create(Usuario, req.body.sanitizedInput)
-    await em.flush()
-    res.status(201).json({ message: 'usuario creado', data: usuario})
+    const { sanitizedInput } = req.body;
+
+    // Verificar si el email ya existe
+    const existingUser = await em.findOne(Usuario, { mail: sanitizedInput.mail });
+    if (existingUser) {
+      res.status(400).json({ message: 'El email ya está registrado' });
+      return;
+    }
+
+    // Hash de la contraseña
+    const salt = await bcrypt.genSalt(10);
+    sanitizedInput.contraseña = await bcrypt.hash(sanitizedInput.contraseña, salt);
+
+    const usuario = em.create(Usuario, sanitizedInput);
+    await em.flush();
+    res.status(201).json({ message: 'Usuario creado', data: usuario });
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: error.message });
   }
 }
 
-async function update(req: Request, res: Response) {
+async function update(req: Request, res: Response): Promise<void> {
   try {
-    const id = req.params.id
-    const usuario = await em.getReference(Usuario, id )
-    em.assign(usuario, req.body.sanitizedInput)
-    await em.flush()
-    res
-      .status(200)
-      .json({ message: 'usuario actualizado', data: usuario })
+    const usuario = await em.getReference(Usuario, req.params.id);
+    const sanitizedInput = req.body.sanitizedInput || req.body;
+
+    if (sanitizedInput.contraseña) {
+      const salt = await bcrypt.genSalt(10);
+      sanitizedInput.contraseña = await bcrypt.hash(sanitizedInput.contraseña, salt);
+    }
+
+    em.assign(usuario, sanitizedInput);
+    await em.flush();
+    res.status(200).json({ message: 'Usuario actualizado', data: usuario });
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: error.message });
   }
 }
 
-async function remove(req: Request, res: Response) {
+async function remove(req: Request, res: Response): Promise<void> {
   try {
     const id = req.params.id
     const usuario = em.getReference(Usuario, id)
@@ -91,5 +110,56 @@ async function remove(req: Request, res: Response) {
     res.status(500).json({ message: error.message })
   }
 }
+async function login(req: Request, res: Response): Promise<void> {
+  try {
+    const { mail, contraseña } = req.body;
 
-export { sanitizeUsuarioInput, findAll, findOne, add, update, remove }
+    if (!mail || !contraseña) {
+      res.status(400).json({ message: 'Todos los campos son obligatorios' });
+      return;
+    }
+
+    const usuario = await em.findOne(Usuario, { mail });
+    if (!usuario) {
+      res.status(400).json({ message: 'Credenciales inválidas' });
+      return;
+    }
+
+    const isMatch = await bcrypt.compare(contraseña, usuario.contraseña);
+    if (!isMatch) {
+      res.status(400).json({ message: 'Credenciales inválidas' });
+      return;
+    }
+
+    if (!process.env.JWT_SECRET) {
+     res.status(500).json({ message: 'Clave secreta no definida' });
+     return;
+    }
+
+    const token = jwt.sign(
+      { id: usuario.id, mail: usuario.mail },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.status(200).json({ token, usuario: { id: usuario.id, mail: usuario.mail } });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+async function findByMail(req: Request, res: Response): Promise<void> {
+  const mail = req.params.mail
+  try {
+    const usuario = await em.findOne(Usuario, { mail })
+    if (!usuario) {
+      res.status(404).json({ message: 'Usuario no encontrado' });
+      return;
+    }
+    res.status(200).json({ message: 'Usuario encontrado', data: usuario })
+  } catch (error: any) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export { sanitizeUsuarioInput, findAll, findOne, add, update, remove,login ,findByMail}

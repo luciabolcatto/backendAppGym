@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import { UsuarioRouter } from './usuario/usuario.routes.js';
@@ -11,6 +12,7 @@ import {ClaseRouter} from './clase/clase.routes.js';
 import { orm } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 
+dotenv.config();
 const app = express();
 app.use(express.json());
 
