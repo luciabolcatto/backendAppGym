@@ -18,6 +18,10 @@ app.use(cors({ origin: "http://localhost:5173", credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], //se pueden agregar mas metodos aca
     allowedHeaders: ['Content-Type', 'Authorization'],}));
 
+// Servir archivos estáticos (imágenes)
+// Ej: http://localhost:5500/public/uploads/actividad/<id>/<archivo>
+app.use('/public', express.static('public'));
+
 //luego de los middlewares base
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
@@ -31,7 +35,6 @@ app.use('/api/actividad', actividadRouter);
 app.use('/api/entrenadores', EntrenadorRouter);
 app.use('/api/membresias', MembresiaRouter);
 app.use('/api/clases',ClaseRouter);
-app.use('/uploads', express.static('public/uploads'));
 
 app.use((_, res, __) => {
   res.status(404).send({ message: 'Resource not found' });
