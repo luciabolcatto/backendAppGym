@@ -8,7 +8,8 @@ import {
   sanitizeActividadInput,
   uploadImagen,
 } from './actividad.controler.js'
-import { actividadImageUpload } from '../shared/utils/upload.js'
+import { createEntityImageUpload } from '../shared/utils/upload.js'
+const actividadImageUpload = createEntityImageUpload({ entity: 'actividad' })
 
 export const actividadRouter = Router()
 
