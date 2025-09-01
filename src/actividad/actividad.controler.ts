@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express'
 import { orm } from '../shared/db/orm.js'
+import { buildPublicImagePath } from '../shared/utils/upload.js'
 import fs from 'fs'
 import path from 'path'
 import { Actividad } from './actividad.entity.js'
@@ -113,7 +114,7 @@ const uploadImagen: RequestHandler = async (req, res) => {
       return
     }
     const actividad = await em.findOneOrFail(Actividad, { id })
-    const publicPath = `/public/uploads/actividad/${id}/${file.filename}`
+    const publicPath = buildPublicImagePath('actividad', id, file.filename)
     actividad.imagenUrl = publicPath
     await em.flush()
     res.status(200).json({ message: 'imagen actualizada', data: actividad })
