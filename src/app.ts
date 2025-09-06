@@ -17,11 +17,11 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], //se pueden agregar mas metodos aca
+    methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH' , 'OPTIONS'], //se pueden agregar mas metodos aca
     allowedHeaders: ['Content-Type', 'Authorization'],}));
 
 // Servir archivos estáticos (imágenes)
-// Ej: http://localhost:5500/public/uploads/actividad/<id>/<archivo>
+// Ej: http://localhost:5500/public/uploads/<clase>/<id>/<archivo>
 app.use('/public', express.static('public'));
 
 //luego de los middlewares base

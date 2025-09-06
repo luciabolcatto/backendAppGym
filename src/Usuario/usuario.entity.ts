@@ -25,7 +25,7 @@ export class Usuario extends BaseEntity {
   mail!: string;
 
   @Property({ nullable: false })
-  contraseña!: string;
+  contrasena!: string;
 
   @Property({ nullable: true })
   fotoPerfil?: string;
