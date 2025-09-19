@@ -166,10 +166,6 @@ async function contratarMembresia(req: Request, res: Response) {
       message: mensaje,
       data: {
         contrato: nuevoContrato,
-        fechaInicio: fechaInicio,
-        fechaFin: fechaFin,
-        precio: membresia.precio,
-        estadoPago: 'pendiente',
         esRenovacion: esRenovacion,
         contratoAnterior: ultimoContratoPagado ? {
           id: ultimoContratoPagado.id,
@@ -218,12 +214,7 @@ async function simularPago(req: Request, res: Response) {
       res.status(200).json({
         message: 'Pago procesado exitosamente',
         data: {
-          contrato: contrato,
-          metodoPago: metodoPago,
-          fechaPago: fechaPago,
-          monto: contrato.membresia.precio,
-          vigenciaDesde: contrato.fecha_hora_ini,
-          vigenciaHasta: contrato.fecha_hora_fin
+          contrato: contrato
         }
       });
     } else {
@@ -274,7 +265,6 @@ async function cancelarContrato(req: Request, res: Response) {
       message: 'Contrato cancelado exitosamente',
       data: {
         contrato: contrato,
-        fechaCancelacion: fechaCancelacion,
         estadoAnterior: estadoAnterior
       }
     });
