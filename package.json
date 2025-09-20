@@ -18,6 +18,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/luxon": "^3.7.1",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.3.0",
     "ts-node": "^10.9.2",
@@ -28,11 +29,14 @@
     "@mikro-orm/core": "5.8.10",
     "@mikro-orm/mongo-highlighter": "1.0.0",
     "@mikro-orm/mongodb": "5.8.10",
+    "@types/mongodb": "^4.0.7",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "luxon": "^3.7.2",
+    "mongodb": "^6.20.0",
     "multer": "^2.0.2",
     "reflect-metadata": "0.1.13"
   }
