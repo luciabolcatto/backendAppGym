@@ -83,5 +83,37 @@ async function remove(req: Request, res: Response) {
     res.status(500).json({ message: error.message })
   }
 }
+async function findFiltered(req: Request, res: Response) {
+  try {
+    const { estado } = req.query;
 
-export {sanitizeContratoInput,  findAll, findOne, add, update, remove }
+
+    const filtro: any = {};
+    if (estado) {
+      filtro.estado = estado;
+    }
+
+    // Consultamos contratos con usuario y membresía , orden por id
+    const contratos = await em.find(
+      Contrato,
+      filtro,
+      { populate: ['usuario', 'membresia'], orderBy: { id: 'ASC' } }
+    );
+
+    // Mapear solo los campos que necesitamos
+    const data = contratos.map(c => ({
+      idUsuario: c.usuario.id,
+      nombre: c.usuario.nombre,
+      apellido: c.usuario.apellido,
+      fecha_hora_ini: c.fecha_hora_ini,
+      fecha_hora_fin: c.fecha_hora_fin,
+      estado: c.estado,
+      membresia: c.membresia.nombre
+    }));
+
+    res.status(200).json({ message: 'Contratos filtrados encontrados', data });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+export {sanitizeContratoInput,  findAll, findOne, add, update, remove, findFiltered }

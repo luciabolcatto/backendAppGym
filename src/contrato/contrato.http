@@ -12,7 +12,7 @@ Content-Type: application/json
 {
   "fecha_hora_fin": "2023-12-31T23:59:59.999Z",
   "estado": "activo",
-  "usuario":"68b38556522c191d4af508dc",
+  "usuario": "68d08ab246398fafcab0deb3",
   "membresia": "6870354f4de2d6060e081894"
 
  
@@ -73,3 +73,18 @@ DELETE http://localhost:5500/api/Contratos/{{idConParaBorrar}}
 
 ### borrar un Contrato
 DELETE http://localhost:5500/api/Contratos/{{id}}
+
+### obtener contratos pagados
+GET http://localhost:5500/api/Contratos/filtrado?estado=pagado
+
+### obtener contratos pendientes
+GET http://localhost:5500/api/Contratos/filtrado?estado=pendiente
+
+### obtener contratos cancelados
+GET http://localhost:5500/api/Contratos/filtrado?estado=cancelado
+
+### obtener contratos terminados
+GET http://localhost:5500/api/Contratos/filtrado?estado=terminado
+
+### obtener contratos activos(solo prueba ya que este estado ya no existe)
+GET http://localhost:5500/api/Contratos/filtrado?estado=activo
