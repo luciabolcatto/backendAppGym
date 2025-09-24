@@ -11,7 +11,7 @@ Content-Type: application/json
 
 {
   "fecha_hora_fin": "2023-12-31T23:59:59.999Z",
-  "estado": "activo",
+  "estado": "pagado",
   "usuario": "68d08ab246398fafcab0deb3",
   "membresia": "6870354f4de2d6060e081894"
 
