@@ -3,6 +3,7 @@ import { orm } from '../shared/db/orm.js';
 import { Clase } from './clase.entity.js';
 import { Actividad } from '../actividad/actividad.entity.js';
 import { ObjectId } from 'mongodb';
+import { Entrenador } from '../entrenador/entrenador.entity.js';
 
 const em = orm.em;
 
@@ -82,10 +83,25 @@ async function findOne(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
   try {
     const input = req.body.sanitizedInput || req.body;
-    const clase = em.create(Clase, input);
+
+    // Recuperar entidades relacionadas
+    const actividad = await em.findOneOrFail(Actividad, input.actividad);
+    const entrenador = await em.findOneOrFail(Entrenador, input.entrenador);
+
+    // Crear la clase usando referencias reales
+    const clase = em.create(Clase, {
+      fecha_hora_ini: input.fecha_hora_ini,
+      fecha_hora_fin: input.fecha_hora_fin,
+      cupo_disp: input.cupo_disp,
+      actividad, // referencia real
+      entrenador, // referencia real
+    });
+
     await em.flush();
+
     res.status(201).json({ message: 'clase creada', data: clase });
   } catch (error: any) {
+    console.error('Error creando clase:', error);
     res.status(500).json({ message: error.message });
   }
 }
