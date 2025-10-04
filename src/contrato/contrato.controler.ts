@@ -88,9 +88,7 @@ async function findFiltered(req: Request, res: Response) {
   try {
     const { estado } = req.query;
 
-    // Caso especial: usuarios sin contrato
     if (estado === 'sin-contrato') {
-      // Obtener todos los usuarios
       const todosLosUsuarios = await em.find(Usuario, {});
       
       // Obtener todos los contratos para saber qué usuarios los tienen
