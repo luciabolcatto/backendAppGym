@@ -90,7 +90,7 @@ async function findAllOrdered(req: Request, res: Response) {
   try {
     const { fecha, actividadId } = req.query;
     
-    // Construir filtros dinámicos
+    
     const filtros: any = {};
     
     // Filtrar por fecha si se proporciona

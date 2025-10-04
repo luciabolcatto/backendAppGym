@@ -1,4 +1,4 @@
-// src/shared/seed/complete.seed.ts
+
 import { orm } from '../db/orm.js';
 import { Usuario } from '../../usuario/usuario.entity.js';
 import { Entrenador } from '../../entrenador/entrenador.entity.js';
