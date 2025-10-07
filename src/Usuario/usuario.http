@@ -9,8 +9,7 @@ Content-Type: application/json
   "apellido": "Perez",
   "tel": 41231234,
   "mail": "JuanPerez@gmail.com",
-  "contraseña": "MiPass123",
-  "fotoPerfil": "https://ejemplo.com/juan.jpg"
+  "contrasena": "123456"
 }
 
 ### =====================================================
@@ -20,7 +19,7 @@ Content-Type: application/json
 
 {
   "mail": "JuanPerez@gmail.com",
-  "contraseña": "MiPass123"
+  "contrasena": "MiPass123"
 }
 
 
@@ -48,7 +47,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YjM4NTU2N
   "apellido": "Perez",
   "tel": 41234321,
   "mail": "jp@gmail.com",
-  "contraseña": "NuevaPass456",
+  "contrasena": "NuevaPass456",
   "fotoPerfil": "https://ejemplo.com/juan2.jpg"
 }
 
@@ -62,7 +61,7 @@ Content-Type: application/json
   "apellido": "Juarez",
   "tel": 3232323,
   "mail": "facundo@gmail.com",
-  "contraseña": "FacuPass123",
+  "contrasena": "FacuPass123",
   "fotoPerfil": "https://ejemplo.com/facu.jpg"
 }
 
@@ -77,7 +76,7 @@ Content-Type: application/json
   "apellido": "Sanchez",
   "tel": 1234567,
   "mail": "PedroSanchez@gmail.com",
-  "contraseña": "PedroPass123",
+  "contrasena": "PedroPass123",
   "fotoPerfil": "https://ejemplo.com/pedro.jpg"
 }
 
@@ -95,7 +94,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YjM4NTU2N
 {
   "tel": 341897666,
   "mail": "ps@gmail.com",
-  "contraseña": "PatchPass789",
+  "contrasena": "PatchPass789",
   "fotoPerfil": "https://ejemplo.com/pedro2.jpg"
 }
 

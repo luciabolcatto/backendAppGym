@@ -1,18 +1,13 @@
-import { Router } from 'express';
-import {
-  sanitizeClaseInput,
-  findAll,
-  findOne,
-  add,
-  update,
-  remove,
-} from './clase.controler.js';
+import { Router } from 'express'
+import { sanitizeClaseInput, findAll, findOne, add, update, remove, findAllOrdered } from './clase.controler.js'
+import { adminAuth } from '../admin/adminauth.js'
 
-export const claseRouter = Router();
+export const ClaseRouter = Router()
 
-claseRouter.get('/', findAll);
-claseRouter.get('/:id', findOne);
-claseRouter.post('/', sanitizeClaseInput, add);
-claseRouter.put('/:id', sanitizeClaseInput, update);
-claseRouter.patch('/:id', sanitizeClaseInput, update);
-claseRouter.delete('/:id', remove);
+ClaseRouter.get('/todas-ordenadas', adminAuth, findAllOrdered)
+ClaseRouter.get('/', findAll)
+ClaseRouter.get('/:id', findOne)
+ClaseRouter.post('/', sanitizeClaseInput, add)
+ClaseRouter.put('/:id', sanitizeClaseInput, update)
+ClaseRouter.patch('/:id', sanitizeClaseInput, update)
+ClaseRouter.delete('/:id', remove)

@@ -404,6 +404,75 @@ async function obtenerEstadisticasContrato(req: Request, res: Response) {
     res.status(500).json({ message: error.message });
   }
 }
+async function findFiltered(req: Request, res: Response) {
+  try {
+    const { estado } = req.query;
+
+    if (estado === 'sin-contrato') {
+      const todosLosUsuarios = await em.find(Usuario, {});
+      
+      // Obtener todos los contratos para saber qué usuarios los tienen
+      const usuariosConContrato = await em.find(Contrato, {}, { populate: ['usuario'] });
+      const idsUsuariosConContrato = new Set(usuariosConContrato.map(c => c.usuario.id));
+      
+      // Filtrar usuarios que no tienen contrato
+      const usuariosSinContrato = todosLosUsuarios.filter(u => !idsUsuariosConContrato.has(u.id));
+
+      const data = usuariosSinContrato.map(u => ({
+        idUsuario: u.id,
+        nombre: u.nombre,
+        apellido: u.apellido,
+        fecha_hora_ini: null,
+        fecha_hora_fin: null,
+        estado: 'sin-contrato',
+        membresia: 'Sin membresía'
+      }));
+
+      res.status(200).json({ message: 'Usuarios sin contrato encontrados', data });
+      return;
+    }
+
+    const filtro: any = {};
+    if (estado) {
+      filtro.estado = estado;
+    }
+
+    // Consultamos contratos con usuario y membresía
+    const contratos = await em.find(
+      Contrato,
+      filtro,
+      { populate: ['usuario', 'membresia'] }
+    );
+
+    // Mapear y ordenar: primero por usuario (apellido, nombre) y luego por fecha más reciente
+    const data = contratos
+      .map(c => ({
+        idUsuario: c.usuario.id,
+        nombre: c.usuario.nombre,
+        apellido: c.usuario.apellido,
+        fecha_hora_ini: c.fecha_hora_ini,
+        fecha_hora_fin: c.fecha_hora_fin,
+        estado: c.estado,
+        membresia: c.membresia.nombre
+      }))
+      .sort((a, b) => {
+        // Primero ordenar por apellido
+        if (a.apellido !== b.apellido) {
+          return a.apellido.localeCompare(b.apellido);
+        }
+        // Luego por nombre
+        if (a.nombre !== b.nombre) {
+          return a.nombre.localeCompare(b.nombre);
+        }
+        // Finalmente por fecha (más reciente primero)
+        return new Date(b.fecha_hora_ini).getTime() - new Date(a.fecha_hora_ini).getTime();
+      });
+
+    res.status(200).json({ message: 'Contratos filtrados encontrados', data });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
 
 export {
   sanitizeContratoInput,  
@@ -417,5 +486,6 @@ export {
   cancelarContrato,
   verificarVencimientos,
   obtenerContratosUsuario,
-  obtenerEstadisticasContrato
+  obtenerEstadisticasContrato,
+  findFiltered
 }
