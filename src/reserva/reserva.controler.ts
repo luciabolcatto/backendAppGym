@@ -50,7 +50,7 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
-    const reserva = em.create(  Reserva , req.body)
+    const reserva = em.create(Reserva, req.body)
     await em.flush()
     res
       .status(201)
@@ -115,4 +115,5 @@ async function findFiltered(req: Request, res: Response) {
     res.status(500).json({ message: error.message });
   }
 }
-export {sanitizeReservaInput,  findAll, findOne, add, update, remove ,findFiltered}
+
+export {sanitizeReservaInput,  findAll, findOne, add, update, remove, findFiltered}

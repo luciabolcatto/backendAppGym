@@ -110,11 +110,28 @@ async function contratarMembresia(req: Request, res: Response) {
     if (!membresia) {
       return res.status(404).json({ message: 'Membresía no encontrada' });
     }
-    
-    // Buscar el último contrato PAGADO del usuario (cualquier membresía)
-    const ultimoContratoPagado = await em.findOne(Contrato, { 
+
+    // Verificar límite de contratos pendientes (máximo 2)
+    const contratosPendientes = await em.find(Contrato, {
       usuario: usuario,
-      estado: EstadoContrato.PAGADO
+      estado: EstadoContrato.PENDIENTE
+    });
+
+    if (contratosPendientes.length >= 2) {
+      return res.status(400).json({
+        message: 'No puedes contratar más membresías. Ya tienes 2 contratos pendientes de pago. Completa el pago o cancela alguno antes de crear uno nuevo.',
+        contratosPendientesActuales: contratosPendientes.length,
+        limite: 2,
+        error: 'LIMITE_CONTRATOS_EXCEDIDO'
+      });
+    }
+    
+    // Buscar el último contrato activo del usuario que termine en el futuro (PAGADO o PENDIENTE)
+    const fechaActual = new Date();
+    const ultimoContratoActivo = await em.findOne(Contrato, { 
+      usuario: usuario,
+      estado: { $in: [EstadoContrato.PAGADO, EstadoContrato.PENDIENTE] },
+      fecha_hora_fin: { $gt: fechaActual } // Solo contratos que terminen en el futuro
     }, { 
       orderBy: { fecha_hora_fin: 'DESC' }
     });
@@ -123,14 +140,14 @@ async function contratarMembresia(req: Request, res: Response) {
     let fechaFin: Date;
     let esRenovacion = false;
     
-    if (ultimoContratoPagado) {
-      // Si tiene un contrato pagado, el nuevo contrato inicia cuando termine el último
-      fechaInicio = new Date(ultimoContratoPagado.fecha_hora_fin);
+    if (ultimoContratoActivo) {
+      // Si tiene un contrato activo que termine en el futuro, el nuevo contrato inicia cuando termine
+      fechaInicio = new Date(ultimoContratoActivo.fecha_hora_fin);
       fechaFin = new Date(fechaInicio);
       fechaFin.setMonth(fechaFin.getMonth() + membresia.meses);
       esRenovacion = true;
     } else {
-      // No tiene contratos pagados previos: nuevo contrato inicia inmediatamente
+      // No tiene contratos activos vigentes: nuevo contrato inicia inmediatamente
       fechaInicio = new Date();
       fechaFin = new Date();
       fechaFin.setMonth(fechaFin.getMonth() + membresia.meses);
@@ -148,7 +165,7 @@ async function contratarMembresia(req: Request, res: Response) {
     await em.flush();
     
     const mensaje = esRenovacion 
-      ? `Nueva membresía programada. Iniciará el ${fechaInicio.toLocaleDateString('es-ES')} cuando termine el contrato pagado actual. Pendiente de pago.`
+      ? `Nueva membresía programada. Iniciará el ${fechaInicio.toLocaleDateString('es-ES')} cuando termine el contrato actual (${ultimoContratoActivo?.estado}). Pendiente de pago.`
       : 'Contrato creado exitosamente. Pendiente de pago.';
     
     res.status(201).json({
@@ -156,9 +173,10 @@ async function contratarMembresia(req: Request, res: Response) {
       data: {
         contrato: nuevoContrato,
         esRenovacion: esRenovacion,
-        contratoAnterior: ultimoContratoPagado ? {
-          id: ultimoContratoPagado.id,
-          fechaFin: ultimoContratoPagado.fecha_hora_fin
+        contratoAnterior: ultimoContratoActivo ? {
+          id: ultimoContratoActivo.id,
+          estado: ultimoContratoActivo.estado,
+          fechaFin: ultimoContratoActivo.fecha_hora_fin
         } : null
       }
     });
@@ -415,7 +433,9 @@ async function findFiltered(req: Request, res: Response) {
         fecha_hora_fin: null,
         estado: 'sin-contrato',
         membresia: 'Sin membresía',
-        metodoPago: 'N/A'
+        metodoPago: 'N/A',
+        fechaPago: null,
+        fechaCancelacion: null
       }));
 
       res.status(200).json({ message: 'Usuarios sin contrato encontrados', data });
@@ -444,7 +464,9 @@ async function findFiltered(req: Request, res: Response) {
         fecha_hora_fin: c.fecha_hora_fin,
         estado: c.estado,
         membresia: c.membresia.nombre,
-        metodoPago: c.metodoPago || 'N/A'
+        metodoPago: c.metodoPago || 'N/A',
+        fechaPago: c.fechaPago || null,
+        fechaCancelacion: c.fechaCancelacion || null
       }))
       .sort((a, b) => {
         // Primero ordenar por apellido
