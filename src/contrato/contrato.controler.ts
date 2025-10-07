@@ -111,10 +111,9 @@ async function contratarMembresia(req: Request, res: Response) {
       return res.status(404).json({ message: 'Membresía no encontrada' });
     }
     
-    // Buscar el último contrato pagado del usuario para esta membresía
+    // Buscar el último contrato PAGADO del usuario (cualquier membresía)
     const ultimoContratoPagado = await em.findOne(Contrato, { 
-      usuario: usuario, 
-      membresia: membresia,
+      usuario: usuario,
       estado: EstadoContrato.PAGADO
     }, { 
       orderBy: { fecha_hora_fin: 'DESC' }
@@ -125,23 +124,13 @@ async function contratarMembresia(req: Request, res: Response) {
     let esRenovacion = false;
     
     if (ultimoContratoPagado) {
-      // Si tiene un contrato pagado, verificar si está vigente o vencido
-      const fechaActual = new Date();
-      
-      if (ultimoContratoPagado.fecha_hora_fin > fechaActual) {
-        // Contrato vigente: el nuevo contrato inicia cuando termine el actual
-        fechaInicio = new Date(ultimoContratoPagado.fecha_hora_fin);
-        fechaFin = new Date(fechaInicio);
-        fechaFin.setMonth(fechaFin.getMonth() + membresia.meses);
-        esRenovacion = true;
-      } else {
-        // Contrato vencido: el nuevo contrato inicia inmediatamente
-        fechaInicio = new Date();
-        fechaFin = new Date();
-        fechaFin.setMonth(fechaFin.getMonth() + membresia.meses);
-      }
+      // Si tiene un contrato pagado, el nuevo contrato inicia cuando termine el último
+      fechaInicio = new Date(ultimoContratoPagado.fecha_hora_fin);
+      fechaFin = new Date(fechaInicio);
+      fechaFin.setMonth(fechaFin.getMonth() + membresia.meses);
+      esRenovacion = true;
     } else {
-      // No tiene contratos pagados previos: nuevo contrato
+      // No tiene contratos pagados previos: nuevo contrato inicia inmediatamente
       fechaInicio = new Date();
       fechaFin = new Date();
       fechaFin.setMonth(fechaFin.getMonth() + membresia.meses);
@@ -159,7 +148,7 @@ async function contratarMembresia(req: Request, res: Response) {
     await em.flush();
     
     const mensaje = esRenovacion 
-      ? 'Renovación programada exitosamente. Pendiente de pago.'
+      ? `Nueva membresía programada. Iniciará el ${fechaInicio.toLocaleDateString('es-ES')} cuando termine el contrato pagado actual. Pendiente de pago.`
       : 'Contrato creado exitosamente. Pendiente de pago.';
     
     res.status(201).json({
@@ -425,7 +414,8 @@ async function findFiltered(req: Request, res: Response) {
         fecha_hora_ini: null,
         fecha_hora_fin: null,
         estado: 'sin-contrato',
-        membresia: 'Sin membresía'
+        membresia: 'Sin membresía',
+        metodoPago: 'N/A'
       }));
 
       res.status(200).json({ message: 'Usuarios sin contrato encontrados', data });
@@ -453,7 +443,8 @@ async function findFiltered(req: Request, res: Response) {
         fecha_hora_ini: c.fecha_hora_ini,
         fecha_hora_fin: c.fecha_hora_fin,
         estado: c.estado,
-        membresia: c.membresia.nombre
+        membresia: c.membresia.nombre,
+        metodoPago: c.metodoPago || 'N/A'
       }))
       .sort((a, b) => {
         // Primero ordenar por apellido

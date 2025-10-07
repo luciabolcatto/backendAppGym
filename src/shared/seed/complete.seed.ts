@@ -4,7 +4,7 @@ import { Usuario } from '../../usuario/usuario.entity.js';
 import { Entrenador } from '../../entrenador/entrenador.entity.js';
 import { Actividad } from '../../actividad/actividad.entity.js';
 import { Membresia } from '../../membresia/membresia.entity.js';
-import { Contrato } from '../../contrato/contrato.entity.js';
+import { Contrato, EstadoContrato } from '../../contrato/contrato.entity.js';
 import { Clase } from '../../clase/clase.entity.js';
 import { Reserva } from '../../reserva/reserva.entity.js';
 import bcrypt from 'bcrypt';
@@ -72,14 +72,6 @@ async function seedCompleto() {
       mail: 'carlosruiz@mail.com',
       frase: 'El sudor de hoy es la fuerza de mañana.',
       fotoUrl: '/public/uploads/entrenador/profesor.jpg'
-    }),
-    em.create(Entrenador, {
-      nombre: 'Ana',
-      apellido: 'López',
-      tel: 444555666,
-      mail: 'analopez@mail.com',
-      frase: 'Cada pedalada te acerca a tu mejor versión.',
-      fotoUrl: '/public/uploads/entrenador/profesor4.jpg'
     })
   ];
 
@@ -97,10 +89,6 @@ async function seedCompleto() {
   
   // Carlos - Spinning
   entrenadores[2].actividades.add(actividades[2]);
-  
-  // Ana - Spinning y Yoga Avanzado
-  entrenadores[3].actividades.add(actividades[2]);
-  entrenadores[3].actividades.add(actividades[1]);
 
   await em.persistAndFlush(entrenadores);
   console.log('✅ Actividades asignadas a entrenadores!');
@@ -279,110 +267,118 @@ async function seedCompleto() {
   const contratos: Contrato[] = [];
   
   // Función para crear contrato con fecha de inicio calculada
-  const crearContrato = (usuario: any, membresia: any, estado: string, fechaInicio: Date) => {
+  const crearContrato = (usuario: any, membresia: any, estado: EstadoContrato, fechaInicio: Date) => {
     const fechaFin = new Date(fechaInicio);
     fechaFin.setMonth(fechaFin.getMonth() + membresia.meses);
+    
+    // Generar método de pago realista para contratos pagados y vencidos (que fueron pagados en su momento)
+    let metodoPago = undefined;
+    if (estado === EstadoContrato.PAGADO || estado === EstadoContrato.VENCIDO) {
+      const metodos = ['Tarjeta de Crédito', 'Tarjeta de Débito', 'Transferencia Bancaria', 'Efectivo', 'Pago Simulado'];
+      metodoPago = metodos[Math.floor(Math.random() * metodos.length)];
+    }
     
     return em.create(Contrato, {
       fecha_hora_ini: fechaInicio,
       fecha_hora_fin: fechaFin,
       estado: estado,
       usuario: usuario,
-      membresia: membresia
+      membresia: membresia,
+      metodoPago: metodoPago
     });
   };
 
   // Pedro (usuarios[0]) - Varios contratos terminados y uno pagado actual
   let fechaInicio = new Date(ahora.getTime() - 365 * 24 * 60 * 60 * 1000); // Hace 1 año
-  contratos.push(crearContrato(usuarios[0], membresias[0], 'terminado', fechaInicio)); // Básica terminada
+  contratos.push(crearContrato(usuarios[0], membresias[0], EstadoContrato.VENCIDO, fechaInicio)); // Básica terminada
   fechaInicio = new Date(fechaInicio.getTime() + 31 * 24 * 60 * 60 * 1000); // +1 mes
-  contratos.push(crearContrato(usuarios[0], membresias[1], 'terminado', fechaInicio)); // Premium terminada
+  contratos.push(crearContrato(usuarios[0], membresias[1], EstadoContrato.VENCIDO, fechaInicio)); // Premium terminada
   fechaInicio = new Date(fechaInicio.getTime() + 93 * 24 * 60 * 60 * 1000); // +3 meses
-  contratos.push(crearContrato(usuarios[0], membresias[0], 'terminado', fechaInicio)); // Básica terminada
+  contratos.push(crearContrato(usuarios[0], membresias[0], EstadoContrato.VENCIDO, fechaInicio)); // Básica terminada
   fechaInicio = new Date(fechaInicio.getTime() + 31 * 24 * 60 * 60 * 1000); // +1 mes
-  contratos.push(crearContrato(usuarios[0], membresias[1], 'pagado', fechaInicio)); // Premium actual PAGADO
+  contratos.push(crearContrato(usuarios[0], membresias[1], EstadoContrato.PAGADO, fechaInicio)); // Premium actual PAGADO
 
   // Laura (usuarios[1]) - Varios cancelados y uno pendiente
   fechaInicio = new Date(ahora.getTime() - 200 * 24 * 60 * 60 * 1000); // Hace 200 días
-  contratos.push(crearContrato(usuarios[1], membresias[0], 'cancelado', fechaInicio)); // Básica cancelada
+  contratos.push(crearContrato(usuarios[1], membresias[0], EstadoContrato.CANCELADO, fechaInicio)); // Básica cancelada
   fechaInicio = new Date(fechaInicio.getTime() + 45 * 24 * 60 * 60 * 1000); // +45 días
-  contratos.push(crearContrato(usuarios[1], membresias[3], 'cancelado', fechaInicio)); // Estudiante cancelada
+  contratos.push(crearContrato(usuarios[1], membresias[3], EstadoContrato.CANCELADO, fechaInicio)); // Estudiante cancelada
   fechaInicio = new Date(fechaInicio.getTime() + 50 * 24 * 60 * 60 * 1000); // +50 días
-  contratos.push(crearContrato(usuarios[1], membresias[0], 'pendiente', fechaInicio)); // Básica PENDIENTE
+  contratos.push(crearContrato(usuarios[1], membresias[0], EstadoContrato.PENDIENTE, fechaInicio)); // Básica PENDIENTE
 
   // Diego (usuarios[2]) - Varios terminados
   fechaInicio = new Date(ahora.getTime() - 300 * 24 * 60 * 60 * 1000); // Hace 300 días
-  contratos.push(crearContrato(usuarios[2], membresias[3], 'terminado', fechaInicio)); // Estudiante terminada
+  contratos.push(crearContrato(usuarios[2], membresias[3], EstadoContrato.VENCIDO, fechaInicio)); // Estudiante terminada
   fechaInicio = new Date(fechaInicio.getTime() + 31 * 24 * 60 * 60 * 1000); // +1 mes
-  contratos.push(crearContrato(usuarios[2], membresias[0], 'terminado', fechaInicio)); // Básica terminada
+  contratos.push(crearContrato(usuarios[2], membresias[0], EstadoContrato.VENCIDO, fechaInicio)); // Básica terminada
   fechaInicio = new Date(fechaInicio.getTime() + 31 * 24 * 60 * 60 * 1000); // +1 mes
-  contratos.push(crearContrato(usuarios[2], membresias[1], 'terminado', fechaInicio)); // Premium terminada
+  contratos.push(crearContrato(usuarios[2], membresias[1], EstadoContrato.VENCIDO, fechaInicio)); // Premium terminada
 
   // Sofia (usuarios[3]) - Varios pendientes
   fechaInicio = new Date(ahora.getTime() - 15 * 24 * 60 * 60 * 1000); // Hace 15 días
-  contratos.push(crearContrato(usuarios[3], membresias[0], 'pendiente', fechaInicio)); // Básica PENDIENTE
+  contratos.push(crearContrato(usuarios[3], membresias[0], EstadoContrato.PENDIENTE, fechaInicio)); // Básica PENDIENTE
   fechaInicio = new Date(fechaInicio.getTime() + 31 * 24 * 60 * 60 * 1000); // +1 mes (en el futuro)
-  contratos.push(crearContrato(usuarios[3], membresias[1], 'pendiente', fechaInicio)); // Premium PENDIENTE
+  contratos.push(crearContrato(usuarios[3], membresias[1], EstadoContrato.PENDIENTE, fechaInicio)); // Premium PENDIENTE
 
   // Miguel (usuarios[4]) - Varios pagados
   fechaInicio = new Date(ahora.getTime() - 60 * 24 * 60 * 60 * 1000); // Hace 60 días
-  contratos.push(crearContrato(usuarios[4], membresias[0], 'pagado', fechaInicio)); // Básica PAGADO
+  contratos.push(crearContrato(usuarios[4], membresias[0], EstadoContrato.PAGADO, fechaInicio)); // Básica PAGADO
   fechaInicio = new Date(fechaInicio.getTime() + 31 * 24 * 60 * 60 * 1000); // +1 mes
-  contratos.push(crearContrato(usuarios[4], membresias[1], 'pagado', fechaInicio)); // Premium PAGADO
+  contratos.push(crearContrato(usuarios[4], membresias[1], EstadoContrato.PAGADO, fechaInicio)); // Premium PAGADO
 
   // Carmen (usuarios[5]) - Varios cancelados
   fechaInicio = new Date(ahora.getTime() - 150 * 24 * 60 * 60 * 1000); // Hace 150 días
-  contratos.push(crearContrato(usuarios[5], membresias[3], 'cancelado', fechaInicio)); // Estudiante cancelada
+  contratos.push(crearContrato(usuarios[5], membresias[3], EstadoContrato.CANCELADO, fechaInicio)); // Estudiante cancelada
   fechaInicio = new Date(fechaInicio.getTime() + 40 * 24 * 60 * 60 * 1000); // +40 días
-  contratos.push(crearContrato(usuarios[5], membresias[0], 'cancelado', fechaInicio)); // Básica cancelada
+  contratos.push(crearContrato(usuarios[5], membresias[0], EstadoContrato.CANCELADO, fechaInicio)); // Básica cancelada
 
   // Andrés (usuarios[6]) - Terminados y uno cancelado
   fechaInicio = new Date(ahora.getTime() - 180 * 24 * 60 * 60 * 1000); // Hace 180 días
-  contratos.push(crearContrato(usuarios[6], membresias[0], 'terminado', fechaInicio)); // Básica terminada
+  contratos.push(crearContrato(usuarios[6], membresias[0], EstadoContrato.VENCIDO, fechaInicio)); // Básica terminada
   fechaInicio = new Date(fechaInicio.getTime() + 31 * 24 * 60 * 60 * 1000); // +1 mes
-  contratos.push(crearContrato(usuarios[6], membresias[1], 'cancelado', fechaInicio)); // Premium cancelada
+  contratos.push(crearContrato(usuarios[6], membresias[1], EstadoContrato.CANCELADO, fechaInicio)); // Premium cancelada
 
   // Valentina (usuarios[7]) - Un pagado actual
   fechaInicio = new Date(ahora.getTime() - 45 * 24 * 60 * 60 * 1000); // Hace 45 días
-  contratos.push(crearContrato(usuarios[7], membresias[1], 'pagado', fechaInicio)); // Premium PAGADO
+  contratos.push(crearContrato(usuarios[7], membresias[1], EstadoContrato.PAGADO, fechaInicio)); // Premium PAGADO
 
   // Joaquín (usuarios[8]) - Varios pendientes
   fechaInicio = new Date(ahora.getTime() - 10 * 24 * 60 * 60 * 1000); // Hace 10 días
-  contratos.push(crearContrato(usuarios[8], membresias[3], 'pendiente', fechaInicio)); // Estudiante PENDIENTE
+  contratos.push(crearContrato(usuarios[8], membresias[3], EstadoContrato.PENDIENTE, fechaInicio)); // Estudiante PENDIENTE
   fechaInicio = new Date(fechaInicio.getTime() + 31 * 24 * 60 * 60 * 1000); // +1 mes
-  contratos.push(crearContrato(usuarios[8], membresias[0], 'pendiente', fechaInicio)); // Básica PENDIENTE
+  contratos.push(crearContrato(usuarios[8], membresias[0], EstadoContrato.PENDIENTE, fechaInicio)); // Básica PENDIENTE
 
   // Isabella (usuarios[9]) - Varios terminados
   fechaInicio = new Date(ahora.getTime() - 240 * 24 * 60 * 60 * 1000); // Hace 240 días
-  contratos.push(crearContrato(usuarios[9], membresias[0], 'terminado', fechaInicio)); // Básica terminada
+  contratos.push(crearContrato(usuarios[9], membresias[0], EstadoContrato.VENCIDO, fechaInicio)); // Básica terminada
   fechaInicio = new Date(fechaInicio.getTime() + 31 * 24 * 60 * 60 * 1000); // +1 mes
-  contratos.push(crearContrato(usuarios[9], membresias[3], 'terminado', fechaInicio)); // Estudiante terminada
+  contratos.push(crearContrato(usuarios[9], membresias[3], EstadoContrato.VENCIDO, fechaInicio)); // Estudiante terminada
 
   // Nicolás (usuarios[10]) - Terminados y cancelado
   fechaInicio = new Date(ahora.getTime() - 120 * 24 * 60 * 60 * 1000); // Hace 120 días
-  contratos.push(crearContrato(usuarios[10], membresias[0], 'terminado', fechaInicio)); // Básica terminada
+  contratos.push(crearContrato(usuarios[10], membresias[0], EstadoContrato.VENCIDO, fechaInicio)); // Básica terminada
   fechaInicio = new Date(fechaInicio.getTime() + 31 * 24 * 60 * 60 * 1000); // +1 mes
-  contratos.push(crearContrato(usuarios[10], membresias[1], 'cancelado', fechaInicio)); // Premium cancelada
+  contratos.push(crearContrato(usuarios[10], membresias[1], EstadoContrato.CANCELADO, fechaInicio)); // Premium cancelada
 
   // Camila (usuarios[11]) - Un pendiente
   fechaInicio = new Date(ahora.getTime() - 5 * 24 * 60 * 60 * 1000); // Hace 5 días
-  contratos.push(crearContrato(usuarios[11], membresias[1], 'pendiente', fechaInicio)); // Premium PENDIENTE
+  contratos.push(crearContrato(usuarios[11], membresias[1], EstadoContrato.PENDIENTE, fechaInicio)); // Premium PENDIENTE
 
   // Sebastián (usuarios[12]) - Varios cancelados
   fechaInicio = new Date(ahora.getTime() - 100 * 24 * 60 * 60 * 1000); // Hace 100 días
-  contratos.push(crearContrato(usuarios[12], membresias[0], 'cancelado', fechaInicio)); // Básica cancelada
+  contratos.push(crearContrato(usuarios[12], membresias[0], EstadoContrato.CANCELADO, fechaInicio)); // Básica cancelada
   fechaInicio = new Date(fechaInicio.getTime() + 31 * 24 * 60 * 60 * 1000); // +1 mes
-  contratos.push(crearContrato(usuarios[12], membresias[3], 'cancelado', fechaInicio)); // Estudiante cancelada
+  contratos.push(crearContrato(usuarios[12], membresias[3], EstadoContrato.CANCELADO, fechaInicio)); // Estudiante cancelada
 
   // Lucía (usuarios[13]) - Un terminado anual
   fechaInicio = new Date(ahora.getTime() - 400 * 24 * 60 * 60 * 1000); // Hace 400 días
-  contratos.push(crearContrato(usuarios[13], membresias[2], 'terminado', fechaInicio)); // Anual terminada
+  contratos.push(crearContrato(usuarios[13], membresias[2], EstadoContrato.VENCIDO, fechaInicio)); // Anual terminada
 
   // Mateo (usuarios[14]) - Varios terminados
   fechaInicio = new Date(ahora.getTime() - 200 * 24 * 60 * 60 * 1000); // Hace 200 días
-  contratos.push(crearContrato(usuarios[14], membresias[1], 'terminado', fechaInicio)); // Premium terminada
+  contratos.push(crearContrato(usuarios[14], membresias[1], EstadoContrato.VENCIDO, fechaInicio)); // Premium terminada
   fechaInicio = new Date(fechaInicio.getTime() + 93 * 24 * 60 * 60 * 1000); // +3 meses
-  contratos.push(crearContrato(usuarios[14], membresias[0], 'terminado', fechaInicio)); // Básica terminada
+  contratos.push(crearContrato(usuarios[14], membresias[0], EstadoContrato.VENCIDO, fechaInicio)); // Básica terminada
 
   // Los últimos 3 usuarios (15, 16, 17) no tienen contratos para probar "sin-contrato"
 
