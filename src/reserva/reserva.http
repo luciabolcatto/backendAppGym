@@ -11,7 +11,7 @@ Content-Type: application/json
 
 {
   "estado": "pendiente",
-  "usuario": "68b38556522c191d4af508dc",
+  "usuario": "68d08ab246398fafcab0deb3",
   "clase":"687074f1a244472f752dbbe3"
 }
  
@@ -33,34 +33,34 @@ Content-Type: application/json
    "clase":"687074f1a244472f752dbbe3"
 }
 
-### crear una nueva reserva
+### crear una nueva reserva - estado cancelada
 POST http://localhost:5500/api/Reservas
 Content-Type: application/json
 
 {
-  "estado": "activo",
+  "estado": "cancelada",
   "usuario": "6861b98ee84a812628ec450e",
    "clase":"687074f1a244472f752dbbe3"
 }
 
-### crear una nueva reserva
+### crear una nueva reserva - estado terminada
 # @name crearReservaParaBorrar
 POST http://localhost:5500/api/Reservas
 Content-Type: application/json
 
 {
-  "estado": "activo",
+  "estado": "terminada",
   "usuario": "6861b98ee84a812628ec450e",
    "clase":"687074f1a244472f752dbbe3"
 }
 
-### modificar un Contrato (PATCH - recurso parcial)
+### modificar una reserva (PATCH - recurso parcial) - estado cancelada
 @idResParaBorrar = {{crearReservaParaBorrar.response.body.data.id}}
 PATCH http://localhost:5500/api/Reservas/{{idResParaBorrar}}
 Content-Type: application/json
 
 {
-  "estado": "cerrada"
+  "estado": "cancelada"
 }
 
 
@@ -69,3 +69,24 @@ DELETE http://localhost:5500/api/Reservas/{{idResParaBorrar}}
 
 ### borrar un Contrato
 DELETE http://localhost:5500/api/Reservas/{{id}}
+
+### crear reserva estado cerrada (no puede cancelarse)
+POST http://localhost:5500/api/Reservas
+Content-Type: application/json
+
+{
+  "estado": "cerrada",
+  "usuario": "68d08ab246398fafcab0deb3",
+  "clase":"687074f1a244472f752dbbe3"
+}
+
+### cambiar reserva a estado terminada
+PATCH http://localhost:5500/api/Reservas/{{id}}
+Content-Type: application/json
+
+{
+  "estado": "terminada"
+}
+
+### obtener reservas filtradas por clase
+GET http://localhost:5500/api/reservas/filtrado?claseId=687074f1a244472f752dbbe3

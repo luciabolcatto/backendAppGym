@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { orm } from '../shared/db/orm.js';
 import { Clase } from './clase.entity.js';
 import { Actividad } from '../actividad/actividad.entity.js';
-import { ObjectId } from 'mongodb';
 import { Entrenador } from '../entrenador/entrenador.entity.js';
 
 const em = orm.em;
@@ -130,4 +129,47 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeClaseInput, findAll, findOne, add, update, remove };
+async function findAllOrdered(req: Request, res: Response) {
+  try {
+    const { fecha, actividadId } = req.query;
+    
+    
+    const filtros: any = {};
+    
+    // Filtrar por fecha si se proporciona
+    if (fecha) {
+      const fechaInicio = new Date(fecha as string);
+      const fechaFin = new Date(fechaInicio);
+      fechaFin.setDate(fechaFin.getDate() + 1); // Siguiente día
+      
+      filtros.fecha_hora_ini = {
+        $gte: fechaInicio,
+        $lt: fechaFin
+      };
+    }
+    
+    // Filtrar por actividad si se proporciona
+    if (actividadId) {
+      filtros.actividad = actividadId;
+    }
+
+    // Buscar clases con los filtros aplicados, ordenadas por fecha más reciente primero
+    const clases = await em.find(
+      Clase,
+      filtros,
+      { 
+        populate: ['entrenador', 'actividad'],
+        orderBy: { fecha_hora_ini: 'DESC' }
+      }
+    );
+
+    res.status(200).json({ 
+      message: 'Clases obtenidas correctamente', 
+      data: clases 
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export {sanitizeClaseInput,  findAll, findOne, add, update, remove, findAllOrdered }

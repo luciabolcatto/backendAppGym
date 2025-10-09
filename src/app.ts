@@ -2,15 +2,19 @@ import 'reflect-metadata';
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
+
 import { UsuarioRouter } from './usuario/usuario.routes.js';
 import { ContratoRouter } from './contrato/contrato.routes.js';
 import { ReservaRouter } from './reserva/reserva.routes.js';
 import { actividadRouter } from './actividad/actividad.routes.js';
 import { EntrenadorRouter } from './entrenador/entrenador.routes.js';
 import { MembresiaRouter } from './membresia/membresia.routes.js';
-import { claseRouter } from './clase/clase.routes.js';
+import {ClaseRouter} from './clase/clase.routes.js';
+import { AdminRouter } from './admin/admin.routes.js';
+
 import { orm } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
+import { verificarVencimientos } from './contrato/contrato.controler.js';
 
 dotenv.config();
 const app = express();
@@ -41,12 +45,38 @@ app.use('/api/Reservas', ReservaRouter);
 app.use('/api/actividad', actividadRouter);
 app.use('/api/entrenadores', EntrenadorRouter);
 app.use('/api/membresias', MembresiaRouter);
-app.use('/api/clases', claseRouter);
+app.use('/api/clases',ClaseRouter);
+app.use('/api/admin', AdminRouter);
 
 app.use((_, res, __) => {
   res.status(404).send({ message: 'Resource not found' });
 });
 
-app.listen(5500, () => {
+app.listen(5500, async () => {
   console.log('Server runnning on http://localhost:5500/');
+  
+  // Verificar contratos vencidos al iniciar el servidor
+  console.log(' Verificando contratos vencidos al iniciar...');
+  
+  try {
+    // Crear un contexto de EntityManager para la verificación inicial
+    await RequestContext.create(orm.em, async () => {
+      // Simular req y res para usar la función existente
+      const mockReq = {} as any;
+      const mockRes = {
+        status: (code: number) => ({
+          json: (data: any) => {
+            console.log(` ${data.message}`);
+            if (data.data?.contratosActualizados > 0) {
+              console.log(` Contratos actualizados: ${data.data.contratosActualizados}`);
+            }
+          }
+        })
+      } as any;
+      
+      await verificarVencimientos(mockReq, mockRes);
+    });
+  } catch (error) {
+    console.error(' Error al verificar contratos vencidos:', error);
+  }
 });

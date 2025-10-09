@@ -50,7 +50,7 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
-    const reserva = em.create(  Reserva , req.body)
+    const reserva = em.create(Reserva, req.body)
     await em.flush()
     res
       .status(201)
@@ -82,5 +82,38 @@ async function remove(req: Request, res: Response) {
     res.status(500).json({ message: error.message })
   }
 }
+async function findFiltered(req: Request, res: Response) {
+  try {
+    const { claseId } = req.query;
 
-export {sanitizeReservaInput,  findAll, findOne, add, update, remove }
+    if (!claseId) {
+      return res.status(400).json({ message: 'Debe proveer el id de la clase para filtrar' });
+    }
+
+    // Buscar reservas filtradas por clase con usuario y clase , ordenadas por fecha_hora
+    const reservas = await em.find(
+      Reserva,
+      { clase: claseId },
+      { populate: ['usuario','clase', 'clase.actividad'], orderBy: { fecha_hora: 'ASC' } }
+    );
+
+    // Mapear solo los campos que necesitamos
+    const data = reservas.map(r => ({
+      idActividad: r.clase.actividad.id,
+      nombreActividad: r.clase.actividad.nombre,
+      idUsuario: r.usuario.id,
+      nombre: r.usuario.nombre,
+      apellido: r.usuario.apellido,
+      fecha_hora_ini: r.clase.fecha_hora_ini,
+      fecha_hora_fin: r.clase.fecha_hora_fin,
+      fecha_hora_reserva: r.fecha_hora,
+      estado_reserva: r.estado
+    }));
+
+    res.status(200).json({ message: 'Reservas filtradas por clase', data });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export {sanitizeReservaInput,  findAll, findOne, add, update, remove, findFiltered}

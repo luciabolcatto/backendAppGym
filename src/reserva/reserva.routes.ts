@@ -1,7 +1,9 @@
 import { Router } from 'express'
-import { sanitizeReservaInput, findAll, findOne, add, update, remove } from './reserva.controler.js'
-
+import { sanitizeReservaInput, findAll, findOne, add, update, remove, findFiltered } from './reserva.controler.js'
+import { adminAuth } from '../admin/adminauth.js' 
 export const ReservaRouter = Router()
+
+ReservaRouter.get('/filtrado', adminAuth, findFiltered)
 
 ReservaRouter.get('/', findAll)
 ReservaRouter.get('/:id', findOne)

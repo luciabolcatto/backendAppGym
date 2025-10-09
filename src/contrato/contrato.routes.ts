@@ -11,12 +11,17 @@ import {
   cancelarContrato,
   verificarVencimientos,
   obtenerContratosUsuario,
-  obtenerEstadisticasContrato
+  obtenerEstadisticasContrato, 
+  findFiltered
+
 } from './contrato.controler.js'
+
+import { adminAuth } from '../admin/adminauth.js' 
 
 export const ContratoRouter = Router()
 
-// Rutas existentes
+ContratoRouter.get('/filtrado', adminAuth, findFiltered)
+
 ContratoRouter.get('/', findAll)
 ContratoRouter.get('/:id', findOne)
 ContratoRouter.post('/', sanitizeContratoInput, add)
