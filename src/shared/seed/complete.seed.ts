@@ -6,7 +6,7 @@ import { Actividad } from '../../actividad/actividad.entity.js';
 import { Membresia } from '../../membresia/membresia.entity.js';
 import { Contrato, EstadoContrato } from '../../contrato/contrato.entity.js';
 import { Clase } from '../../clase/clase.entity.js';
-import { Reserva } from '../../reserva/reserva.entity.js';
+import { Reserva, EstadoReserva } from '../../reserva/reserva.entity.js';
 import bcrypt from 'bcrypt';
 
 async function seedCompleto() {
@@ -24,19 +24,22 @@ async function seedCompleto() {
   await em.nativeDelete(Usuario, {});
 
   console.log('🏋️ Creando actividades...');
-  // 1. ACTIVIDADES (basadas en las fotos que tienes)
+  // 1. ACTIVIDADES (con IDs fijos para que coincidan con las carpetas de fotos)
   const actividades = [
     em.create(Actividad, {
+      id: '68e578233c5910d2261820a1',
       nombre: 'Yoga',
       descripcion: 'Práctica de yoga para principiantes y nivel intermedio. Conecta tu mente y cuerpo.',
       cupo: 15
     }),
     em.create(Actividad, {
+      id: '68e578233c5910d2261820a2',
       nombre: 'Yoga Avanzado', 
       descripcion: 'Práctica avanzada de yoga con posturas complejas y técnicas de respiración.',
       cupo: 12
     }),
     em.create(Actividad, {
+      id: '68e578233c5910d2261820a3',
       nombre: 'Spinning',
       descripcion: 'Entrenamiento cardiovascular intenso en bicicleta estática con música motivadora.',
       cupo: 20
@@ -469,18 +472,23 @@ async function seedCompleto() {
   console.log('✅ Contratos creados!');
 
   console.log('🏃 Creando clases...');
-  // 7. CLASES (próximos 7 días, 2-3 clases por día)
+  // 7. CLASES (últimos 3 días + próximos 7 días con horarios realistas de gym: L-S 7:00-22:00)
   const clases = [];
   
-  for (let dia = 0; dia < 7; dia++) {
+  // Generar clases desde hace 3 días hasta dentro de 7 días
+  for (let dia = -3; dia < 7; dia++) {
     const fechaClase = new Date(ahora);
     fechaClase.setDate(fechaClase.getDate() + dia);
     
-    // Clase de Yoga - 8:00 AM (1 hora)
+    // Solo clases de Lunes a Sábado (día 0 = hoy, revisar día de la semana)
+    const diaSemana = fechaClase.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
+    if (diaSemana === 0) continue; // Saltar domingos
+    
+    // Yoga Matutino - 7:30 AM (1 hora) - Todos los días L-S
     const yogaMañana = new Date(fechaClase);
-    yogaMañana.setHours(8, 0, 0, 0);
+    yogaMañana.setHours(7, 30, 0, 0);
     const yogaMañanaFin = new Date(yogaMañana);
-    yogaMañanaFin.setHours(9, 0, 0, 0);
+    yogaMañanaFin.setHours(8, 30, 0, 0);
     
     clases.push(em.create(Clase, {
       fecha_hora_ini: yogaMañana,
@@ -490,26 +498,58 @@ async function seedCompleto() {
       actividad: actividades[0] // Yoga
     }));
 
-    // Spinning - 6:00 PM (1 hora)
-    const spinningTarde = new Date(fechaClase);
-    spinningTarde.setHours(18, 0, 0, 0);
-    const spinningTardeFin = new Date(spinningTarde);
-    spinningTardeFin.setHours(19, 0, 0, 0);
+    // Spinning Mediodía - 12:00 PM (45 min) - Martes, Jueves, Sábado
+    if (diaSemana === 2 || diaSemana === 4 || diaSemana === 6) {
+      const spinningMedio = new Date(fechaClase);
+      spinningMedio.setHours(12, 0, 0, 0);
+      const spinningMedioFin = new Date(spinningMedio);
+      spinningMedioFin.setHours(12, 45, 0, 0);
+      
+      clases.push(em.create(Clase, {
+        fecha_hora_ini: spinningMedio,
+        fecha_hora_fin: spinningMedioFin,
+        cupo_disp: 20,
+        entrenador: entrenadores[2], // Carlos
+        actividad: actividades[2] // Spinning
+      }));
+    }
+
+    // Yoga Tarde - 18:00 PM (1 hora) - Lunes, Miércoles, Viernes
+    if (diaSemana === 1 || diaSemana === 3 || diaSemana === 5) {
+      const yogaTarde = new Date(fechaClase);
+      yogaTarde.setHours(18, 0, 0, 0);
+      const yogaTardeFin = new Date(yogaTarde);
+      yogaTardeFin.setHours(19, 0, 0, 0);
+      
+      clases.push(em.create(Clase, {
+        fecha_hora_ini: yogaTarde,
+        fecha_hora_fin: yogaTardeFin,
+        cupo_disp: 15,
+        entrenador: entrenadores[1], // María
+        actividad: actividades[0] // Yoga
+      }));
+    }
+
+    // Spinning Nocturno - 19:30 PM (1 hora) - Todos los días L-S
+    const spinningNoche = new Date(fechaClase);
+    spinningNoche.setHours(19, 30, 0, 0);
+    const spinningNocheFin = new Date(spinningNoche);
+    spinningNocheFin.setHours(20, 30, 0, 0);
     
     clases.push(em.create(Clase, {
-      fecha_hora_ini: spinningTarde,
-      fecha_hora_fin: spinningTardeFin,
+      fecha_hora_ini: spinningNoche,
+      fecha_hora_fin: spinningNocheFin,
       cupo_disp: 20,
       entrenador: entrenadores[2], // Carlos
       actividad: actividades[2] // Spinning
     }));
 
-    // Yoga Avanzado - Lunes, Miércoles, Viernes (7:00 PM - 1.5 horas)
-    if (dia % 2 === 0) { // días pares (0,2,4,6)
+    // Yoga Avanzado Nocturno - 21:00 PM (1 hora) - Lunes, Miércoles, Viernes
+    if (diaSemana === 1 || diaSemana === 3 || diaSemana === 5) {
       const yogaAvanzado = new Date(fechaClase);
-      yogaAvanzado.setHours(19, 0, 0, 0);
+      yogaAvanzado.setHours(21, 0, 0, 0);
       const yogaAvanzadoFin = new Date(yogaAvanzado);
-      yogaAvanzadoFin.setHours(20, 30, 0, 0);
+      yogaAvanzadoFin.setHours(22, 0, 0, 0);
       
       clases.push(em.create(Clase, {
         fecha_hora_ini: yogaAvanzado,
@@ -521,12 +561,120 @@ async function seedCompleto() {
     }
   }
 
-  await em.persistAndFlush(clases);
+  // 🧪 CLASES DE PRUEBA PARA ACTUALIZACIÓN DE RESERVAS
+  console.log('🧪 Agregando clases de prueba para actualización de reservas...');
+  
+  // Clase del pasado (ayer a las 10:00 AM) - para probar reservas de clases pasadas
+  const clasePasado = new Date(ahora);
+  clasePasado.setDate(clasePasado.getDate() - 1);
+  clasePasado.setHours(10, 0, 0, 0);
+  const clasePasadoFin = new Date(clasePasado);
+  clasePasadoFin.setHours(11, 0, 0, 0);
+  
+  clases.push(em.create(Clase, {
+    fecha_hora_ini: clasePasado,
+    fecha_hora_fin: clasePasadoFin,
+    cupo_disp: 15,
+    entrenador: entrenadores[1], // María
+    actividad: actividades[0] // Yoga
+  }));
+
+  // Clase a 40 minutos (para NO actualizar)
+  const clase40Min = new Date(ahora);
+  clase40Min.setMinutes(clase40Min.getMinutes() + 40);
+  const clase40MinFin = new Date(clase40Min);
+  clase40MinFin.setHours(clase40MinFin.getHours() + 1);
+  
+  clases.push(em.create(Clase, {
+    fecha_hora_ini: clase40Min,
+    fecha_hora_fin: clase40MinFin,
+    cupo_disp: 20,
+    entrenador: entrenadores[2], // Carlos
+    actividad: actividades[2] // Spinning
+  }));
+
+  // Clase a 25 minutos (para SÍ actualizar)
+  const clase25Min = new Date(ahora);
+  clase25Min.setMinutes(clase25Min.getMinutes() + 25);
+  const clase25MinFin = new Date(clase25Min);
+  clase25MinFin.setHours(clase25MinFin.getHours() + 1);
+  
+  clases.push(em.create(Clase, {
+    fecha_hora_ini: clase25Min,
+    fecha_hora_fin: clase25MinFin,
+    cupo_disp: 12,
+    entrenador: entrenadores[0], // Juan
+    actividad: actividades[1] // Yoga Avanzado
+  }));
+
+await em.persistAndFlush(clases);
   console.log('✅ Clases creadas!');
 
   console.log('📅 Creando reservas...');
   // 8. RESERVAS (2-3 por clase) con lógica de estados correcta
   const reservas: Reserva[] = [];
+  
+  // 🧪 RESERVAS DE PRUEBA PARA ACTUALIZACIÓN AUTOMÁTICA
+  console.log('🧪 Agregando reservas de prueba específicas...');
+  
+  // Conseguir las últimas 3 clases que son nuestras clases de prueba
+  const clasesTotal = clases.length;
+  const clasePasadoPrueba = clases[clasesTotal - 3]; // Clase del pasado
+  const clase40MinPrueba = clases[clasesTotal - 2];  // Clase a 40 min (NO debe actualizar)
+  const clase25MinPrueba = clases[clasesTotal - 1];  // Clase a 25 min (SÍ debe actualizar)
+  
+  // Reservas para clase del PASADO con estado PENDIENTE (debe actualizarse a CERRADA)
+  reservas.push(
+    em.create(Reserva, {
+      fecha_hora: new Date(clasePasadoPrueba.fecha_hora_ini.getTime() - 2 * 60 * 60 * 1000), // Reservada 2h antes
+      estado: EstadoReserva.PENDIENTE, // 🚨 ESTADO PENDIENTE para clase pasada
+      usuario: usuarios[0], // Pedro
+      clase: clasePasadoPrueba
+    }),
+    em.create(Reserva, {
+      fecha_hora: new Date(clasePasadoPrueba.fecha_hora_ini.getTime() - 1 * 60 * 60 * 1000), // Reservada 1h antes
+      estado: EstadoReserva.PENDIENTE, // 🚨 ESTADO PENDIENTE para clase pasada
+      usuario: usuarios[1], // Laura
+      clase: clasePasadoPrueba
+    })
+  );
+  
+  // Reservas para clase a 40 MINUTOS con estado PENDIENTE (NO debe actualizarse)
+  reservas.push(
+    em.create(Reserva, {
+      fecha_hora: new Date(ahora.getTime() - 10 * 60 * 1000), // Reservada hace 10 min
+      estado: EstadoReserva.PENDIENTE, // ✅ Debe permanecer PENDIENTE (>30 min)
+      usuario: usuarios[2], // Diego
+      clase: clase40MinPrueba
+    }),
+    em.create(Reserva, {
+      fecha_hora: new Date(ahora.getTime() - 5 * 60 * 1000), // Reservada hace 5 min
+      estado: EstadoReserva.PENDIENTE, // ✅ Debe permanecer PENDIENTE (>30 min)
+      usuario: usuarios[3], // Sofia
+      clase: clase40MinPrueba
+    })
+  );
+  
+  // Reservas para clase a 25 MINUTOS con estado PENDIENTE (SÍ debe actualizarse a CERRADA)
+  reservas.push(
+    em.create(Reserva, {
+      fecha_hora: new Date(ahora.getTime() - 15 * 60 * 1000), // Reservada hace 15 min
+      estado: EstadoReserva.PENDIENTE, // 🚨 ESTADO PENDIENTE (<30 min, debe actualizarse)
+      usuario: usuarios[4], // Miguel
+      clase: clase25MinPrueba
+    }),
+    em.create(Reserva, {
+      fecha_hora: new Date(ahora.getTime() - 8 * 60 * 1000), // Reservada hace 8 min
+      estado: EstadoReserva.PENDIENTE, // 🚨 ESTADO PENDIENTE (<30 min, debe actualizarse)
+      usuario: usuarios[5], // Carmen
+      clase: clase25MinPrueba
+    })
+  );
+  
+  console.log(`🧪 Agregadas 6 reservas de prueba:`);
+  console.log(`   - 2 reservas PENDIENTES para clase PASADA (deben → CERRADA)`);
+  console.log(`   - 2 reservas PENDIENTES para clase a 40min (deben → PENDIENTE)`);
+  console.log(`   - 2 reservas PENDIENTES para clase a 25min (deben → CERRADA)`);
   
   // Crear reservas para cada clase (2-3 reservas por clase)
   clases.forEach((clase, claseIndex) => {
@@ -538,28 +686,56 @@ async function seedCompleto() {
     
     for (let i = 0; i < numReservas; i++) {
       const usuario = usuarios[i % usuarios.length]; // Rotar entre usuarios
-      let estado: string;
+      let estado: EstadoReserva;
+      let fechaReserva: Date;
       
-      // Lógica de estados según las reglas:
+      // Lógica de estados coherente con fechas:
       if (claseYaPaso) {
-        // Clase ya pasó: solo 'terminada' o 'cancelada'
-        estado = Math.random() < 0.8 ? 'terminada' : 'cancelada';
+        // Clase ya pasó: solo puede estar 'cerrada' (se cerró automáticamente) o 'cancelada'
+        const fueCancelada = Math.random() < 0.3; // 30% fueron canceladas antes
+        
+        if (fueCancelada) {
+          estado = EstadoReserva.CANCELADA;
+          // Fecha de reserva: entre 7 días y 2 horas antes de la clase
+          const maxTiempo = 7 * 24 * 60 * 60 * 1000; // 7 días
+          const minTiempo = 2 * 60 * 60 * 1000; // 2 horas
+          const tiempoAleatorio = Math.floor(Math.random() * (maxTiempo - minTiempo)) + minTiempo;
+          fechaReserva = new Date(fechaClase.getTime() - tiempoAleatorio);
+        } else {
+          estado = EstadoReserva.CERRADA;
+          // Fecha de reserva: entre 7 días y 1 hora antes de la clase (se cerró automáticamente a los 30 min)
+          const maxTiempo = 7 * 24 * 60 * 60 * 1000; // 7 días
+          const minTiempo = 1 * 60 * 60 * 1000; // 1 hora
+          const tiempoAleatorio = Math.floor(Math.random() * (maxTiempo - minTiempo)) + minTiempo;
+          fechaReserva = new Date(fechaClase.getTime() - tiempoAleatorio);
+        }
       } else {
         // Clase aún no ocurrió
         if (falta30Min) {
-          // Faltan menos de 30 min: solo 'cerrada' o 'cancelada'
-          estado = Math.random() < 0.7 ? 'cerrada' : 'cancelada';
+          // Faltan menos de 30 min: automáticamente 'cerrada' (no se pueden cancelar)
+          estado = EstadoReserva.CERRADA;
+          // Fecha de reserva: entre 7 días y 31 minutos antes de la clase
+          const maxTiempo = 7 * 24 * 60 * 60 * 1000; // 7 días
+          const minTiempo = 31 * 60 * 1000; // 31 minutos
+          const tiempoAleatorio = Math.floor(Math.random() * (maxTiempo - minTiempo)) + minTiempo;
+          fechaReserva = new Date(fechaClase.getTime() - tiempoAleatorio);
         } else {
-          // Falta más de 30 min: 'pendiente', 'cancelada'
-          estado = Math.random() < 0.6 ? 'pendiente' : 'cancelada';
+          // Falta más de 30 min: puede estar 'pendiente' o 'cancelada'
+          const fueCancelada = Math.random() < 0.25; // 25% canceladas
+          
+          if (fueCancelada) {
+            estado = EstadoReserva.CANCELADA;
+          } else {
+            estado = EstadoReserva.PENDIENTE;
+          }
+          
+          // Fecha de reserva: entre 7 días y 31 minutos antes de la clase
+          const maxTiempo = 7 * 24 * 60 * 60 * 1000; // 7 días
+          const minTiempo = 31 * 60 * 1000; // 31 minutos
+          const tiempoAleatorio = Math.floor(Math.random() * (maxTiempo - minTiempo)) + minTiempo;
+          fechaReserva = new Date(fechaClase.getTime() - tiempoAleatorio);
         }
       }
-      
-      // Fecha de reserva aleatoria (entre hace 7 días y hace 1 hora)
-      const maxTiempo = 7 * 24 * 60 * 60 * 1000; // 7 días
-      const minTiempo = 60 * 60 * 1000; // 1 hora
-      const tiempoAleatorio = Math.floor(Math.random() * (maxTiempo - minTiempo)) + minTiempo;
-      const fechaReserva = new Date(ahora.getTime() - tiempoAleatorio);
       
       reservas.push(em.create(Reserva, {
         fecha_hora: fechaReserva,

@@ -1,6 +1,6 @@
 import { Request, Response ,  NextFunction} from 'express'
 import { orm } from '../shared/db/orm.js'
-import { Reserva} from './reserva.entity.js'
+import { Reserva, EstadoReserva} from './reserva.entity.js'
 
 const em = orm.em
 
@@ -27,6 +27,9 @@ function sanitizeReservaInput(
 
 async function findAll(req: Request, res: Response) {
   try {
+    // Actualizar reservas antes de buscar
+    await actualizarReservas();
+    
     const reservas = await em.find(Reserva, {}, { populate: ['usuario','clase'] })
     res
       .status(200)
@@ -38,6 +41,9 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
+    // Actualizar reservas antes de buscar
+    await actualizarReservas();
+    
     const id = req.params.id
     const reserva = await em.findOneOrFail(Reserva, { id }, { populate: ['usuario','clase'] })
     res
@@ -84,6 +90,9 @@ async function remove(req: Request, res: Response) {
 }
 async function findFiltered(req: Request, res: Response) {
   try {
+    // Actualizar reservas antes de filtrar
+    await actualizarReservas();
+    
     const { claseId } = req.query;
 
     if (!claseId) {
@@ -116,4 +125,89 @@ async function findFiltered(req: Request, res: Response) {
   }
 }
 
-export {sanitizeReservaInput,  findAll, findOne, add, update, remove, findFiltered}
+async function actualizarReservas(req?: Request, res?: Response) {
+  try {
+    const now = new Date();
+    const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+
+    console.log(` Actualizando reservas - ${now.toLocaleString()}`);
+
+    // Buscar todas las reservas PENDIENTES cuyas clases empiecen en 30 minutos o menos
+    const reservasPendientes = await em.find(
+      Reserva,
+      { 
+        estado: EstadoReserva.PENDIENTE
+      },
+      { 
+        populate: ['clase'] 
+      }
+    );
+
+    // Filtrar las que tienen clases que empiezan en 30 minutos o menos
+    const reservasACerrar = reservasPendientes.filter(reserva => {
+      const fechaInicioClase = new Date(reserva.clase.fecha_hora_ini);
+      return fechaInicioClase <= thirtyMinutesFromNow;
+    });
+
+    if (reservasACerrar.length === 0) {
+      console.log(` No hay reservas para actualizar`);
+      const resultado = { actualizadas: 0, detalles: [] };
+      
+      if (res) {
+        return res.status(200).json({ 
+          message: 'No hay reservas para actualizar', 
+          data: resultado 
+        });
+      }
+      return resultado;
+    }
+
+    // Actualizar el estado de las reservas de PENDIENTE a CERRADA
+    const detalles = [];
+    for (const reserva of reservasACerrar) {
+      const fechaInicioClase = new Date(reserva.clase.fecha_hora_ini);
+      const minutosRestantes = Math.round((fechaInicioClase.getTime() - now.getTime()) / (1000 * 60));
+      
+      reserva.estado = EstadoReserva.CERRADA;
+      
+      detalles.push({
+        reservaId: reserva.id,
+        claseId: reserva.clase.id,
+        fechaInicioClase: fechaInicioClase.toISOString(),
+        minutosRestantes: minutosRestantes,
+        estadoAnterior: EstadoReserva.PENDIENTE,
+        estadoNuevo: EstadoReserva.CERRADA
+      });
+    }
+
+    // Guardar todos los cambios
+    await em.flush();
+
+    console.log(` ${reservasACerrar.length} reservas actualizadas`);
+
+    const resultado = { 
+      actualizadas: reservasACerrar.length,
+      detalles: detalles
+    };
+
+    if (res) {
+      res.status(200).json({ 
+        message: `${resultado.actualizadas} reservas actualizadas correctamente`, 
+        data: resultado
+      });
+    }
+
+    return resultado;
+
+  } catch (error: any) {
+    console.error(' Error actualizando reservas:', error);
+    
+    if (res) {
+      res.status(500).json({ message: error.message });
+    }
+    
+    return { actualizadas: 0, detalles: [], error: error.message };
+  }
+}
+
+export {sanitizeReservaInput,  findAll, findOne, add, update, remove, findFiltered, actualizarReservas}

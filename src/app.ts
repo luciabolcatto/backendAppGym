@@ -15,6 +15,7 @@ import { AdminRouter } from './admin/admin.routes.js';
 import { orm } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 import { verificarVencimientos } from './contrato/contrato.controler.js';
+import { actualizarReservas } from './reserva/reserva.controler.js';
 
 dotenv.config();
 const app = express();
@@ -79,4 +80,60 @@ app.listen(5500, async () => {
   } catch (error) {
     console.error(' Error al verificar contratos vencidos:', error);
   }
+
+  // Actualizar reservas al iniciar el servidor
+  console.log(' Actualizando reservas al iniciar...');
+  
+  try {
+    await RequestContext.create(orm.em, async () => {
+      const resultado = await actualizarReservas() as any;
+      if (resultado.actualizadas > 0) {
+        console.log(` ${resultado.actualizadas} reservas actualizadas al iniciar`);
+      } else {
+        console.log(` No hay reservas para actualizar al iniciar`);
+      }
+    });
+  } catch (error) {
+    console.error(' Error al actualizar reservas al iniciar:', error);
+  }
+
+  // Scheduler automático para contratos (cada hora)
+  setInterval(async () => {
+    try {
+      await RequestContext.create(orm.em, async () => {
+        const mockReq = {} as any;
+        const mockRes = {
+          status: (code: number) => ({
+            json: (data: any) => {
+              if (data.data?.contratosActualizados > 0) {
+                console.log(` Scheduler: ${data.data.contratosActualizados} contratos actualizados automáticamente`);
+              }
+            }
+          })
+        } as any;
+        
+        await verificarVencimientos(mockReq, mockRes);
+      });
+    } catch (error) {
+      console.error(' Error en scheduler de contratos:', error);
+    }
+  }, 60 * 60 * 1000); // Cada hora
+
+  // Scheduler automático para reservas (cada 10 minutos)
+  setInterval(async () => {
+    try {
+      await RequestContext.create(orm.em, async () => {
+        const resultado = await actualizarReservas() as any;
+        if (resultado.actualizadas > 0) {
+          console.log(` Scheduler: ${resultado.actualizadas} reservas actualizadas automáticamente`);
+        }
+      });
+    } catch (error) {
+      console.error(' Error en scheduler de reservas:', error);
+    }
+  }, 10 * 60 * 1000); // Cada 10 minutos
+
+  console.log(' Schedulers iniciados:');
+  console.log('   - Contratos: cada 1 hora');
+  console.log('   - Reservas: cada 10 minutos');
 });

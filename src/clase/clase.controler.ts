@@ -1,8 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import { orm } from '../shared/db/orm.js';
-import { Clase } from './clase.entity.js';
-import { Actividad } from '../actividad/actividad.entity.js';
-import { Entrenador } from '../entrenador/entrenador.entity.js';
+import { Request, Response, NextFunction } from 'express'
+import { orm } from '../shared/db/orm.js'
+import { Clase } from './clase.entity.js'
+import { Actividad } from '../actividad/actividad.entity.js'
+import { Entrenador } from '../entrenador/entrenador.entity.js'
+import { actualizarReservas } from '../reserva/reserva.controler.js'
 
 const em = orm.em;
 
@@ -83,9 +84,28 @@ async function add(req: Request, res: Response) {
   try {
     const input = req.body.sanitizedInput || req.body;
 
-    // Recuperar entidades relacionadas
-    const actividad = await em.findOneOrFail(Actividad, input.actividad);
-    const entrenador = await em.findOneOrFail(Entrenador, input.entrenador);
+    // Recuperar entidades relacionadas con sus actividades/entrenadores
+    const actividad = await em.findOneOrFail(Actividad, input.actividad, {
+      populate: ['entrenadores']
+    });
+    const entrenador = await em.findOneOrFail(Entrenador, input.entrenador, {
+      populate: ['actividades']
+    });
+
+    // Validar que el entrenador está relacionado con la actividad
+    const entrenadorRelacionado = actividad.entrenadores.getItems().some(
+      e => e.id === entrenador.id
+    );
+
+    if (!entrenadorRelacionado) {
+      return res.status(400).json({ 
+        message: 'El entrenador seleccionado no está habilitado para dictar esta actividad',
+        details: {
+          entrenador: entrenador.nombre + ' ' + entrenador.apellido,
+          actividad: actividad.nombre
+        }
+      });
+    }
 
     // Crear la clase usando referencias reales
     const clase = em.create(Clase, {
@@ -110,6 +130,37 @@ async function update(req: Request, res: Response) {
     const id = req.params.id;
     const clase = await em.findOneOrFail(Clase, { id });
     const input = req.body.sanitizedInput || req.body;
+
+    // Si se está actualizando la actividad o el entrenador, validar la relación
+    if (input.actividad || input.entrenador) {
+      // Usar las entidades actuales si no se están actualizando
+      const actividadId = input.actividad || clase.actividad.id;
+      const entrenadorId = input.entrenador || clase.entrenador.id;
+
+      // Recuperar entidades con sus relaciones
+      const actividad = await em.findOneOrFail(Actividad, actividadId, {
+        populate: ['entrenadores']
+      });
+      const entrenador = await em.findOneOrFail(Entrenador, entrenadorId, {
+        populate: ['actividades']
+      });
+
+      // Validar que el entrenador está relacionado con la actividad
+      const entrenadorRelacionado = actividad.entrenadores.getItems().some(
+        e => e.id === entrenador.id
+      );
+
+      if (!entrenadorRelacionado) {
+        return res.status(400).json({ 
+          message: 'El entrenador seleccionado no está habilitado para dictar esta actividad',
+          details: {
+            entrenador: entrenador.nombre + ' ' + entrenador.apellido,
+            actividad: actividad.nombre
+          }
+        });
+      }
+    }
+
     em.assign(clase, input);
     await em.flush();
     res.status(200).json({ message: 'clase actualizada', data: clase });
@@ -131,8 +182,10 @@ async function remove(req: Request, res: Response) {
 
 async function findAllOrdered(req: Request, res: Response) {
   try {
-    const { fecha, actividadId } = req.query;
+    // Actualizar reservas antes de buscar clases
+    await actualizarReservas();
     
+    const { fecha, actividadId } = req.query;
     
     const filtros: any = {};
     
@@ -158,7 +211,7 @@ async function findAllOrdered(req: Request, res: Response) {
       Clase,
       filtros,
       { 
-        populate: ['entrenador', 'actividad'],
+        populate: ['entrenador', 'actividad', 'reservas'],
         orderBy: { fecha_hora_ini: 'DESC' }
       }
     );
