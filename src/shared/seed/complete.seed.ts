@@ -283,9 +283,11 @@ async function seedCompleto() {
       const metodos = ['Tarjeta de Crédito', 'Tarjeta de Débito', 'Transferencia Bancaria', 'Efectivo', 'Pago Simulado'];
       metodoPago = metodos[Math.floor(Math.random() * metodos.length)];
       
-      // Fecha de pago: entre 1-7 días después de la fecha de inicio
+      // Fecha de pago: entre 1-7 días después de la fecha de inicio, pero SIEMPRE EN EL PASADO
       const diasPago = Math.floor(Math.random() * 7) + 1; // 1-7 días
-      fechaPago = new Date(fechaInicio.getTime() + diasPago * 24 * 60 * 60 * 1000);
+      const fechaPagoCalculada = new Date(fechaInicio.getTime() + diasPago * 24 * 60 * 60 * 1000);
+      // Asegurar que el pago sea ANTES DE AHORA
+      fechaPago = fechaPagoCalculada < ahora ? fechaPagoCalculada : new Date(ahora.getTime() - Math.floor(Math.random() * 30 + 1) * 24 * 60 * 60 * 1000); // 1-30 días atrás
     }
     
     if (estado === EstadoContrato.CANCELADO) {
@@ -296,17 +298,21 @@ async function seedCompleto() {
         const metodos = ['Tarjeta de Crédito', 'Tarjeta de Débito', 'Transferencia Bancaria', 'Efectivo', 'Pago Simulado'];
         metodoPago = metodos[Math.floor(Math.random() * metodos.length)];
         
-        // Fecha de pago: 1-5 días después del inicio
+        // Fecha de pago: 1-5 días después del inicio (PASADO)
         const diasPago = Math.floor(Math.random() * 5) + 1;
         fechaPago = new Date(fechaInicio.getTime() + diasPago * 24 * 60 * 60 * 1000);
         
-        // Fecha de cancelación: 5-20 días después del pago
+        // Fecha de cancelación: 5-20 días después del pago, pero ANTES DE AHORA
         const diasCancelacion = Math.floor(Math.random() * 16) + 5; // 5-20 días
-        fechaCancelacion = new Date(fechaPago.getTime() + diasCancelacion * 24 * 60 * 60 * 1000);
+        const fechaCancelacionCalculada = new Date(fechaPago.getTime() + diasCancelacion * 24 * 60 * 60 * 1000);
+        // Asegurar que la cancelación sea ANTES DE AHORA
+        fechaCancelacion = fechaCancelacionCalculada < ahora ? fechaCancelacionCalculada : new Date(ahora.getTime() - Math.floor(Math.random() * 30 + 1) * 24 * 60 * 60 * 1000); // 1-30 días atrás
       } else {
-        // Cancelado sin pagar: fecha de cancelación 1-10 días después del inicio (más común)
+        // Cancelado sin pagar: fecha de cancelación 1-10 días después del inicio, pero ANTES DE AHORA
         const diasCancelacion = Math.floor(Math.random() * 10) + 1; // 1-10 días
-        fechaCancelacion = new Date(fechaInicio.getTime() + diasCancelacion * 24 * 60 * 60 * 1000);
+        const fechaCancelacionCalculada = new Date(fechaInicio.getTime() + diasCancelacion * 24 * 60 * 60 * 1000);
+        // Asegurar que la cancelación sea ANTES DE AHORA
+        fechaCancelacion = fechaCancelacionCalculada < ahora ? fechaCancelacionCalculada : new Date(ahora.getTime() - Math.floor(Math.random() * 30 + 1) * 24 * 60 * 60 * 1000); // 1-30 días atrás
       }
     }
     
