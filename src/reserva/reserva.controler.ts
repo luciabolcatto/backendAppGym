@@ -1,6 +1,7 @@
 import { Request, Response ,  NextFunction} from 'express'
 import { orm } from '../shared/db/orm.js'
 import { Reserva, EstadoReserva} from './reserva.entity.js'
+import { Clase } from '../clase/clase.entity.js'
 
 const em = orm.em
 
@@ -10,9 +11,9 @@ function sanitizeReservaInput(
   next: NextFunction
 ) {
   req.body.sanitizedInput = {
-    fecha_hora: req.body.fecha_hora_ini,
+    fecha_hora: req.body.fecha_hora || req.body.fecha_hora_ini,
     estado: req.body.estado,
-    usuario:req.body.usuario,
+    usuario: req.body.usuario,
     clase: req.body.clase,
   }
 
@@ -30,10 +31,17 @@ async function findAll(req: Request, res: Response) {
     // Actualizar reservas antes de buscar
     await actualizarReservas();
     
-    const reservas = await em.find(Reserva, {}, { populate: ['usuario','clase'] })
+    // Si viene el parámetro usuario, filtrar por usuario
+    const usuarioId = req.query.usuario as string;
+    const filtros = usuarioId ? { usuario: usuarioId } : {};
+    
+    const reservas = await em.find(Reserva, filtros, { 
+      populate: ['usuario', 'clase', 'clase.actividad', 'clase.entrenador'],
+      orderBy: { fecha_hora: 'DESC' }
+    })
     res
       .status(200)
-      .json({ message: 'se encotraron todos los reservas', data: reservas })
+      .json({ message: 'se encontraron todas las reservas', data: reservas })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
@@ -69,11 +77,58 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const reserva = await em.findOneOrFail(Reserva, {id})
+    const reserva = await em.findOneOrFail(Reserva, {id}, { populate: ['clase'] })
+    
+    // Validar que no se intente cancelar una reserva cerrada
+    if (reserva.estado === EstadoReserva.CERRADA && req.body.estado === EstadoReserva.CANCELADA) {
+      return res.status(400).json({ 
+        message: 'No se puede cancelar una reserva de una clase ya realizada (estado: cerrada)',
+        details: {
+          estadoActual: reserva.estado,
+          estadoSolicitado: req.body.estado
+        }
+      })
+    }
+
+    // Validar transiciones de estado válidas
+    if (req.body.estado) {
+      if (reserva.estado === EstadoReserva.CANCELADA && req.body.estado !== EstadoReserva.CANCELADA) {
+        return res.status(400).json({ 
+          message: 'No se puede cambiar el estado de una reserva ya cancelada',
+          details: {
+            estadoActual: reserva.estado,
+            estadoSolicitado: req.body.estado
+          }
+        })
+      }
+    }
+    
+    // Validar que el estado sea válido
+    if (req.body.estado && !Object.values(EstadoReserva).includes(req.body.estado)) {
+      return res.status(400).json({ 
+        message: 'Estado de reserva inválido',
+        details: {
+          estadoRecibido: req.body.estado,
+          estadosValidos: Object.values(EstadoReserva)
+        }
+      })
+    }
+
+    // Si se está cancelando una reserva, liberar el cupo
+    const estadoAnterior = reserva.estado;
     em.assign(reserva, req.body)
+    
+    if (estadoAnterior !== EstadoReserva.CANCELADA && req.body.estado === EstadoReserva.CANCELADA) {
+      // Liberar cupo: incrementar cupo_disp de la clase
+      reserva.clase.cupo_disp += 1;
+      
+    }
+    
     await em.flush()
-    res.status(200).json({ message: 'reserva actualizada',data: reserva})
+    
+    res.status(200).json({ message: 'reserva actualizada', data: reserva })
   } catch (error: any) {
+    console.error('Error actualizando reserva:', error);
     res.status(500).json({ message: error.message })
   }
 }

@@ -12,7 +12,7 @@ import bcrypt from 'bcrypt';
 async function seedCompleto() {
   const em = orm.em.fork();
 
-  console.log('🧹 Limpiando datos existentes...');
+  console.log('Limpiando datos existentes...');
   // Limpiar en orden inverso por las relaciones
   await em.nativeDelete(Reserva, {});
   await em.nativeDelete(Clase, {});
@@ -23,7 +23,7 @@ async function seedCompleto() {
   await em.nativeDelete(Membresia, {}); 
   await em.nativeDelete(Usuario, {});
 
-  console.log('🏋️ Creando actividades...');
+  console.log('Creando actividades...');
   // 1. ACTIVIDADES (con IDs fijos para que coincidan con las carpetas de fotos)
   const actividades = [
     em.create(Actividad, {
@@ -47,9 +47,9 @@ async function seedCompleto() {
   ];
 
   await em.persistAndFlush(actividades);
-  console.log('✅ Actividades creadas!');
+  console.log('Actividades creadas correctamente.');
 
-  console.log('💪 Creando entrenadores...');
+  console.log('Creando entrenadores...');
   // 2. ENTRENADORES
   const entrenadores = [
     em.create(Entrenador, {
@@ -79,10 +79,10 @@ async function seedCompleto() {
   ];
 
   await em.persistAndFlush(entrenadores);
-  console.log('✅ Entrenadores creados!');
+  console.log('Entrenadores creados correctamente.');
 
   // 3. ASIGNAR ACTIVIDADES A ENTRENADORES
-  console.log('🔗 Asignando actividades a entrenadores...');
+  console.log('Asignando actividades a entrenadores...');
   // Juan - Yoga y Yoga Avanzado
   entrenadores[0].actividades.add(actividades[0]);
   entrenadores[0].actividades.add(actividades[1]);
@@ -94,9 +94,9 @@ async function seedCompleto() {
   entrenadores[2].actividades.add(actividades[2]);
 
   await em.persistAndFlush(entrenadores);
-  console.log('✅ Actividades asignadas a entrenadores!');
+  console.log('Actividades asignadas a entrenadores correctamente.');
 
-  console.log('💳 Creando membresías...');
+  console.log('Creando membresías...');
   // 4. MEMBRESÍAS
   const membresias = [
     em.create(Membresia, {
@@ -677,6 +677,7 @@ await em.persistAndFlush(clases);
   console.log(`   - 2 reservas PENDIENTES para clase a 25min (deben → CERRADA)`);
   
   // Crear reservas para cada clase (2-3 reservas por clase)
+  let contadorUsuario = 0; // 🔧 Contador global para rotación correcta
   clases.forEach((clase, claseIndex) => {
     const numReservas = Math.floor(Math.random() * 2) + 2; // 2-3 reservas por clase
     const fechaClase = clase.fecha_hora_ini;
@@ -685,7 +686,8 @@ await em.persistAndFlush(clases);
     const falta30Min = (fechaClase.getTime() - ahora.getTime()) < (30 * 60 * 1000);
     
     for (let i = 0; i < numReservas; i++) {
-      const usuario = usuarios[i % usuarios.length]; // Rotar entre usuarios
+      const usuario = usuarios[contadorUsuario % usuarios.length]; // 🔧 Usar contador global
+      contadorUsuario++; // 🔧 Incrementar para próxima reserva
       let estado: EstadoReserva;
       let fechaReserva: Date;
       
@@ -714,11 +716,12 @@ await em.persistAndFlush(clases);
         if (falta30Min) {
           // Faltan menos de 30 min: automáticamente 'cerrada' (no se pueden cancelar)
           estado = EstadoReserva.CERRADA;
-          // Fecha de reserva: entre 7 días y 31 minutos antes de la clase
-          const maxTiempo = 7 * 24 * 60 * 60 * 1000; // 7 días
-          const minTiempo = 31 * 60 * 1000; // 31 minutos
-          const tiempoAleatorio = Math.floor(Math.random() * (maxTiempo - minTiempo)) + minTiempo;
-          fechaReserva = new Date(fechaClase.getTime() - tiempoAleatorio);
+          // Fecha de reserva: SIEMPRE en el pasado
+          // Entre hace 7 días y hace 32 minutos (desde ahora hacia atrás)
+          const maxTiempoAtras = 7 * 24 * 60 * 60 * 1000; // 7 días atrás
+          const minTiempoAtras = 32 * 60 * 1000; // 32 minutos atrás
+          const tiempoAleatorio = Math.floor(Math.random() * (maxTiempoAtras - minTiempoAtras)) + minTiempoAtras;
+          fechaReserva = new Date(ahora.getTime() - tiempoAleatorio);
         } else {
           // Falta más de 30 min: puede estar 'pendiente' o 'cancelada'
           const fueCancelada = Math.random() < 0.25; // 25% canceladas
@@ -729,11 +732,12 @@ await em.persistAndFlush(clases);
             estado = EstadoReserva.PENDIENTE;
           }
           
-          // Fecha de reserva: entre 7 días y 31 minutos antes de la clase
-          const maxTiempo = 7 * 24 * 60 * 60 * 1000; // 7 días
-          const minTiempo = 31 * 60 * 1000; // 31 minutos
-          const tiempoAleatorio = Math.floor(Math.random() * (maxTiempo - minTiempo)) + minTiempo;
-          fechaReserva = new Date(fechaClase.getTime() - tiempoAleatorio);
+          // Fecha de reserva: SIEMPRE en el pasado
+          // Entre hace 7 días y hace 1 hora (desde ahora hacia atrás)
+          const maxTiempoAtras = 7 * 24 * 60 * 60 * 1000; // 7 días atrás
+          const minTiempoAtras = 1 * 60 * 60 * 1000; // 1 hora atrás
+          const tiempoAleatorio = Math.floor(Math.random() * (maxTiempoAtras - minTiempoAtras)) + minTiempoAtras;
+          fechaReserva = new Date(ahora.getTime() - tiempoAleatorio);
         }
       }
       

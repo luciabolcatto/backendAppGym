@@ -241,6 +241,69 @@ async function actualizarCupo(req: Request, res: Response) {
   }
 }
 
+async function findAllWithUserReservas(req: Request, res: Response) {
+  try {
+    // Actualizar reservas antes de buscar clases
+    await actualizarReservas();
+    
+    const { fecha, actividadId, usuarioId } = req.query;
+    
+    const filtros: any = {};
+    
+    // Filtrar por fecha si se proporciona
+    if (fecha) {
+      const fechaInicio = new Date(fecha as string);
+      const fechaFin = new Date(fechaInicio);
+      fechaFin.setDate(fechaFin.getDate() + 1); // Siguiente día
+      
+      filtros.fecha_hora_ini = {
+        $gte: fechaInicio,
+        $lt: fechaFin
+      };
+    }
+    
+    // Filtrar por actividad si se proporciona
+    if (actividadId) {
+      filtros.actividad = actividadId;
+    }
+
+    // Buscar clases con los filtros aplicados
+    const clases = await em.find(
+      Clase,
+      filtros,
+      { 
+        populate: ['entrenador', 'actividad', 'reservas', 'reservas.usuario'],
+        orderBy: { fecha_hora_ini: 'DESC' }
+      }
+    );
+
+    // Si se proporciona usuarioId, filtrar las reservas para mostrar solo las PENDIENTES del usuario
+    let clasesConReservasUsuario = clases;
+    if (usuarioId) {
+      clasesConReservasUsuario = clases.map(clase => {
+        // Solo buscar reservas pendientes para clases futuras
+        // Las cerradas no son relevantes porque esas clases ya no se muestran
+        const reservaUsuario = clase.reservas.getItems().find(reserva => 
+          reserva.usuario.id === usuarioId && reserva.estado === 'pendiente'
+        );
+        
+        return {
+          ...clase,
+          reservaUsuario: reservaUsuario || null
+        };
+      });
+    }
+
+    res.status(200).json({
+      message: 'Clases con reservas de usuario obtenidas correctamente',
+      data: clasesConReservasUsuario,
+    });
+  } catch (error: any) {
+    console.error('Error en findAllWithUserReservas:', error);
+    res.status(500).json({ message: error.message });
+  }
+}
+
 export {
   sanitizeClaseInput,
   findAll,
@@ -250,4 +313,5 @@ export {
   remove,
   findAllOrdered,
   actualizarCupo,
+  findAllWithUserReservas,
 };
