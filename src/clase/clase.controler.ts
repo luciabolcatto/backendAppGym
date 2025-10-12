@@ -26,13 +26,10 @@ async function findAll(req: Request, res: Response) {
   try {
     const actividadId = req.query.actividadId as string | undefined;
 
-    // build where condition: si viene actividadId, filtramos por la relación
+    // Filtrar por actividad si se proporciona
     let where: any = {};
 
-    // If actividadId is provided, attempt to filter in the DB when possible.
-    // We try to use getReference for a valid ObjectId-like value. If it's not
-    // a valid ObjectId, we won't fail the request — we'll fetch and filter
-    // in-memory to support non-ObjectId ids or populated relations.
+    // Si hay actividadId, filtramos en la base de datos
     let clases: any[] = [];
 
     if (actividadId) {
@@ -107,13 +104,13 @@ async function add(req: Request, res: Response) {
       });
     }
 
-    // Crear la clase usando referencias reales
+    
     const clase = em.create(Clase, {
       fecha_hora_ini: input.fecha_hora_ini,
       fecha_hora_fin: input.fecha_hora_fin,
       cupo_disp: input.cupo_disp,
-      actividad, // referencia real
-      entrenador, // referencia real
+      actividad, 
+      entrenador, 
     });
 
     await em.flush();
@@ -182,7 +179,6 @@ async function remove(req: Request, res: Response) {
 
 async function findAllOrdered(req: Request, res: Response) {
   try {
-    // Actualizar reservas antes de buscar clases
     await actualizarReservas();
     
     const { fecha, actividadId } = req.query;
@@ -243,7 +239,7 @@ async function actualizarCupo(req: Request, res: Response) {
 
 async function findAllWithUserReservas(req: Request, res: Response) {
   try {
-    // Actualizar reservas antes de buscar clases
+    
     await actualizarReservas();
     
     const { fecha, actividadId, usuarioId } = req.query;
@@ -254,7 +250,7 @@ async function findAllWithUserReservas(req: Request, res: Response) {
     if (fecha) {
       const fechaInicio = new Date(fecha as string);
       const fechaFin = new Date(fechaInicio);
-      fechaFin.setDate(fechaFin.getDate() + 1); // Siguiente día
+      fechaFin.setDate(fechaFin.getDate() + 1); // Siguiente día (para limitar a un día)
       
       filtros.fecha_hora_ini = {
         $gte: fechaInicio,

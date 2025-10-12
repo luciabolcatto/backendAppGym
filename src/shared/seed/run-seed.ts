@@ -1,4 +1,4 @@
-// src/shared/seed/run-seed.ts
+
 import 'reflect-metadata';
 import { seedCompleto } from './complete.seed.js';
 

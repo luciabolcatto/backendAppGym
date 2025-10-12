@@ -33,6 +33,8 @@ function sanitizeContratoInput(
 
 async function findAll(req: Request, res: Response) {
   try {
+    await verificarVencimientos(req, res);
+    
     const contratos = await em.find(Contrato, {}, { populate: ['usuario','membresia'] })
     res
       .status(200)
@@ -311,6 +313,8 @@ async function verificarVencimientos(req: Request, res: Response) {
 
 async function obtenerContratosUsuario(req: Request, res: Response) {
   try {
+    await verificarVencimientos(req, res);
+    
     const { usuarioId } = req.params;
     
     if (!usuarioId) {
@@ -380,6 +384,8 @@ async function obtenerContratosUsuario(req: Request, res: Response) {
 
 async function obtenerEstadisticasContrato(req: Request, res: Response) {
   try {
+    await verificarVencimientos(req, res);
+    
     const fechaActual = new Date();
     
     // Contar contratos por estado
@@ -413,6 +419,8 @@ async function obtenerEstadisticasContrato(req: Request, res: Response) {
 }
 async function findFiltered(req: Request, res: Response) {
   try {
+    await verificarVencimientos(req, res);
+    
     const { estado } = req.query;
 
     if (estado === 'sin-contrato') {

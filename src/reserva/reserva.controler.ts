@@ -28,7 +28,6 @@ function sanitizeReservaInput(
 
 async function findAll(req: Request, res: Response) {
   try {
-    // Actualizar reservas antes de buscar
     await actualizarReservas();
     
     // Si viene el parámetro usuario, filtrar por usuario
@@ -49,7 +48,6 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
-    // Actualizar reservas antes de buscar
     await actualizarReservas();
     
     const id = req.params.id
@@ -161,7 +159,7 @@ async function findFiltered(req: Request, res: Response) {
       { populate: ['usuario','clase', 'clase.actividad'], orderBy: { fecha_hora: 'ASC' } }
     );
 
-    // Mapear solo los campos que necesitamos
+   
     const data = reservas.map(r => ({
       idActividad: r.clase.actividad.id,
       nombreActividad: r.clase.actividad.nombre,
@@ -235,7 +233,7 @@ async function actualizarReservas(req?: Request, res?: Response) {
       });
     }
 
-    // Guardar todos los cambios
+    
     await em.flush();
 
     console.log(` ${reservasACerrar.length} reservas actualizadas`);

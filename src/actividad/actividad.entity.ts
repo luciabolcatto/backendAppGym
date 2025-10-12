@@ -14,7 +14,7 @@ export class Actividad extends BaseEntity {
   @Property()
   cupo!: number
 
-  // Nueva propiedad: URL pública de la imagen
+  // URL pública de la imagen
   @Property({ nullable: true })
   imagenUrl?: string
 
