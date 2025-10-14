@@ -62,20 +62,11 @@ app.listen(5500, async () => {
   try {
     // Crear un contexto de EntityManager para la verificación inicial
     await RequestContext.create(orm.em, async () => {
-      // Simular req y res para usar la función existente
-      const mockReq = {} as any;
-      const mockRes = {
-        status: (code: number) => ({
-          json: (data: any) => {
-            console.log(` ${data.message}`);
-            if (data.data?.contratosActualizados > 0) {
-              console.log(` Contratos actualizados: ${data.data.contratosActualizados}`);
-            }
-          }
-        })
-      } as any;
-      
-      await verificarVencimientos(mockReq, mockRes);
+      const resultado = await verificarVencimientos() as any;
+      console.log(` Se verificaron contratos vencidos al iniciar`);
+      if (resultado?.contratosActualizados > 0) {
+        console.log(` Contratos actualizados: ${resultado.contratosActualizados}`);
+      }
     });
   } catch (error) {
     console.error(' Error al verificar contratos vencidos:', error);
@@ -101,18 +92,10 @@ app.listen(5500, async () => {
   setInterval(async () => {
     try {
       await RequestContext.create(orm.em, async () => {
-        const mockReq = {} as any;
-        const mockRes = {
-          status: (code: number) => ({
-            json: (data: any) => {
-              if (data.data?.contratosActualizados > 0) {
-                console.log(` Scheduler: ${data.data.contratosActualizados} contratos actualizados automáticamente`);
-              }
-            }
-          })
-        } as any;
-        
-        await verificarVencimientos(mockReq, mockRes);
+        const resultado = await verificarVencimientos() as any;
+        if (resultado?.contratosActualizados > 0) {
+          console.log(` Scheduler: ${resultado.contratosActualizados} contratos actualizados automáticamente`);
+        }
       });
     } catch (error) {
       console.error(' Error en scheduler de contratos:', error);

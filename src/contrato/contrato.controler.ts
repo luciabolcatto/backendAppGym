@@ -33,7 +33,8 @@ function sanitizeContratoInput(
 
 async function findAll(req: Request, res: Response) {
   try {
-    await verificarVencimientos(req, res);
+
+    await verificarVencimientos();
     
     const contratos = await em.find(Contrato, {}, { populate: ['usuario','membresia'] })
     res
@@ -282,7 +283,7 @@ async function cancelarContrato(req: Request, res: Response) {
   }
 }
 
-async function verificarVencimientos(req: Request, res: Response) {
+async function verificarVencimientos(req?: Request, res?: Response) {
   try {
     const fechaActual = new Date();
     
@@ -299,21 +300,33 @@ async function verificarVencimientos(req: Request, res: Response) {
     
     await em.flush();
     
-    res.status(200).json({
-      message: `Se actualizaron ${contratosVencidos.length} contratos vencidos`,
-      data: {
-        contratosActualizados: contratosVencidos.length,
-        fechaVerificacion: fechaActual
-      }
-    });
+    const resultado = {
+      contratosActualizados: contratosVencidos.length,
+      fechaVerificacion: fechaActual
+    };
+    
+    // Si se proporciona res, enviar respuesta HTTP (uso como endpoint)
+    if (res) {
+      return res.status(200).json({
+        message: `Se actualizaron ${resultado.contratosActualizados} contratos vencidos`,
+        data: resultado
+      });
+    }
+    
+    // Si no hay res, solo retornar resultado (uso interno)
+    return resultado;
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    if (res) {
+      res.status(500).json({ message: error.message });
+    }
+    return { contratosActualizados: 0, fechaVerificacion: new Date(), error: error.message };
   }
 }
 
 async function obtenerContratosUsuario(req: Request, res: Response) {
   try {
-    await verificarVencimientos(req, res);
+    // Verificar vencimientos antes de obtener contratos del usuario
+    await verificarVencimientos();
     
     const { usuarioId } = req.params;
     
@@ -384,7 +397,8 @@ async function obtenerContratosUsuario(req: Request, res: Response) {
 
 async function obtenerEstadisticasContrato(req: Request, res: Response) {
   try {
-    await verificarVencimientos(req, res);
+
+    await verificarVencimientos();
     
     const fechaActual = new Date();
     
@@ -419,7 +433,8 @@ async function obtenerEstadisticasContrato(req: Request, res: Response) {
 }
 async function findFiltered(req: Request, res: Response) {
   try {
-    await verificarVencimientos(req, res);
+   
+    await verificarVencimientos();
     
     const { estado } = req.query;
 
