@@ -1,89 +1,313 @@
-import { Request, Response ,  NextFunction} from 'express'
+import { Request, Response, NextFunction } from 'express'
 import { orm } from '../shared/db/orm.js'
-import { Clase} from './clase.entity.js'
+import { Clase } from './clase.entity.js'
+import { Actividad } from '../actividad/actividad.entity.js'
+import { Entrenador } from '../entrenador/entrenador.entity.js'
+import { actualizarReservas } from '../reserva/reserva.controler.js'
 
-const em = orm.em
-function sanitizeClaseInput(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+const em = orm.em;
+
+function sanitizeClaseInput(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     fecha_hora_ini: req.body.fecha_hora_ini,
     fecha_hora_fin: req.body.fecha_hora_fin,
     cupo_disp: req.body.cupo_disp,
     entrenador: req.body.entrenador,
-    actividad: req.body.membresia,
-  }
-  
-
+    actividad: req.body.actividad,
+  };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
-      delete req.body.sanitizedInput[key]
+      delete req.body.sanitizedInput[key];
     }
-  })
-  next()
+  });
+  next();
 }
-
-
-
-
 async function findAll(req: Request, res: Response) {
   try {
-    const clases = await em.find(Clase, {}, { populate: ['entrenador', 'actividad', 'reservas'] })
+    const actividadId = req.query.actividadId as string | undefined;
+
+    // Filtrar por actividad si se proporciona
+    let where: any = {};
+
+    // Si hay actividadId, filtramos en la base de datos
+    let clases: any[] = [];
+
+    if (actividadId) {
+      try {
+        where = { actividad: actividadId };
+        clases = await em.find(Clase, where, {
+          populate: ['entrenador', 'actividad', 'reservas'],
+        });
+      } catch (err) {
+        console.error('Error filtrando por actividadId:', err);
+        return res
+          .status(500)
+          .json({ message: 'Error filtrando por actividad' });
+      }
+    } else {
+      clases = await em.find(
+        Clase,
+        {},
+        {
+          populate: ['entrenador', 'actividad', 'reservas'],
+        }
+      );
+    }
+
     res
       .status(200)
-      .json({ message: 'se encotraron todas las clases', data: clases })
+      .json({ message: 'se encontraron las clases', data: clases });
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    console.error('findAll clases error:', error);
+    res.status(500).json({ message: error.message });
   }
 }
 
 async function findOne(req: Request, res: Response) {
   try {
-    const id = req.params.id
-    const clase = await em.findOneOrFail(Clase, { id }, { populate: ['entrenador', 'actividad', 'reservas'] })
-    res
-      .status(200)
-      .json({ message: 'clase encontrada', data: clase })
+    const id = req.params.id;
+    const clase = await em.findOneOrFail(
+      Clase,
+      { id },
+      { populate: ['entrenador', 'actividad', 'reservas'] }
+    );
+    res.status(200).json({ message: 'clase encontrada', data: clase });
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: error.message });
   }
 }
 
 async function add(req: Request, res: Response) {
   try {
-    const clase = em.create(Clase, req.body)
-    await em.flush()
-    res
-      .status(201)
-      .json({ message: 'clase creada', data: clase })
+    const input = req.body.sanitizedInput || req.body;
+
+    // Recuperar entidades relacionadas con sus actividades/entrenadores
+    const actividad = await em.findOneOrFail(Actividad, input.actividad, {
+      populate: ['entrenadores']
+    });
+    const entrenador = await em.findOneOrFail(Entrenador, input.entrenador, {
+      populate: ['actividades']
+    });
+
+    // Validar que el entrenador está relacionado con la actividad
+    const entrenadorRelacionado = actividad.entrenadores.getItems().some(
+      e => e.id === entrenador.id
+    );
+
+    if (!entrenadorRelacionado) {
+      return res.status(400).json({ 
+        message: 'El entrenador seleccionado no está habilitado para dictar esta actividad',
+        details: {
+          entrenador: entrenador.nombre + ' ' + entrenador.apellido,
+          actividad: actividad.nombre
+        }
+      });
+    }
+
+    
+    const clase = em.create(Clase, {
+      fecha_hora_ini: input.fecha_hora_ini,
+      fecha_hora_fin: input.fecha_hora_fin,
+      cupo_disp: input.cupo_disp,
+      actividad, 
+      entrenador, 
+    });
+
+    await em.flush();
+
+    res.status(201).json({ message: 'clase creada', data: clase });
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    console.error('Error creando clase:', error);
+    res.status(500).json({ message: error.message });
   }
 }
 
 async function update(req: Request, res: Response) {
   try {
-    const id = req.params.id
-    const clase = await em.findOneOrFail(Clase, {id})
-    em.assign(clase, req.body)
-    await em.flush()
-    res.status(200).json({ message: 'clase actualizada',  data: clase})
+    const id = req.params.id;
+    const clase = await em.findOneOrFail(Clase, { id });
+    const input = req.body.sanitizedInput || req.body;
+
+    // Si se está actualizando la actividad o el entrenador, validar la relación
+    if (input.actividad || input.entrenador) {
+      // Usar las entidades actuales si no se están actualizando
+      const actividadId = input.actividad || clase.actividad.id;
+      const entrenadorId = input.entrenador || clase.entrenador.id;
+
+      // Recuperar entidades con sus relaciones
+      const actividad = await em.findOneOrFail(Actividad, actividadId, {
+        populate: ['entrenadores']
+      });
+      const entrenador = await em.findOneOrFail(Entrenador, entrenadorId, {
+        populate: ['actividades']
+      });
+
+      // Validar que el entrenador está relacionado con la actividad
+      const entrenadorRelacionado = actividad.entrenadores.getItems().some(
+        e => e.id === entrenador.id
+      );
+
+      if (!entrenadorRelacionado) {
+        return res.status(400).json({ 
+          message: 'El entrenador seleccionado no está habilitado para dictar esta actividad',
+          details: {
+            entrenador: entrenador.nombre + ' ' + entrenador.apellido,
+            actividad: actividad.nombre
+          }
+        });
+      }
+    }
+
+    em.assign(clase, input);
+    await em.flush();
+    res.status(200).json({ message: 'clase actualizada', data: clase });
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: error.message });
   }
 }
 
 async function remove(req: Request, res: Response) {
   try {
-    const id = req.params.id
-    const clase = em.getReference(Clase, id)
-    await em.removeAndFlush(clase)
-    res.status(200).send({ message: 'clase eliminada' })
+    const id = req.params.id;
+    const clase = em.getReference(Clase, id);
+    await em.removeAndFlush(clase);
+    res.status(200).send({ message: 'clase eliminada' });
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: error.message });
   }
 }
 
-export {sanitizeClaseInput,  findAll, findOne, add, update, remove }
+async function findAllOrdered(req: Request, res: Response) {
+  try {
+    await actualizarReservas();
+    
+    const { fecha, actividadId } = req.query;
+    
+    const filtros: any = {};
+
+    // Filtrar por fecha si se proporciona
+    if (fecha) {
+      const fechaInicio = new Date(fecha as string);
+      const fechaFin = new Date(fechaInicio);
+      fechaFin.setDate(fechaFin.getDate() + 1); // Siguiente día
+
+      filtros.fecha_hora_ini = {
+        $gte: fechaInicio,
+        $lt: fechaFin,
+      };
+    }
+
+    // Filtrar por actividad si se proporciona
+    if (actividadId) {
+      filtros.actividad = actividadId;
+    }
+
+    // Buscar clases con los filtros aplicados, ordenadas por fecha más reciente primero
+    const clases = await em.find(
+      Clase,
+      filtros,
+      { 
+        populate: ['entrenador', 'actividad', 'reservas'],
+        orderBy: { fecha_hora_ini: 'DESC' }
+      }
+    );
+
+    res.status(200).json({
+      message: 'Clases obtenidas correctamente',
+      data: clases,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+async function actualizarCupo(req: Request, res: Response) {
+  try {
+    const id = req.params.id;
+    const clase = await em.findOneOrFail(Clase, { id });
+    if (clase.cupo_disp > 0) {
+      clase.cupo_disp -= 1;
+      await em.flush();
+      res.status(200).json({ message: 'Cupo actualizado', data: clase });
+    } else {
+      res.status(400).json({ message: 'No hay cupos disponibles' });
+    }
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+async function findAllWithUserReservas(req: Request, res: Response) {
+  try {
+    
+    await actualizarReservas();
+    
+    const { fecha, actividadId, usuarioId } = req.query;
+    
+    const filtros: any = {};
+    
+    // Filtrar por fecha si se proporciona
+    if (fecha) {
+      const fechaInicio = new Date(fecha as string);
+      const fechaFin = new Date(fechaInicio);
+      fechaFin.setDate(fechaFin.getDate() + 1); // Siguiente día (para limitar a un día)
+      
+      filtros.fecha_hora_ini = {
+        $gte: fechaInicio,
+        $lt: fechaFin
+      };
+    }
+    
+    // Filtrar por actividad si se proporciona
+    if (actividadId) {
+      filtros.actividad = actividadId;
+    }
+
+    // Buscar clases con los filtros aplicados
+    const clases = await em.find(
+      Clase,
+      filtros,
+      { 
+        populate: ['entrenador', 'actividad', 'reservas', 'reservas.usuario'],
+        orderBy: { fecha_hora_ini: 'DESC' }
+      }
+    );
+
+    // Si se proporciona usuarioId, filtrar las reservas para mostrar solo las PENDIENTES del usuario
+    let clasesConReservasUsuario = clases;
+    if (usuarioId) {
+      clasesConReservasUsuario = clases.map(clase => {
+        // Solo buscar reservas pendientes para clases futuras
+        // Las cerradas no son relevantes porque esas clases ya no se muestran
+        const reservaUsuario = clase.reservas.getItems().find(reserva => 
+          reserva.usuario.id === usuarioId && reserva.estado === 'pendiente'
+        );
+        
+        return {
+          ...clase,
+          reservaUsuario: reservaUsuario || null
+        };
+      });
+    }
+
+    res.status(200).json({
+      message: 'Clases con reservas de usuario obtenidas correctamente',
+      data: clasesConReservasUsuario,
+    });
+  } catch (error: any) {
+    console.error('Error en findAllWithUserReservas:', error);
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export {
+  sanitizeClaseInput,
+  findAll,
+  findOne,
+  add,
+  update,
+  remove,
+  findAllOrdered,
+  actualizarCupo,
+  findAllWithUserReservas,
+};

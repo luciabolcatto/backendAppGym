@@ -1,0 +1,121 @@
+### Test de validación: Crear clase con Juan y Yoga - DEBE FUNCIONAR ✅
+POST http://localhost:5500/api/Clases
+Content-Type: application/json
+
+{
+  "fecha_hora_ini": "2025-10-15T10:00:00.000Z",
+  "fecha_hora_fin": "2025-10-15T11:00:00.000Z",
+  "cupo_disp": 15,
+  "entrenador": "68e98a61254e70d7ff10f5a1",
+  "actividad": "68e578233c5910d2261820a1"
+}
+
+### Test de validación: Crear clase con Juan y Yoga Avanzado - DEBE FUNCIONAR ✅
+POST http://localhost:5500/api/Clases
+Content-Type: application/json
+
+{
+  "fecha_hora_ini": "2025-10-15T12:00:00.000Z",
+  "fecha_hora_fin": "2025-10-15T13:00:00.000Z",
+  "cupo_disp": 10,
+  "entrenador": "68e98a61254e70d7ff10f5a1",
+  "actividad": "68e578233c5910d2261820a2"
+}
+
+### Test de validación: Crear clase con María y Yoga - DEBE FUNCIONAR ✅
+POST http://localhost:5500/api/Clases
+Content-Type: application/json
+
+{
+  "fecha_hora_ini": "2025-10-15T14:00:00.000Z",
+  "fecha_hora_fin": "2025-10-15T15:00:00.000Z",
+  "cupo_disp": 12,
+  "entrenador": "68e98a61254e70d7ff10f5a2",
+  "actividad": "68e578233c5910d2261820a1"
+}
+
+### Test de validación: Crear clase con Carlos y Spinning - DEBE FUNCIONAR ✅
+POST http://localhost:5500/api/Clases
+Content-Type: application/json
+
+{
+  "fecha_hora_ini": "2025-10-15T16:00:00.000Z",
+  "fecha_hora_fin": "2025-10-15T17:00:00.000Z",
+  "cupo_disp": 20,
+  "entrenador": "68e98a61254e70d7ff10f5a3",
+  "actividad": "68e578233c5910d2261820a3"
+}
+
+### Test de validación: Crear clase con María y Spinning - DEBE FALLAR ❌
+# María NO está relacionada con Spinning, solo con Yoga
+POST http://localhost:5500/api/Clases
+Content-Type: application/json
+
+{
+  "fecha_hora_ini": "2025-10-15T18:00:00.000Z",
+  "fecha_hora_fin": "2025-10-15T19:00:00.000Z",
+  "cupo_disp": 15,
+  "entrenador": "68e98a61254e70d7ff10f5a2",
+  "actividad": "68e578233c5910d2261820a3"
+}
+
+### Test de validación: Crear clase con Carlos y Yoga - DEBE FALLAR ❌  
+# Carlos NO está relacionado con Yoga, solo con Spinning
+POST http://localhost:5500/api/Clases
+Content-Type: application/json
+
+{
+  "fecha_hora_ini": "2025-10-15T20:00:00.000Z",
+  "fecha_hora_fin": "2025-10-15T21:00:00.000Z",
+  "cupo_disp": 18,
+  "entrenador": "68e98a61254e70d7ff10f5a3",
+  "actividad": "68e578233c5910d2261820a1"
+}
+
+### Test de validación: Actualizar clase cambiando a entrenador NO relacionado - DEBE FALLAR ❌
+# Cambiar de Juan (Yoga habilitado) a Carlos (Yoga NO habilitado) 
+PUT http://localhost:5500/api/Clases/68e98a61254e70d7ff10f5e2
+Content-Type: application/json
+
+{
+  "entrenador": "68e98a61254e70d7ff10f5a3"
+}
+
+### Test de validación: Actualizar clase cambiando a actividad NO relacionada - DEBE FALLAR ❌  
+# Cambiar de Yoga a Spinning (Juan NO está habilitado para Spinning)
+PUT http://localhost:5500/api/Clases/68e98a61254e70d7ff10f5e2
+Content-Type: application/json
+
+{
+  "actividad": "68e578233c5910d2261820a3"
+}
+
+### Test de validación: Actualizar clase con cambio válido - DEBE FUNCIONAR ✅
+# Cambiar de Juan a María (ambos pueden dictar Yoga)
+PUT http://localhost:5500/api/Clases/68e98a61254e70d7ff10f5e2
+Content-Type: application/json
+
+{
+  "entrenador": "68e98a61254e70d7ff10f5a2"
+}
+
+### 📋 INFORMACIÓN DE REFERENCIA
+
+### Obtener todas las clases para verificar IDs
+GET http://localhost:5500/api/Clases
+
+### Obtener todos los entrenadores para verificar relaciones
+GET http://localhost:5500/api/Entrenadores
+
+### Obtener todas las actividades para verificar relaciones  
+GET http://localhost:5500/api/actividad
+
+### 📊 RELACIONES EN EL SEED:
+# Juan Pérez (68e98a61254e70d7ff10f5a1): Yoga + Yoga Avanzado
+# María Gómez (68e98a61254e70d7ff10f5a2): Yoga
+# Carlos Ruiz (68e98a61254e70d7ff10f5a3): Spinning
+#
+# Actividades:
+# Yoga (68e578233c5910d2261820a1)
+# Yoga Avanzado (68e578233c5910d2261820a2) 
+# Spinning (68e578233c5910d2261820a3)

@@ -1,10 +1,5 @@
-### obtener todos los Usuarios
-GET http://localhost:5500/api/Usuarios
-
-
-
-
-### crear un nuevo Usuario
+### =====================================================
+### CREAR UN NUEVO USUARIO - Juan Perez
 # @name crearJuanPerez
 POST http://localhost:5500/api/Usuarios
 Content-Type: application/json
@@ -13,38 +8,65 @@ Content-Type: application/json
   "nombre": "Juan",
   "apellido": "Perez",
   "tel": 41231234,
-  "mail": "JuanPerez@gmail.com"
+  "mail": "JuanPerez@gmail.com",
+  "contrasena": "123456"
 }
 
-### ID - Debe ejecutarse después de crearJuanPerez
+### =====================================================
+### LOGIN DEL USUARIO CREADO PARA OBTENER TOKEN
+POST http://localhost:5500/api/Usuarios/login
+Content-Type: application/json
+
+{
+  "mail": "JuanPerez@gmail.com",
+  "contrasena": "MiPass123"
+}
+
+
+### =====================================================
+### OBTENER TODOS LOS USUARIOS
+GET http://localhost:5500/api/Usuarios
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YjM4NTU2NTIyYzE5MWQ0YWY1MDhkYyIsIm1haWwiOiJKdWFuUGVyZXpAZ21haWwuY29tIiwiaWF0IjoxNzU2NjAwMzY3LCJleHAiOjE3NTY2MDM5Njd9.0nJlE3jwVLx4fhc1kA17f1MiW9GLOsev3JI1z-DRxKo
+
+### =====================================================
+### OBTENER UN USUARIO POR ID
 @id = {{crearJuanPerez.response.body.data.id}}
-
-### obtener un Usuario
 GET http://localhost:5500/api/Usuarios/{{id}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YjM4NTU2NTIyYzE5MWQ0YWY1MDhkYyIsIm1haWwiOiJKdWFuUGVyZXpAZ21haWwuY29tIiwiaWF0IjoxNzU2NjAwMzY3LCJleHAiOjE3NTY2MDM5Njd9.0nJlE3jwVLx4fhc1kA17f1MiW9GLOsev3JI1z-DRxKo
 
-### modificar un Usuario (PUT - recurso completo e idempotente)
+
+### =====================================================
+### MODIFICAR UN USUARIO (PUT - recurso completo)
 PUT http://localhost:5500/api/Usuarios/{{id}}
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YjM4NTU2NTIyYzE5MWQ0YWY1MDhkYyIsIm1haWwiOiJKdWFuUGVyZXpAZ21haWwuY29tIiwiaWF0IjoxNzU2NjAwMzY3LCJleHAiOjE3NTY2MDM5Njd9.0nJlE3jwVLx4fhc1kA17f1MiW9GLOsev3JI1z-DRxKo
+
 
 {
   "nombre": "Juan",
   "apellido": "Perez",
   "tel": 41234321,
-  "mail": "jp@gmail.com"  
+  "mail": "jp@gmail.com",
+  "contrasena": "NuevaPass456",
+  "fotoPerfil": "https://ejemplo.com/juan2.jpg"
 }
 
-### crear un nuevo Usuario
+### =====================================================
+### CREAR OTRO USUARIO - Facundo Juarez
 POST http://localhost:5500/api/Usuarios
 Content-Type: application/json
 
 {
   "nombre": "Facundo",
-  "apellido": "juarez",
+  "apellido": "Juarez",
   "tel": 3232323,
-  "mail": "facundo@gmail.com"   
+  "mail": "facundo@gmail.com",
+  "contrasena": "FacuPass123",
+  "fotoPerfil": "https://ejemplo.com/facu.jpg"
 }
 
-### crear un nuevo Usuario
+### =====================================================
+### CREAR USUARIO PARA BORRAR - Pedro Sanchez
 # @name crearUsuarioParaBorrar
 POST http://localhost:5500/api/Usuarios
 Content-Type: application/json
@@ -53,23 +75,41 @@ Content-Type: application/json
   "nombre": "Pedro",
   "apellido": "Sanchez",
   "tel": 1234567,
-  "mail": "PedroSanchezo@gmail.com"   
+  "mail": "PedroSanchez@gmail.com",
+  "contrasena": "PedroPass123",
+  "fotoPerfil": "https://ejemplo.com/pedro.jpg"
 }
 
-### modificar un Usuario (PATCH - recurso parcial)
+### =====================================================
+### OBTENER ID DEL USUARIO PARA BORRAR
 @idParaBorrar = {{crearUsuarioParaBorrar.response.body.data.id}}
+
+### =====================================================
+### MODIFICAR UN USUARIO (PATCH - recurso parcial)
 PATCH http://localhost:5500/api/Usuarios/{{idParaBorrar}}
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YjM4NTU2NTIyYzE5MWQ0YWY1MDhkYyIsIm1haWwiOiJKdWFuUGVyZXpAZ21haWwuY29tIiwiaWF0IjoxNzU2NjAwMzY3LCJleHAiOjE3NTY2MDM5Njd9.0nJlE3jwVLx4fhc1kA17f1MiW9GLOsev3JI1z-DRxKo
+
 
 {
   "tel": 341897666,
-  "mail" : "ps@gmail.com"   
+  "mail": "ps@gmail.com",
+  "contrasena": "PatchPass789",
+  "fotoPerfil": "https://ejemplo.com/pedro2.jpg"
 }
 
-### borrar un Usuario
+### =====================================================
+### BORRAR UN USUARIO
 DELETE http://localhost:5500/api/Usuarios/{{id}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YjM4NTU2NTIyYzE5MWQ0YWY1MDhkYyIsIm1haWwiOiJKdWFuUGVyZXpAZ21haWwuY29tIiwiaWF0IjoxNzU2NjAwMzY3LCJleHAiOjE3NTY2MDM5Njd9.0nJlE3jwVLx4fhc1kA17f1MiW9GLOsev3JI1z-DRxKo
 
-### borrar un Usuario
-
-
+### =====================================================
+### BORRAR EL USUARIO CREADO PARA PRUEBA
 DELETE http://localhost:5500/api/Usuarios/{{idParaBorrar}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YjM4NTU2NTIyYzE5MWQ0YWY1MDhkYyIsIm1haWwiOiJKdWFuUGVyZXpAZ21haWwuY29tIiwiaWF0IjoxNzU2NjAwMzY3LCJleHAiOjE3NTY2MDM5Njd9.0nJlE3jwVLx4fhc1kA17f1MiW9GLOsev3JI1z-DRxKo
+
+
+### =====================================================
+### BUSCAR USUARIO POR MAIL
+GET http://localhost:5500/api/Usuarios/email/jp@gmail.com
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YjM4NTU2NTIyYzE5MWQ0YWY1MDhkYyIsIm1haWwiOiJKdWFuUGVyZXpAZ21haWwuY29tIiwiaWF0IjoxNzU2NjAwMzY3LCJleHAiOjE3NTY2MDM5Njd9.0nJlE3jwVLx4fhc1kA17f1MiW9GLOsev3JI1z-DRxKo

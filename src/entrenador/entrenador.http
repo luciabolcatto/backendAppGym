@@ -11,7 +11,7 @@ Content-Type: application/json
   "apellido": "Martinez",
   "tel": 341123456,
   "mail": "lucas.martinez@gmail.com",
-  "actividades":["68703a4492f989cfb52764ec", "68703b7092f989cfb52764ef"]
+  "actividades":["689690af110349d7520e268d", "689690b8110349d7520e268e"]
 }
 
 ### ID - Debe ejecutarse después de crearEntrenador
@@ -29,7 +29,7 @@ Content-Type: application/json
   "apellido": "Martinez",
   "tel": 341654321,
   "mail": "lucas.martinez@update.com",
-  "actividades":["686d811b6b04936970d34947","68703a4492f989cfb52764ec"]
+  "actividades":["689690b8110349d7520e268e","68703a4492f989cfb52764ec"]
 }
 
 ### crear un nuevo Entrenador

@@ -1,0 +1,321 @@
+###
+# CASO DE USO: CONTRATAR PLAN - Ejemplos de Testing
+# Documentación completa: doc/CASO_USO_CONTRATAR_PLAN.md
+# Asegúrate de tener el servidor corriendo en puerto 5500
+
+###
+# 🔧 CONFIGURACIÓN INICIAL
+###
+
+### Obtener membresías disponibles
+GET http://localhost:5500/api/membresias
+
+### Obtener usuarios existentes
+GET http://localhost:5500/api/usuarios
+
+###
+# 📝 FLUJO 1: PRIMERA CONTRATACIÓN
+###
+
+### 1.1. Contratar membresía por primera vez
+POST http://localhost:5500/api/contratos/contratar
+Content-Type: application/json
+
+{
+  "usuarioId": "ID_DEL_USUARIO_AQUI",
+  "membresiaId": "ID_DE_LA_MEMBRESIA_AQUI"
+}
+
+### 1.2. Simular pago con tarjeta de crédito
+POST http://localhost:5500/api/contratos/simular-pago
+Content-Type: application/json
+
+{
+  "contratoId": "ID_DEL_CONTRATO_CREADO",
+  "metodoPago": "tarjeta_credito"
+}
+
+### 1.3. Verificar contrato creado
+GET http://localhost:5500/api/contratos/usuario/ID_DEL_USUARIO_AQUI
+
+###
+# 🔄 FLUJO 2: RENOVACIÓN ANTICIPADA
+###
+
+### 2.1. Contratar la MISMA membresía (renovación secuencial)
+POST http://localhost:5500/api/contratos/contratar
+Content-Type: application/json
+
+{
+  "usuarioId": "ID_DEL_USUARIO_AQUI",
+  "membresiaId": "ID_DE_LA_MEMBRESIA_AQUI"
+}
+
+### 2.2. Pagar renovación con MercadoPago
+POST http://localhost:5500/api/contratos/simular-pago
+Content-Type: application/json
+
+{
+  "contratoId": "ID_DEL_SEGUNDO_CONTRATO",
+  "metodoPago": "mercado_pago"
+}
+
+### 2.3. Verificar contratos múltiples del usuario
+GET http://localhost:5500/api/contratos/usuario/ID_DEL_USUARIO_AQUI
+
+###
+# 📊 FLUJO 3: MEMBRESÍAS MÚLTIPLES
+###
+
+### 3.1. Contratar membresía diferente (mismo usuario)
+POST http://localhost:5500/api/contratos/contratar
+Content-Type: application/json
+
+{
+  "usuarioId": "ID_DEL_USUARIO_AQUI",
+  "membresiaId": "ID_DE_OTRA_MEMBRESIA"
+}
+
+### 3.2. Pagar con PayPal
+POST http://localhost:5500/api/contratos/simular-pago
+Content-Type: application/json
+
+{
+  "contratoId": "ID_DEL_TERCER_CONTRATO",
+  "metodoPago": "paypal"
+}
+
+###
+# ❌ FLUJO 4: CANCELACIONES
+###
+
+### 4.1. Cancelar contrato pendiente
+PATCH http://localhost:5500/api/contratos/cancelar/ID_CONTRATO_PENDIENTE
+
+### 4.2. Cancelar contrato futuro (sin afectar el actual)
+PATCH http://localhost:5500/api/contratos/cancelar/ID_CONTRATO_FUTURO
+
+### 4.3. Intentar cancelar contrato vencido (debería fallar)
+PATCH http://localhost:5500/api/contratos/cancelar/ID_CONTRATO_VENCIDO
+
+###
+# 🔍 FLUJO 5: CONSULTAS Y ADMINISTRACIÓN
+###
+
+### 5.1. Ver todos los contratos del sistema
+GET http://localhost:5500/api/contratos
+
+### 5.2. Ver contrato específico
+GET http://localhost:5500/api/contratos/ID_CONTRATO_ESPECÍFICO
+
+### 5.3. Obtener estadísticas del sistema
+GET http://localhost:5500/api/contratos/admin/estadisticas
+
+### 5.4. Verificar y actualizar contratos vencidos
+POST http://localhost:5500/api/contratos/verificar-vencimientos
+
+###
+# ⚠️ FLUJO 6: CASOS DE ERROR
+###
+
+### 6.1. Contratar con usuario inexistente
+POST http://localhost:5500/api/contratos/contratar
+Content-Type: application/json
+
+{
+  "usuarioId": "usuario_inexistente",
+  "membresiaId": "ID_DE_LA_MEMBRESIA_AQUI"
+}
+
+### 6.2. Simular pago fallido (10% probabilidad)
+POST http://localhost:5500/api/contratos/simular-pago
+Content-Type: application/json
+
+{
+  "contratoId": "ID_CONTRATO_PARA_FALLO",
+  "metodoPago": "efectivo"
+}
+
+### 6.3. Intentar pagar contrato ya pagado
+POST http://localhost:5500/api/contratos/simular-pago
+Content-Type: application/json
+
+{
+  "contratoId": "ID_CONTRATO_YA_PAGADO",
+  "metodoPago": "transferencia"
+}
+
+###
+# 🧪 TESTING COMPLETO - ESCENARIO REAL
+# Usar estos ejemplos con IDs reales del sistema
+###
+
+### TEST 1: Crear primer contrato
+POST http://localhost:5500/api/contratos/contratar
+Content-Type: application/json
+
+{
+  "usuarioId": "68cb57c6727d9954a0342a6a",
+  "membresiaId": "68b50266b1d34f2eba08e36b"
+}
+
+### TEST 2: Pagar primer contrato
+POST http://localhost:5500/api/contratos/simular-pago
+Content-Type: application/json
+
+{
+  "contratoId": "REEMPLAZAR_CON_ID_DEL_PASO_ANTERIOR",
+  "metodoPago": "tarjeta_debito"
+}
+
+### TEST 3: Renovar anticipadamente
+POST http://localhost:5500/api/contratos/contratar
+Content-Type: application/json
+
+{
+  "usuarioId": "68cb57c6727d9954a0342a6a",
+  "membresiaId": "68b50266b1d34f2eba08e36b"
+}
+
+### TEST 4: Pagar renovación
+POST http://localhost:5500/api/contratos/simular-pago
+Content-Type: application/json
+
+{
+  "contratoId": "REEMPLAZAR_CON_ID_DE_RENOVACION",
+  "metodoPago": "mercado_pago"
+}
+
+### TEST 5: Ver resultado final
+GET http://localhost:5500/api/contratos/usuario/68cb57c6727d9954a0342a6a
+
+###
+# 📋 NOTAS IMPORTANTES
+###
+
+# 1. Estados de contrato: pendiente, pagado, cancelado, vencido
+# 2. Métodos de pago soportados: cualquier string (preparado para integración real)
+# 3. Renovaciones: se programan automáticamente al finalizar contrato vigente
+# 4. Múltiples contratos: un usuario puede tener varios contratos simultáneos
+# 5. Cancelaciones: solo se pueden cancelar contratos pendientes o pagados (no vencidos)
+# 6. Fechas: se calculan automáticamente basadas en la duración de la membresía
+
+###
+# 🚀 PRÓXIMOS PASOS
+###
+
+# 1. Reemplazar IDs de ejemplo con IDs reales de tu base de datos
+# 2. Ejecutar flujos secuencialmente para ver la funcionalidad completa
+# 3. Verificar en base de datos que los campos se actualizan correctamente
+# 4. Probar casos de error para validar las validaciones
+# 5. Usar endpoint de estadísticas para monitorear el sistema
+
+### 4. Simular otro pago para el segundo contrato
+POST http://localhost:5500/api/contratos/simular-pago
+Content-Type: application/json
+
+{
+  "contratoId": "ID_DEL_SEGUNDO_CONTRATO",
+  "metodoPago": "mercado_pago"
+}
+
+### 5. Obtener todos los contratos de un usuario específico
+GET http://localhost:5500/api/contratos/usuario/68cb57c6727d9954a0342a6a
+
+### 6. Cancelar un contrato
+PATCH http://localhost:5500/api/contratos/cancelar/ID_DEL_CONTRATO_AQUI
+
+### 7. Verificar y actualizar contratos vencidos
+POST http://localhost:5500/api/contratos/verificar-vencimientos
+
+### 8. Obtener estadísticas generales de contratos
+GET http://localhost:5500/api/contratos/admin/estadisticas
+
+### 9. Obtener todos los contratos (para ver estados)
+GET http://localhost:5500/api/contratos
+
+### 10. Obtener un contrato específico
+GET http://localhost:5500/api/contratos/ID_DEL_CONTRATO_AQUI
+
+###
+# FLUJO COMPLETO DE TESTING - MÚLTIPLES CONTRATOS
+###
+
+### Paso 1: Obtener membresías disponibles
+GET http://localhost:5500/api/membresias
+
+### Paso 2: Obtener usuarios existentes
+GET http://localhost:5500/api/usuarios
+
+### Paso 3: Contratar primera membresía
+POST http://localhost:5500/api/contratos/contratar
+Content-Type: application/json
+
+{
+  "usuarioId": "68cb57c6727d9954a0342a6a",
+  "membresiaId": "68b50266b1d34f2eba08e36b"
+}
+
+### Paso 4: Pagar primer contrato
+POST http://localhost:5500/api/contratos/simular-pago
+Content-Type: application/json
+
+{
+  "contratoId": "CONTRATO_1_ID",
+  "metodoPago": "tarjeta_credito"
+}
+
+### Paso 5: Contratar la misma membresía otra vez (debería crear renovación)
+POST http://localhost:5500/api/contratos/contratar
+Content-Type: application/json
+
+{
+  "usuarioId": "68cb57c6727d9954a0342a6a",
+  "membresiaId": "68b50266b1d34f2eba08e36b"
+}
+
+### Paso 6: Pagar segundo contrato  
+POST http://localhost:5500/api/contratos/simular-pago
+Content-Type: application/json
+
+{
+  "contratoId": "CONTRATO_2_ID",
+  "metodoPago": "mercado_pago"
+}
+
+### Paso 7: Ver todos los contratos del usuario
+GET http://localhost:5500/api/contratos/usuario/68cb57c6727d9954a0342a6a
+
+### Paso 8: Ver estadísticas generales
+GET http://localhost:5500/api/contratos/admin/estadisticas
+
+###
+# CASOS DE PRUEBA ADICIONALES
+###
+
+### Contratar membresía diferente para el mismo usuario
+POST http://localhost:5500/api/contratos/contratar
+Content-Type: application/json
+
+{
+  "usuarioId": "68cb57c6727d9954a0342a6a",
+  "membresiaId": "OTRA_MEMBRESIA_ID"
+}
+
+### Simular pago fallido (10% de probabilidad)
+POST http://localhost:5500/api/contratos/simular-pago
+Content-Type: application/json
+
+{
+  "contratoId": "ID_CONTRATO_PARA_FALLO",
+  "metodoPago": "paypal"
+}
+
+### Intentar cancelar contrato vencido (debería fallar)
+PATCH http://localhost:5500/api/contratos/cancelar/ID_CONTRATO_VENCIDO
+POST http://localhost:5500/api/contratos/simular-pago
+Content-Type: application/json
+
+{
+  "contratoId": "68cc82bd57ba014a4121a05c"
+}
