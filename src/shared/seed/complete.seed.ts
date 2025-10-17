@@ -613,6 +613,8 @@ async function seedCompleto() {
     actividad: actividades[1] // Yoga Avanzado
   }));
 
+
+
 await em.persistAndFlush(clases);
   console.log('✅ Clases creadas!');
 
@@ -759,6 +761,87 @@ await em.persistAndFlush(clases);
   await em.persistAndFlush(reservas);
   console.log('✅ Reservas creadas!');
 
+  // 🧪 CLASES DE PRUEBA SIN RESERVAS - Creadas DESPUÉS de las reservas
+  console.log('🧪 Agregando clases de prueba SIN RESERVAS...');
+  const clasesPrueba = [];
+  
+  // 1. Yoga sin cupo - Mañana 11:00 AM
+  const yogaSinCupoMañana = new Date(ahora);
+  yogaSinCupoMañana.setDate(yogaSinCupoMañana.getDate() + 1); // Mañana
+  yogaSinCupoMañana.setHours(11, 0, 0, 0);
+  const yogaSinCupoMañanaFin = new Date(yogaSinCupoMañana);
+  yogaSinCupoMañanaFin.setHours(12, 0, 0, 0);
+  
+  clasesPrueba.push(em.create(Clase, {
+    fecha_hora_ini: yogaSinCupoMañana,
+    fecha_hora_fin: yogaSinCupoMañanaFin,
+    cupo_disp: 0, // SIN CUPO
+    entrenador: entrenadores[1], // María
+    actividad: actividades[0] // Yoga
+  }));
+
+  // 2. Spinning sin cupo - Mañana 7:00 PM
+  const spinningSinCupoNoche = new Date(ahora);
+  spinningSinCupoNoche.setDate(spinningSinCupoNoche.getDate() + 1); // Mañana
+  spinningSinCupoNoche.setHours(19, 0, 0, 0);
+  const spinningSinCupoNocheFin = new Date(spinningSinCupoNoche);
+  spinningSinCupoNocheFin.setHours(20, 0, 0, 0);
+  
+  clasesPrueba.push(em.create(Clase, {
+    fecha_hora_ini: spinningSinCupoNoche,
+    fecha_hora_fin: spinningSinCupoNocheFin,
+    cupo_disp: 0, // SIN CUPO
+    entrenador: entrenadores[2], // Carlos
+    actividad: actividades[2] // Spinning
+  }));
+
+  // 3. Yoga Avanzado sin cupo - Pasado mañana 6:30 PM
+  const yogaAvanzadoSinCupo = new Date(ahora);
+  yogaAvanzadoSinCupo.setDate(yogaAvanzadoSinCupo.getDate() + 2); // Pasado mañana
+  yogaAvanzadoSinCupo.setHours(18, 30, 0, 0);
+  const yogaAvanzadoSinCupoFin = new Date(yogaAvanzadoSinCupo);
+  yogaAvanzadoSinCupoFin.setHours(19, 30, 0, 0);
+  
+  clasesPrueba.push(em.create(Clase, {
+    fecha_hora_ini: yogaAvanzadoSinCupo,
+    fecha_hora_fin: yogaAvanzadoSinCupoFin,
+    cupo_disp: 0, // SIN CUPO
+    entrenador: entrenadores[0], // Juan
+    actividad: actividades[1] // Yoga Avanzado
+  }));
+
+  // 4. Spinning con 1 cupo - Hoy en 3 horas
+  const spinningUnCupo = new Date(ahora);
+  spinningUnCupo.setHours(spinningUnCupo.getHours() + 3);
+  const spinningUnCupoFin = new Date(spinningUnCupo);
+  spinningUnCupoFin.setHours(spinningUnCupoFin.getHours() + 1);
+  
+  clasesPrueba.push(em.create(Clase, {
+    fecha_hora_ini: spinningUnCupo,
+    fecha_hora_fin: spinningUnCupoFin,
+    cupo_disp: 1, // UN SOLO CUPO
+    entrenador: entrenadores[2], // Carlos
+    actividad: actividades[2] // Spinning
+  }));
+
+  // 5. Yoga Avanzado con 1 cupo - Pasado mañana 2:00 PM
+  const yogaAvanzadoUnCupo = new Date(ahora);
+  yogaAvanzadoUnCupo.setDate(yogaAvanzadoUnCupo.getDate() + 2); // Pasado mañana
+  yogaAvanzadoUnCupo.setHours(14, 0, 0, 0);
+  const yogaAvanzadoUnCupoFin = new Date(yogaAvanzadoUnCupo);
+  yogaAvanzadoUnCupoFin.setHours(15, 0, 0, 0);
+  
+  clasesPrueba.push(em.create(Clase, {
+    fecha_hora_ini: yogaAvanzadoUnCupo,
+    fecha_hora_fin: yogaAvanzadoUnCupoFin,
+    cupo_disp: 1, // UN SOLO CUPO
+    entrenador: entrenadores[0], // Juan
+    actividad: actividades[1] // Yoga Avanzado
+  }));
+
+  await em.persistAndFlush(clasesPrueba);
+  console.log('✅ Agregadas 5 clases de prueba: 3 sin cupo + 2 con 1 solo cupo (SIN RESERVAS)');
+
   console.log('🎉 ¡Semilla completa ejecutada exitosamente!');
   console.log(`
 📊 RESUMEN:
@@ -767,7 +850,7 @@ await em.persistAndFlush(clases);
 - ${membresias.length} Membresías
 - ${usuarios.length} Usuarios (incluye 3 usuarios sin contratos)
 - ${contratos.length} Contratos (múltiples por usuario con fechas encadenadas)
-- ${clases.length} Clases
+- ${clases.length + clasesPrueba.length} Clases (incluye 5 clases de prueba SIN RESERVAS)
 - ${reservas.length} Reservas
   `);
 
