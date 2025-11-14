@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
+import cron from 'node-cron';
 
 import { UsuarioRouter } from './usuario/usuario.routes.js';
 import { ContratoRouter } from './contrato/contrato.routes.js';
@@ -56,40 +57,33 @@ app.use((_, res, __) => {
 app.listen(5500, async () => {
   console.log('Server runnning on http://localhost:5500/');
   
-  // Verificar contratos vencidos al iniciar el servidor
-  console.log(' Verificando contratos vencidos al iniciar...');
-  
-  try {
-    // Crear un contexto de EntityManager para la verificación inicial
-    await RequestContext.create(orm.em, async () => {
-      const resultado = await verificarVencimientos() as any;
-      console.log(` Se verificaron contratos vencidos al iniciar`);
-      if (resultado?.contratosActualizados > 0) {
-        console.log(` Contratos actualizados: ${resultado.contratosActualizados}`);
-      }
-    });
-  } catch (error) {
-    console.error(' Error al verificar contratos vencidos:', error);
-  }
-
-  // Actualizar reservas al iniciar el servidor
-  console.log(' Actualizando reservas al iniciar...');
+  // Actualizar contratos y reservas al iniciar el servidor
+  console.log(' Actualizando datos al iniciar...');
   
   try {
     await RequestContext.create(orm.em, async () => {
-      const resultado = await actualizarReservas() as any;
-      if (resultado.actualizadas > 0) {
-        console.log(` ${resultado.actualizadas} reservas actualizadas al iniciar`);
+      // Verificar contratos vencidos
+      const resultadoContratos = await verificarVencimientos() as any;
+      if (resultadoContratos?.contratosActualizados > 0) {
+        console.log(` ${resultadoContratos.contratosActualizados} contratos vencidos actualizados`);
       } else {
-        console.log(` No hay reservas para actualizar al iniciar`);
+        console.log(` Contratos verificados - sin vencimientos`);
+      }
+      
+      // Actualizar reservas
+      const resultadoReservas = await actualizarReservas() as any;
+      if (resultadoReservas.actualizadas > 0) {
+        console.log(` ${resultadoReservas.actualizadas} reservas actualizadas a cerrada`);
+      } else {
+        console.log(` Reservas verificadas - sin cambios`);
       }
     });
   } catch (error) {
-    console.error(' Error al actualizar reservas al iniciar:', error);
+    console.error(' Error al actualizar datos al iniciar:', error);
   }
 
   // Scheduler automático para contratos (cada hora)
-  setInterval(async () => {
+  cron.schedule('0 * * * *', async () => {
     try {
       await RequestContext.create(orm.em, async () => {
         const resultado = await verificarVencimientos() as any;
@@ -100,10 +94,10 @@ app.listen(5500, async () => {
     } catch (error) {
       console.error(' Error en scheduler de contratos:', error);
     }
-  }, 60 * 60 * 1000); // Cada hora
+  });
 
   // Scheduler automático para reservas (cada 10 minutos)
-  setInterval(async () => {
+  cron.schedule('*/10 * * * *', async () => {
     try {
       await RequestContext.create(orm.em, async () => {
         const resultado = await actualizarReservas() as any;
@@ -114,9 +108,9 @@ app.listen(5500, async () => {
     } catch (error) {
       console.error(' Error en scheduler de reservas:', error);
     }
-  }, 10 * 60 * 1000); // Cada 10 minutos
+  });
 
-  console.log(' Schedulers iniciados:');
-  console.log('   - Contratos: cada 1 hora');
-  console.log('   - Reservas: cada 10 minutos');
+  console.log(' Schedulers iniciados con node-cron:');
+  console.log('   - Contratos: cada 1 hora (0 * * * *) + ejecución inicial');
+  console.log('   - Reservas: cada 10 minutos (*/10 * * * *) + ejecución inicial');
 });
