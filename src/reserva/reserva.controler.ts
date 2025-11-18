@@ -2,6 +2,7 @@ import { Request, Response ,  NextFunction} from 'express'
 import { orm } from '../shared/db/orm.js'
 import { Reserva, EstadoReserva} from './reserva.entity.js'
 import { Clase } from '../clase/clase.entity.js'
+import { Contrato, EstadoContrato } from '../contrato/contrato.entity.js'
 
 const em = orm.em
 
@@ -62,6 +63,60 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
+    const { clase: claseId, usuario: usuarioId } = req.body;
+
+    //  Obtener la clase con populate para validar
+    const clase = await em.findOne(Clase, { id: claseId });
+    if (!clase) {
+      return res.status(404).json({ message: 'Clase no encontrada' });
+    }
+
+    // Validar cupo disponible
+    if (clase.cupo_disp <= 0) {
+      return res.status(400).json({ 
+        message: 'No se puede reservar esta clase. No hay cupo disponible.',
+        details: { cupoDisponible: clase.cupo_disp }
+      });
+    }
+
+    //  Validar tiempo (30 minutos antes del inicio)
+    const ahora = new Date();
+    const treintaMinutosDesdeAhora = new Date(ahora.getTime() + 30 * 60 * 1000);
+    const fechaInicio = new Date(clase.fecha_hora_ini);
+
+    if (fechaInicio <= treintaMinutosDesdeAhora) {
+      return res.status(400).json({ 
+        message: 'No se puede reservar esta clase. Las reservas se cierran 30 minutos antes del inicio.',
+        details: { 
+          fechaInicioClase: fechaInicio.toISOString(),
+          limiteTiempo: treintaMinutosDesdeAhora.toISOString()
+        }
+      });
+    }
+
+    //  Validar contrato vigente pagado
+    const contratos = await em.find(Contrato, { 
+      usuario: usuarioId,
+      estado: EstadoContrato.PAGADO
+    });
+
+    const contratoValido = contratos.find(contrato => {
+      const inicioContrato = new Date(contrato.fecha_hora_ini);
+      const finContrato = new Date(contrato.fecha_hora_fin);
+      return fechaInicio >= inicioContrato && fechaInicio < finContrato;
+    });
+
+    if (!contratoValido) {
+      return res.status(400).json({ 
+        message: 'No tienes un contrato vigente y pagado para la fecha de esta clase.',
+        details: { 
+          fechaClase: fechaInicio.toISOString(),
+          contratosPagados: contratos.length
+        }
+      });
+    }
+
+    // 5. Crear la reserva
     const reserva = em.create(Reserva, req.body)
     await em.flush()
     res
@@ -75,7 +130,36 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = req.params.id
-    const reserva = await em.findOneOrFail(Reserva, {id}, { populate: ['clase'] })
+    const reserva = await em.findOneOrFail(Reserva, {id}, { populate: ['clase', 'usuario'] })
+    
+    // Validar que solo el propietario pueda modificar su reserva
+    const usuarioAutenticadoId = (req as any).user?.id;
+    if (usuarioAutenticadoId && reserva.usuario.id !== usuarioAutenticadoId) {
+      return res.status(403).json({ 
+        message: 'No tienes permiso para modificar esta reserva',
+        details: {
+          propietarioReserva: reserva.usuario.id,
+          usuarioSolicitante: usuarioAutenticadoId
+        }
+      });
+    }
+
+    // Si se intenta cancelar, validar tiempo (30 minutos antes)
+    if (req.body.estado === EstadoReserva.CANCELADA && reserva.estado !== EstadoReserva.CANCELADA) {
+      const ahora = new Date();
+      const treintaMinutosDesdeAhora = new Date(ahora.getTime() + 30 * 60 * 1000);
+      const fechaInicio = new Date(reserva.clase.fecha_hora_ini);
+
+      if (fechaInicio <= treintaMinutosDesdeAhora) {
+        return res.status(400).json({ 
+          message: 'No se puede cancelar esta reserva. Las cancelaciones no están permitidas dentro de los 30 minutos previos al inicio de la clase.',
+          details: { 
+            fechaInicioClase: fechaInicio.toISOString(),
+            limiteTiempo: treintaMinutosDesdeAhora.toISOString()
+          }
+        });
+      }
+    }
     
     // Validar que no se intente cancelar una reserva cerrada
     if (reserva.estado === EstadoReserva.CERRADA && req.body.estado === EstadoReserva.CANCELADA) {

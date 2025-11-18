@@ -14,9 +14,25 @@ function sanitizeUsuarioInput(
 ): void {
   const { nombre, apellido, tel, mail, contrasena, fotoPerfil } = req.body;
 
-  // Validaciones mínimas
+  // Validaciones de campos requeridos
+  if (!nombre || nombre.trim().length === 0) {
+    res.status(400).json({ message: 'El nombre es requerido' });
+    return;
+  }
+
+  if (!apellido || apellido.trim().length === 0) {
+    res.status(400).json({ message: 'El apellido es requerido' });
+    return;
+  }
+
   if (!mail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) {
     res.status(400).json({ message: 'El mail no es válido' });
+    return;
+  }
+
+  // Validación de teléfono 
+  if (tel && tel.toString().trim().length > 0 && !/^\d+$/.test(tel.toString())) {
+    res.status(400).json({ message: 'El teléfono solo debe contener números' });
     return;
   }
 
