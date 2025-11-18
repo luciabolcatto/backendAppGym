@@ -183,6 +183,8 @@ async function actualizarReservas(req?: Request, res?: Response) {
     const now = new Date();
     const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
 
+    console.log(` Actualizando reservas - ${now.toLocaleString()}`);
+
     // Buscar todas las reservas PENDIENTES cuyas clases empiecen en 30 minutos o menos
     const reservasPendientes = await em.find(
       Reserva,
@@ -201,6 +203,7 @@ async function actualizarReservas(req?: Request, res?: Response) {
     });
 
     if (reservasACerrar.length === 0) {
+      console.log(` No hay reservas para actualizar`);
       const resultado = { actualizadas: 0, detalles: [] };
       
       if (res) {
