@@ -1,5 +1,16 @@
 import { Router } from 'express';
-import { sanitizeUsuarioInput, findAll, findOne, add, update, remove, login } from './usuario.controler.js';
+import { 
+  sanitizeUsuarioInput, 
+  findAll, 
+  findOne, 
+  add, 
+  update, 
+  remove, 
+  login,
+  solicitarCodigoRecuperacion,
+  validarCodigoRecuperacion,
+  restablecerContrasena
+} from './usuario.controler.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { createEntityImageUpload } from '../shared/utils/upload.js';
 
@@ -11,6 +22,11 @@ const uploadUsuario = createEntityImageUpload({ entity: 'usuario', idParam: 'id'
 // Rutas públicas
 UsuarioRouter.post('/', createEntityImageUpload({ entity: 'usuario', allowTemp: true }).single('fotoPerfil'), sanitizeUsuarioInput, add);
 UsuarioRouter.post('/login', login);
+
+// Rutas de recuperación de contraseña 
+UsuarioRouter.post('/solicitar-codigo', solicitarCodigoRecuperacion);
+UsuarioRouter.post('/validar-codigo', validarCodigoRecuperacion);
+UsuarioRouter.post('/restablecer-contrasena', restablecerContrasena);
 
 // Rutas protegidas
 UsuarioRouter.get('/', authMiddleware, findAll);

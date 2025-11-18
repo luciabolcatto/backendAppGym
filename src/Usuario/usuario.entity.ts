@@ -30,6 +30,16 @@ export class Usuario extends BaseEntity {
   @Property({ nullable: true })
   fotoPerfil?: string;
 
+  // Campos para recuperación de contraseña
+  @Property({ nullable: true })
+  resetCode?: string;
+
+  @Property({ nullable: true })
+  resetCodeExpiry?: Date;
+
+  @Property({ nullable: true, default: 0 })
+  resetAttempts?: number;
+
   @OneToMany(() => Contrato, (contrato) => contrato.usuario, {
     cascade: [Cascade.ALL],
   })

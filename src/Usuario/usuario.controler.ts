@@ -318,4 +318,188 @@ async function login(req: Request, res: Response): Promise<void> {
   }
 }
 
-export { sanitizeUsuarioInput, findAll, findOne, add, update, remove, login };
+// Solicitar código de recuperación
+async function solicitarCodigoRecuperacion(req: Request, res: Response) {
+  try {
+    const { mail } = req.body;
+
+    if (!mail) {
+      res.status(400).json({ message: 'El email es requerido' });
+      return;
+    }
+
+    const em = orm.em.fork();
+    const usuario = await em.findOne(Usuario, { mail });
+
+    if (!usuario) {
+      // Por seguridad, no revelar si el email existe
+      res.status(200).json({ 
+        message: 'Si el email está registrado, recibirás un código de recuperación' 
+      });
+      return;
+    }
+
+    // Generar código y hashear
+    const { generateRecoveryCode, sendRecoveryCode } = await import('../shared/services/emailService.js');
+    const code = generateRecoveryCode();
+    const hashedCode = await bcrypt.hash(code, 10);
+
+    // Guardar código con expiración de 15 minutos
+    usuario.resetCode = hashedCode;
+    usuario.resetCodeExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+    usuario.resetAttempts = 0;
+
+    await em.flush();
+
+    // Enviar email
+    await sendRecoveryCode(mail, code, usuario.nombre);
+
+    res.status(200).json({ 
+      message: 'Si el email está registrado, recibirás un código de recuperación' 
+    });
+  } catch (error: any) {
+    console.error('Error solicitando código:', error);
+    res.status(500).json({ message: 'Error al enviar el código de recuperación' });
+  }
+}
+
+// Validar código de recuperación
+async function validarCodigoRecuperacion(req: Request, res: Response) {
+  try {
+    const { mail, code } = req.body;
+
+    if (!mail || !code) {
+      res.status(400).json({ message: 'Email y código son requeridos' });
+      return;
+    }
+
+    const em = orm.em.fork();
+    const usuario = await em.findOne(Usuario, { mail });
+
+    if (!usuario || !usuario.resetCode || !usuario.resetCodeExpiry) {
+      res.status(400).json({ message: 'Código inválido o expirado' });
+      return;
+    }
+
+    // Verificar expiración
+    if (new Date() > usuario.resetCodeExpiry) {
+      usuario.resetCode = undefined;
+      usuario.resetCodeExpiry = undefined;
+      usuario.resetAttempts = 0;
+      await em.flush();
+      res.status(400).json({ message: 'El código ha expirado. Solicita uno nuevo' });
+      return;
+    }
+
+    // Verificar intentos (máximo 3)
+    if (usuario.resetAttempts && usuario.resetAttempts >= 3) {
+      usuario.resetCode = undefined;
+      usuario.resetCodeExpiry = undefined;
+      usuario.resetAttempts = 0;
+      await em.flush();
+      res.status(400).json({ message: 'Demasiados intentos. Solicita un nuevo código' });
+      return;
+    }
+
+    // Verificar código
+    const isValid = await bcrypt.compare(code, usuario.resetCode);
+
+    if (!isValid) {
+      usuario.resetAttempts = (usuario.resetAttempts || 0) + 1;
+      await em.flush();
+      const remaining = 3 - usuario.resetAttempts;
+      res.status(400).json({ 
+        message: `Código incorrecto. Te quedan ${remaining} intentos` 
+      });
+      return;
+    }
+
+    // Código válido - generar token temporal
+    if (!process.env.JWT_SECRET) {
+      res.status(500).json({ message: 'Error de configuración' });
+      return;
+    }
+
+    const resetToken = jwt.sign(
+      { id: usuario.id, mail: usuario.mail },
+      process.env.JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    res.status(200).json({ 
+      message: 'Código válido', 
+      resetToken 
+    });
+  } catch (error: any) {
+    console.error('Error validando código:', error);
+    res.status(500).json({ message: 'Error al validar el código' });
+  }
+}
+
+// Restablecer contraseña
+async function restablecerContrasena(req: Request, res: Response) {
+  try {
+    const { resetToken, nuevaContrasena } = req.body;
+
+    if (!resetToken || !nuevaContrasena) {
+      res.status(400).json({ message: 'Token y nueva contraseña son requeridos' });
+      return;
+    }
+
+    if (nuevaContrasena.length < 6) {
+      res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
+      return;
+    }
+
+    if (!process.env.JWT_SECRET) {
+      res.status(500).json({ message: 'Error de configuración' });
+      return;
+    }
+
+    // Verificar token
+    let decoded: any;
+    try {
+      decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+    } catch (error) {
+      res.status(400).json({ message: 'Token inválido o expirado' });
+      return;
+    }
+
+    const em = orm.em.fork();
+    const usuario = await em.findOne(Usuario, { id: decoded.id });
+
+    if (!usuario) {
+      res.status(404).json({ message: 'Usuario no encontrado' });
+      return;
+    }
+
+    // Actualizar contraseña
+    const hashedPassword = await bcrypt.hash(nuevaContrasena, 10);
+    usuario.contrasena = hashedPassword;
+
+    // Limpiar campos de recuperación
+    usuario.resetCode = undefined;
+    usuario.resetCodeExpiry = undefined;
+    usuario.resetAttempts = 0;
+
+    await em.flush();
+
+    res.status(200).json({ message: 'Contraseña restablecida correctamente' });
+  } catch (error: any) {
+    console.error('Error restableciendo contraseña:', error);
+    res.status(500).json({ message: 'Error al restablecer la contraseña' });
+  }
+}
+
+export { 
+  sanitizeUsuarioInput, 
+  findAll, 
+  findOne, 
+  add, 
+  update, 
+  remove, 
+  login,
+  solicitarCodigoRecuperacion,
+  validarCodigoRecuperacion,
+  restablecerContrasena
+};
