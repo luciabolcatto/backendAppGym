@@ -7,7 +7,6 @@ import {
   update, 
   remove,
   contratarMembresia,
-  simularPago,
   cancelarContrato,
   verificarVencimientos,
   obtenerContratosUsuario,
@@ -31,7 +30,6 @@ ContratoRouter.delete('/:id', remove)
 
 // Nuevas rutas para el caso de uso "Contratar Plan"
 ContratoRouter.post('/contratar', contratarMembresia)
-ContratoRouter.post('/simular-pago', simularPago)
 ContratoRouter.patch('/cancelar/:contratoId', cancelarContrato)
 ContratoRouter.post('/verificar-vencimientos', verificarVencimientos)
 

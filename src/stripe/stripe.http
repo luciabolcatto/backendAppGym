@@ -1,0 +1,72 @@
+### Stripe Integration - Testing Endpoints
+### Entorno de prueba de Stripe
+
+# Variables - Reemplazar con IDs reales de tu base de datos
+@baseUrl = http://localhost:5500/api
+@contratoId = 69264fca19a63a7dca473e33
+@sessionId = cs_test_a1wmZ1y7mjRYjVrp6muX8BAS1EXWIytEvwpxo2pB3iF5CebfTk7DDw3IuF
+
+### =====================================================
+### FLUJO COMPLETO DE PAGO CON STRIPE
+### =====================================================
+
+### Paso 1: Crear un contrato (requiere usuarioId y membresiaId existentes)
+### Esto crea un contrato en estado PENDIENTE
+POST {{baseUrl}}/Contratos/contratar
+Content-Type: application/json
+
+{
+  "usuarioId": "6900b3a073065ac90e59f900",
+  "membresiaId": "6900b3a073065ac90e59f8fd"
+}
+
+### Paso 2: Crear sesión de Stripe Checkout para pagar el contrato
+### Usar el contratoId del paso anterior
+### Retorna una URL de checkout donde el usuario debe completar el pago
+POST {{baseUrl}}/stripe/create-checkout-session
+Content-Type: application/json
+
+{
+  "contratoId": "{{contratoId}}"
+}
+
+### Paso 3: Verificar estado de la sesión de pago
+### Usar el sessionId retornado en el paso anterior
+GET {{baseUrl}}/stripe/session/{{sessionId}}
+
+### =====================================================
+### OTROS ENDPOINTS ÚTILES
+### =====================================================
+
+### Obtener todos los contratos de un usuario
+GET {{baseUrl}}/Contratos/usuario/6900b3a073065ac90e59f900
+
+### Cancelar un contrato pendiente
+PATCH {{baseUrl}}/Contratos/cancelar/{{contratoId}}
+
+### =====================================================
+### NOTAS DE USO
+### =====================================================
+
+# 1. Primero asegúrate de tener el servidor corriendo:
+#    pnpm run start:dev
+
+# 2. Para probar webhooks en desarrollo, necesitas Stripe CLI:
+#    stripe listen --forward-to localhost:5500/api/stripe/webhook
+#    
+#    Esto te dará un webhook secret (whsec_...) que debes agregar a .env:
+#    STRIPE_WEBHOOK_SECRET=whsec_xxxxx
+
+# 3. Flujo de prueba:
+#    a) Crear contrato con POST /contratar
+#    b) Crear checkout session con POST /stripe/create-checkout-session
+#    c) Abrir la URL retornada en el navegador
+#    d) Usar tarjeta de prueba: 4242 4242 4242 4242, cualquier fecha futura, cualquier CVC
+#    e) El webhook actualizará automáticamente el contrato a PAGADO
+
+# 4. Tarjetas de prueba de Stripe:
+#    - Pago exitoso: 4242 4242 4242 4242
+#    - Pago rechazado: 4000 0000 0000 0002
+#    - Requiere autenticación: 4000 0025 0000 3155
+#    
+#    Usar cualquier fecha de vencimiento futura y cualquier CVC de 3 dígitos

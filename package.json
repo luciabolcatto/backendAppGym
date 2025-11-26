@@ -39,6 +39,7 @@
     "luxon": "^3.7.2",
     "mongodb": "^6.20.0",
     "multer": "^2.0.2",
-    "reflect-metadata": "0.1.13"
+    "reflect-metadata": "0.1.13",
+    "stripe": "^20.0.0"
   }
 }

@@ -28,4 +28,8 @@ dist/**/*
 ## built vscode extensions
 *.vsix
 
-.github/instructions
+.github
+
+doc/ARQUITECTURA_PROYECTO.md
+doc/CASO_USO_CONTRATAR_PLAN.md
+doc/README.md
