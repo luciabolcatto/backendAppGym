@@ -11,6 +11,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const em = orm.em;
 
 /**
+ * Métodos de pago disponibles en el sistema.
+ */
+const METODOS_PAGO = {
+    STRIPE: 'stripe',
+    TRANSFERENCIA: 'transferencia_bancaria',
+    EFECTIVO: 'efectivo'
+} as const;
+
+/**
  * Crea una sesión de Stripe Checkout para pagar un contrato pendiente.
  * 
  * @param req - Request con contratoId en el body
@@ -60,7 +69,7 @@ async function createCheckoutSession(req: Request, res: Response) {
             }
         }
 
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
         // Nota: Usamos USD para el entorno de prueba porque ARS tiene restricciones
         // en modo test de Stripe. En producción se puede cambiar a 'ars'.
@@ -195,7 +204,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         // Actualizar el contrato a pagado
         contrato.estado = EstadoContrato.PAGADO;
         contrato.fechaPago = new Date();
-        contrato.metodoPago = 'stripe';
+        contrato.metodoPago = METODOS_PAGO.STRIPE;
 
         await em.flush();
 
@@ -286,8 +295,194 @@ async function getSessionStatus(req: Request, res: Response) {
     }
 }
 
+/**
+ * Obtiene los métodos de pago disponibles.
+ */
+async function getMetodosPago(_req: Request, res: Response) {
+    res.status(200).json({
+        message: 'Métodos de pago disponibles',
+        data: [
+            {
+                id: METODOS_PAGO.STRIPE,
+                nombre: 'Tarjeta de Crédito/Débito',
+                descripcion: 'Pago seguro con tarjeta a través de Stripe',
+                icono: 'credit-card',
+                requiereRedireccion: true
+            },
+            {
+                id: METODOS_PAGO.TRANSFERENCIA,
+                nombre: 'Transferencia Bancaria',
+                descripcion: 'Transferencia a cuenta bancaria del gimnasio',
+                icono: 'bank',
+                requiereRedireccion: false,
+                datosBancarios: {
+                    banco: 'Banco Ejemplo',
+                    titular: 'Gimnasio AppGym S.A.',
+                    cbu: '0000000000000000000000',
+                    alias: 'GIMNASIO.APPGYM'
+                }
+            },
+            {
+                id: METODOS_PAGO.EFECTIVO,
+                nombre: 'Efectivo',
+                descripcion: 'Pago en efectivo en recepción del gimnasio',
+                icono: 'cash',
+                requiereRedireccion: false,
+                instrucciones: 'Acércate a la recepción del gimnasio con tu número de contrato para realizar el pago.'
+            }
+        ]
+    });
+}
+
+/**
+ * Procesa un pago con transferencia bancaria (simulado).
+ * En un sistema real, esto quedaría pendiente de verificación manual.
+ * Para esta demo, se marca como pagado inmediatamente.
+ */
+async function pagarConTransferencia(req: Request, res: Response) {
+    try {
+        const { contratoId, comprobanteNumero } = req.body;
+
+        if (!contratoId) {
+            return res.status(400).json({ 
+                message: 'Se requiere el ID del contrato' 
+            });
+        }
+
+        // Buscar el contrato
+        const contrato = await em.findOne(Contrato, { id: contratoId }, { 
+            populate: ['usuario', 'membresia'] 
+        });
+
+        if (!contrato) {
+            return res.status(404).json({ 
+                message: 'Contrato no encontrado' 
+            });
+        }
+
+        // Validar que el contrato esté en estado pendiente
+        if (contrato.estado !== EstadoContrato.PENDIENTE) {
+            return res.status(400).json({ 
+                message: `El contrato no está pendiente de pago. Estado actual: ${contrato.estado}` 
+            });
+        }
+
+        // Simular procesamiento de transferencia (en producción esto requeriría verificación manual)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Actualizar el contrato a pagado
+        contrato.estado = EstadoContrato.PAGADO;
+        contrato.fechaPago = new Date();
+        contrato.metodoPago = METODOS_PAGO.TRANSFERENCIA;
+
+        await em.flush();
+
+        console.log(`✅ Contrato ${contratoId} pagado con TRANSFERENCIA BANCARIA`);
+        console.log(`   Usuario: ${contrato.usuario.nombre} ${contrato.usuario.apellido}`);
+        console.log(`   Membresía: ${contrato.membresia.nombre}`);
+        console.log(`   Comprobante: ${comprobanteNumero || 'No proporcionado'}`);
+
+        res.status(200).json({
+            message: 'Pago con transferencia procesado exitosamente',
+            data: {
+                contrato: {
+                    id: contrato.id,
+                    estado: contrato.estado,
+                    fechaPago: contrato.fechaPago,
+                    metodoPago: contrato.metodoPago
+                },
+                membresia: contrato.membresia.nombre,
+                monto: contrato.membresia.precio,
+                comprobante: comprobanteNumero || null
+            }
+        });
+
+    } catch (error: any) {
+        console.error('Error al procesar pago con transferencia:', error);
+        res.status(500).json({ 
+            message: 'Error al procesar el pago',
+            error: error.message 
+        });
+    }
+}
+
+/**
+ * Procesa un pago en efectivo (simulado).
+ * En un sistema real, esto lo registraría un empleado en recepción.
+ * Para esta demo, se marca como pagado inmediatamente.
+ */
+async function pagarConEfectivo(req: Request, res: Response) {
+    try {
+        const { contratoId } = req.body;
+
+        if (!contratoId) {
+            return res.status(400).json({ 
+                message: 'Se requiere el ID del contrato' 
+            });
+        }
+
+        // Buscar el contrato
+        const contrato = await em.findOne(Contrato, { id: contratoId }, { 
+            populate: ['usuario', 'membresia'] 
+        });
+
+        if (!contrato) {
+            return res.status(404).json({ 
+                message: 'Contrato no encontrado' 
+            });
+        }
+
+        // Validar que el contrato esté en estado pendiente
+        if (contrato.estado !== EstadoContrato.PENDIENTE) {
+            return res.status(400).json({ 
+                message: `El contrato no está pendiente de pago. Estado actual: ${contrato.estado}` 
+            });
+        }
+
+        // Simular procesamiento de pago en efectivo
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Actualizar el contrato a pagado
+        contrato.estado = EstadoContrato.PAGADO;
+        contrato.fechaPago = new Date();
+        contrato.metodoPago = METODOS_PAGO.EFECTIVO;
+
+        await em.flush();
+
+        console.log(`✅ Contrato ${contratoId} pagado en EFECTIVO`);
+        console.log(`   Usuario: ${contrato.usuario.nombre} ${contrato.usuario.apellido}`);
+        console.log(`   Membresía: ${contrato.membresia.nombre}`);
+        console.log(`   Monto: $${contrato.membresia.precio} ARS`);
+
+        res.status(200).json({
+            message: 'Pago en efectivo registrado exitosamente',
+            data: {
+                contrato: {
+                    id: contrato.id,
+                    estado: contrato.estado,
+                    fechaPago: contrato.fechaPago,
+                    metodoPago: contrato.metodoPago
+                },
+                membresia: contrato.membresia.nombre,
+                monto: contrato.membresia.precio,
+                reciboNumero: `EF-${Date.now()}`
+            }
+        });
+
+    } catch (error: any) {
+        console.error('Error al procesar pago en efectivo:', error);
+        res.status(500).json({ 
+            message: 'Error al procesar el pago',
+            error: error.message 
+        });
+    }
+}
+
 export {
     createCheckoutSession,
     handleWebhook,
-    getSessionStatus
+    getSessionStatus,
+    getMetodosPago,
+    pagarConTransferencia,
+    pagarConEfectivo
 };

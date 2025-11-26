@@ -7,7 +7,14 @@
 @sessionId = cs_test_a1wmZ1y7mjRYjVrp6muX8BAS1EXWIytEvwpxo2pB3iF5CebfTk7DDw3IuF
 
 ### =====================================================
-### FLUJO COMPLETO DE PAGO CON STRIPE
+### MÉTODOS DE PAGO DISPONIBLES
+### =====================================================
+
+### Obtener todos los métodos de pago disponibles
+GET {{baseUrl}}/stripe/metodos-pago
+
+### =====================================================
+### FLUJO COMPLETO DE PAGO CON STRIPE (TARJETA)
 ### =====================================================
 
 ### Paso 1: Crear un contrato (requiere usuarioId y membresiaId existentes)
@@ -35,6 +42,33 @@ Content-Type: application/json
 GET {{baseUrl}}/stripe/session/{{sessionId}}
 
 ### =====================================================
+### PAGO CON TRANSFERENCIA BANCARIA (SIMULADO)
+### =====================================================
+
+### Pagar contrato con transferencia bancaria
+### El pago se procesa inmediatamente (simulación)
+POST {{baseUrl}}/stripe/pagar-transferencia
+Content-Type: application/json
+
+{
+  "contratoId": "{{contratoId}}",
+  "comprobanteNumero": "TRF-123456789"
+}
+
+### =====================================================
+### PAGO EN EFECTIVO (SIMULADO)
+### =====================================================
+
+### Pagar contrato en efectivo
+### El pago se procesa inmediatamente (simulación)
+POST {{baseUrl}}/stripe/pagar-efectivo
+Content-Type: application/json
+
+{
+  "contratoId": "{{contratoId}}"
+}
+
+### =====================================================
 ### OTROS ENDPOINTS ÚTILES
 ### =====================================================
 
@@ -57,14 +91,24 @@ PATCH {{baseUrl}}/Contratos/cancelar/{{contratoId}}
 #    Esto te dará un webhook secret (whsec_...) que debes agregar a .env:
 #    STRIPE_WEBHOOK_SECRET=whsec_xxxxx
 
-# 3. Flujo de prueba:
+# 3. Flujo de prueba con TARJETA (Stripe):
 #    a) Crear contrato con POST /contratar
 #    b) Crear checkout session con POST /stripe/create-checkout-session
 #    c) Abrir la URL retornada en el navegador
 #    d) Usar tarjeta de prueba: 4242 4242 4242 4242, cualquier fecha futura, cualquier CVC
 #    e) El webhook actualizará automáticamente el contrato a PAGADO
 
-# 4. Tarjetas de prueba de Stripe:
+# 4. Flujo de prueba con TRANSFERENCIA:
+#    a) Crear contrato con POST /contratar
+#    b) Pagar con POST /stripe/pagar-transferencia
+#    c) El contrato se marca como PAGADO inmediatamente
+
+# 5. Flujo de prueba con EFECTIVO:
+#    a) Crear contrato con POST /contratar
+#    b) Pagar con POST /stripe/pagar-efectivo
+#    c) El contrato se marca como PAGADO inmediatamente
+
+# 6. Tarjetas de prueba de Stripe:
 #    - Pago exitoso: 4242 4242 4242 4242
 #    - Pago rechazado: 4000 0000 0000 0002
 #    - Requiere autenticación: 4000 0025 0000 3155
