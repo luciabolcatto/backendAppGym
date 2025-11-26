@@ -77,7 +77,7 @@ async function createCheckoutSession(req: Request, res: Response) {
         
         // Para USD en modo test, convertimos el precio (asumiendo 1 USD = 1000 ARS aprox para demo)
         // En producción con ARS, se usa el precio real
-        const unitAmount = currency === 'usd' 
+        const unitAmount = currency === 'ars' 
             ? Math.round(contrato.membresia.precio * 100 / 1000) // Convertir ARS a USD para test
             : Math.round(contrato.membresia.precio * 100);
 
@@ -88,7 +88,7 @@ async function createCheckoutSession(req: Request, res: Response) {
             line_items: [
                 {
                     price_data: {
-                        currency: currency,
+                        currency: 'ars',
                         product_data: {
                             name: contrato.membresia.nombre,
                             description: `${contrato.membresia.descripcion} - Duración: ${contrato.membresia.meses} mes(es)`,
