@@ -13,7 +13,7 @@ import {ClaseRouter} from './clase/clase.routes.js';
 import { AdminRouter } from './admin/admin.routes.js';
 import { StripeRouter } from './stripe/stripe.routes.js';
 import { handleWebhook } from './stripe/stripe.controller.js';
-
+import { valoracionRouter } from './valoracion/valoracion.routes.js';
 import { orm } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 import { verificarVencimientos } from './contrato/contrato.controler.js';
@@ -58,6 +58,8 @@ app.use('/api/membresias', MembresiaRouter);
 app.use('/api/clases',ClaseRouter);
 app.use('/api/admin', AdminRouter);
 app.use('/api/stripe', StripeRouter);
+app.use('/api/valoraciones', valoracionRouter);
+
 
 app.use((_, res, __) => {
   res.status(404).send({ message: 'Resource not found' });
