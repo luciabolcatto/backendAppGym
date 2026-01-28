@@ -21,6 +21,7 @@ import { actualizarReservas } from './reserva/reserva.controler.js';
 
 dotenv.config();
 const app = express();
+console.log("✅ BACKEND APP.TS CARGADO - TEST LU");
 
 // Webhook de Stripe - DEBE ir ANTES de express.json()
 // Stripe requiere el body raw para verificar la firma
@@ -60,6 +61,10 @@ app.use('/api/admin', AdminRouter);
 app.use('/api/stripe', StripeRouter);
 app.use('/api/valoraciones', valoracionRouter);
 
+app.use((req, _res, next) => {
+  console.log("➡️", req.method, req.url);
+  next();
+});
 
 app.use((_, res, __) => {
   res.status(404).send({ message: 'Resource not found' });
