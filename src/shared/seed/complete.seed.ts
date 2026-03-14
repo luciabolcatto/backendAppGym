@@ -6,6 +6,7 @@ import { Membresia } from '../../membresia/membresia.entity.js';
 import { Contrato, EstadoContrato } from '../../contrato/contrato.entity.js';
 import { Clase } from '../../clase/clase.entity.js';
 import { Reserva, EstadoReserva } from '../../reserva/reserva.entity.js';
+import { Valoracion } from '../../valoracion/valoracion.entity.js';
 import bcrypt from 'bcrypt';
 
 async function seedCompleto() {
@@ -13,6 +14,7 @@ async function seedCompleto() {
 
   console.log('Limpiando datos existentes...');
   // Limpiar en orden inverso por las relaciones
+  await em.nativeDelete(Valoracion, {});
   await em.nativeDelete(Reserva, {});
   await em.nativeDelete(Clase, {});
   await em.nativeDelete(Contrato, {});
@@ -267,8 +269,90 @@ async function seedCompleto() {
   await em.persistAndFlush(usuarios);
   console.log('✅ Usuarios creados!');
 
+  console.log('⭐ Creando valoraciones...');
+  // 6. VALORACIONES con validaciones de consistencia de negocio
+  // - rating entero entre 1 y 5
+  // - comentario string opcional (si viene, no vacío)
+  // - usuario y entrenador existentes en este seed
+  // - unicidad por par usuario-entrenador
+  const valoraciones: Valoracion[] = [];
+  const paresValorados = new Set<string>();
+
+  const agregarValoracion = (
+    usuarioIndex: number,
+    entrenadorIndex: number,
+    rating: number,
+    comentario?: string
+  ) => {
+    const usuario = usuarios[usuarioIndex];
+    const entrenador = entrenadores[entrenadorIndex];
+
+    if (!usuario) {
+      throw new Error(`Valoración inválida: usuario[${usuarioIndex}] no existe`);
+    }
+    if (!entrenador) {
+      throw new Error(
+        `Valoración inválida: entrenador[${entrenadorIndex}] no existe`
+      );
+    }
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      throw new Error(
+        `Valoración inválida para ${usuario.mail}: rating=${rating} (debe ser entero entre 1 y 5)`
+      );
+    }
+    if (
+      comentario !== undefined &&
+      (typeof comentario !== 'string' || comentario.trim().length === 0)
+    ) {
+      throw new Error(
+        `Valoración inválida para ${usuario.mail}: comentario debe ser string no vacío`
+      );
+    }
+
+    const clavePar = `${usuario.id}-${entrenador.id}`;
+    if (paresValorados.has(clavePar)) {
+      throw new Error(
+        `Valoración duplicada detectada para usuario=${usuario.mail} y entrenador=${entrenador.mail}`
+      );
+    }
+
+    paresValorados.add(clavePar);
+    valoraciones.push(
+      em.create(Valoracion, {
+        usuario,
+        entrenador,
+        rating,
+        comentario,
+      })
+    );
+  };
+
+  agregarValoracion(
+    0,
+    0,
+    5,
+    'Excelente profesor, muy claro en las explicaciones.'
+  );
+  agregarValoracion(1, 1, 4, 'Muy buena clase y seguimiento constante.');
+  agregarValoracion(2, 2, 5, 'Spinning intenso y motivador, me encantó.');
+  agregarValoracion(3, 0, 3, 'Buena clase, aunque el ritmo fue exigente.');
+  agregarValoracion(4, 1, 4, 'Muy profesional y atenta a la técnica.');
+  agregarValoracion(5, 2, 5, 'Gran energía en clase, súper recomendable.');
+  agregarValoracion(6, 0, 4, 'Corrigió posturas y ayudó mucho en la práctica.');
+  agregarValoracion(7, 1, 5, 'Clases muy completas, salgo renovada.');
+  agregarValoracion(
+    8,
+    2,
+    3,
+    'Buena clase, podría haber más variedad de ejercicios.'
+  );
+  agregarValoracion(9, 0, 4, 'Muy didáctico y cercano en el trato.');
+
+  await em.persistAndFlush(valoraciones);
+  console.log('✅ Valoraciones creadas!');
+
   console.log('📝 Creando contratos...');
-  // 6. CONTRATOS - Múltiples contratos por usuario con fechas encadenadas
+  // 7. CONTRATOS - Múltiples contratos por usuario con fechas encadenadas
   const ahora = new Date();
   const contratos: Contrato[] = [];
 
@@ -801,7 +885,7 @@ async function seedCompleto() {
   console.log('✅ Contratos creados!');
 
   console.log('🏃 Creando clases...');
-  // 7. CLASES (últimos 3 días + próximos 7 días con horarios realistas de gym: L-S 7:00-22:00)
+  // 8. CLASES (últimos 3 días + próximos 7 días con horarios realistas de gym: L-S 7:00-22:00)
   const clases = [];
 
   // Generar clases desde hace 3 días hasta dentro de 7 días
@@ -958,7 +1042,7 @@ async function seedCompleto() {
   console.log('✅ Clases creadas!');
 
   console.log('📅 Creando reservas...');
-  // 8. RESERVAS (2-3 por clase) con lógica de estados correcta
+  // 9. RESERVAS (2-3 por clase) con lógica de estados correcta
   const reservas: Reserva[] = [];
 
   // 🧪 RESERVAS DE PRUEBA PARA ACTUALIZACIÓN AUTOMÁTICA
@@ -1216,6 +1300,7 @@ async function seedCompleto() {
 - ${entrenadores.length} Entrenadores  
 - ${membresias.length} Membresías
 - ${usuarios.length} Usuarios (incluye 3 usuarios sin contratos)
+- ${valoraciones.length} Valoraciones
 - ${contratos.length} Contratos (múltiples por usuario con fechas encadenadas)
 - ${
     clases.length + clasesPrueba.length

@@ -1,45 +1,56 @@
-@host = http://localhost:3000
-@token = 
+@host = http://localhost:5500/api
 
-### Obtener token (login) - ajustar endpoint/credenciales según tu API
-POST {{host}}/auth/login
-Content-Type: application/json
+### =====================================================
+### VALORACIONES - API ACTUAL
+### =====================================================
 
-{
-    "email": "user@example.com",
-    "password": "secret"
-}
+### Nota:
+### - El backend actual NO usa rutas por id para valoraciones.
+### - El POST funciona como UPSERT por (usuario, entrenador):
+###   si existe, actualiza; si no existe, crea.
 
-### Crear una valoracion
+### 1) Listar valoraciones de un entrenador
+### Requiere query param: ?entrenador=<id>
+GET {{host}}/valoraciones?entrenador=REEMPLAZAR_ID_ENTRENADOR
+
+### 2) Resumen (promedio y cantidad) de un entrenador
+GET {{host}}/valoraciones/resumen?entrenador=REEMPLAZAR_ID_ENTRENADOR
+
+### 3) Crear valoración (o actualizar si ya existe el par usuario-entrenador)
+### Campos válidos: usuario, entrenador, rating (1..5), comentario(opcional)
 POST {{host}}/valoraciones
 Content-Type: application/json
-Authorization: Bearer {{token}}
 
 {
-    "usuarioId": 1,
-    "claseId": 10,
-    "puntuacion": 5,
+    "usuario": "REEMPLAZAR_ID_USUARIO",
+    "entrenador": "REEMPLAZAR_ID_ENTRENADOR",
+    "rating": 5,
     "comentario": "Excelente clase, muy recomendable."
 }
 
-### Obtener todas las valoraciones
-GET {{host}}/valoraciones
-Authorization: Bearer {{token}}
-
-### Obtener una valoracion por id
-GET {{host}}/valoraciones/1
-Authorization: Bearer {{token}}
-
-### Actualizar una valoracion
-PUT {{host}}/valoraciones/1
+### 4) Probar UPSERT (mismo usuario + mismo entrenador): debe actualizar
+POST {{host}}/valoraciones
 Content-Type: application/json
-Authorization: Bearer {{token}}
 
 {
-    "puntuacion": 4,
-    "comentario": "Muy buena, corregir horario."
+    "usuario": "REEMPLAZAR_ID_USUARIO",
+    "entrenador": "REEMPLAZAR_ID_ENTRENADOR",
+    "rating": 4,
+    "comentario": "Actualizo mi valoración luego de más clases."
 }
 
-### Eliminar una valoracion
-DELETE {{host}}/valoraciones/1
-Authorization: Bearer {{token}}
+### 5) Caso inválido (rating fuera de rango)
+POST {{host}}/valoraciones
+Content-Type: application/json
+
+{
+    "usuario": "REEMPLAZAR_ID_USUARIO",
+    "entrenador": "REEMPLAZAR_ID_ENTRENADOR",
+    "rating": 7,
+    "comentario": "Este request debe fallar por validación."
+}
+
+### 6) Obtener IDs útiles para pruebas
+GET {{host}}/Usuarios
+
+GET {{host}}/entrenadores
