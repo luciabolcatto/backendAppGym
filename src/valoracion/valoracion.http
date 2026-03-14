@@ -1,0 +1,45 @@
+@host = http://localhost:3000
+@token = 
+
+### Obtener token (login) - ajustar endpoint/credenciales según tu API
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "user@example.com",
+    "password": "secret"
+}
+
+### Crear una valoracion
+POST {{host}}/valoraciones
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "usuarioId": 1,
+    "claseId": 10,
+    "puntuacion": 5,
+    "comentario": "Excelente clase, muy recomendable."
+}
+
+### Obtener todas las valoraciones
+GET {{host}}/valoraciones
+Authorization: Bearer {{token}}
+
+### Obtener una valoracion por id
+GET {{host}}/valoraciones/1
+Authorization: Bearer {{token}}
+
+### Actualizar una valoracion
+PUT {{host}}/valoraciones/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "puntuacion": 4,
+    "comentario": "Muy buena, corregir horario."
+}
+
+### Eliminar una valoracion
+DELETE {{host}}/valoraciones/1
+Authorization: Bearer {{token}}
