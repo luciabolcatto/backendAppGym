@@ -12,6 +12,8 @@ import { EntrenadorRouter } from './entrenador/entrenador.routes.js';
 import { MembresiaRouter } from './membresia/membresia.routes.js';
 import {ClaseRouter} from './clase/clase.routes.js';
 import { AdminRouter } from './admin/admin.routes.js';
+import { StripeRouter } from './stripe/stripe.routes.js';
+import { handleWebhook } from './stripe/stripe.controller.js';
 
 import { orm } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
@@ -20,6 +22,13 @@ import { actualizarReservas } from './reserva/reserva.controler.js';
 
 dotenv.config();
 const app = express();
+
+// Webhook de Stripe - DEBE ir ANTES de express.json()
+// Stripe requiere el body raw para verificar la firma
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
+  RequestContext.create(orm.em, () => handleWebhook(req, res));
+});
+
 app.use(express.json());
 
 app.use(
@@ -49,6 +58,7 @@ app.use('/api/entrenadores', EntrenadorRouter);
 app.use('/api/membresias', MembresiaRouter);
 app.use('/api/clases',ClaseRouter);
 app.use('/api/admin', AdminRouter);
+app.use('/api/stripe', StripeRouter);
 
 app.use((_, res, __) => {
   res.status(404).send({ message: 'Resource not found' });

@@ -30,6 +30,9 @@ export class Contrato extends BaseEntity {
   @Property({ nullable: true })
   metodoPago?: string;
 
+  @Property({ nullable: true })
+  stripeSessionId?: string;
+
   @ManyToOne(() => Usuario, { nullable: false })
   usuario!: Rel<Usuario>;
 

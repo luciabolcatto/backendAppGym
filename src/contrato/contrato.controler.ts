@@ -188,58 +188,6 @@ async function contratarMembresia(req: Request, res: Response) {
   }
 }
 
-async function simularPago(req: Request, res: Response) {
-  try {
-    const { contratoId, metodoPago = 'simulado' } = req.body;
-    
-    if (!contratoId) {
-      return res.status(400).json({ message: 'Se requiere ID de contrato' });
-    }
-    
-    // Buscar el contrato
-    const contrato = await em.findOne(Contrato, { id: contratoId }, { populate: ['usuario', 'membresia'] });
-    if (!contrato) {
-      return res.status(404).json({ message: 'Contrato no encontrado' });
-    }
-    
-    // Verificar que el contrato esté en estado pendiente
-    if (contrato.estado !== EstadoContrato.PENDIENTE) {
-      return res.status(400).json({ 
-        message: `El contrato no está en estado pendiente. Estado actual: ${contrato.estado}` 
-      });
-    }
-    
-    // Simular procesamiento de pago (aquí iría la integración real con el sistema de pagos)
-    const pagoExitoso = Math.random() > 0.1; // 90% de probabilidad de éxito para la simulación
-    
-    if (pagoExitoso) {
-      // Actualizar el estado a "pagado" y completar campos de pago
-      const fechaPago = new Date();
-      contrato.estado = EstadoContrato.PAGADO;
-      contrato.fechaPago = fechaPago;
-      contrato.metodoPago = metodoPago;
-      
-      await em.flush();
-      
-      res.status(200).json({
-        message: 'Pago procesado exitosamente',
-        data: {
-          contrato: contrato
-        }
-      });
-    } else {
-      // Simular fallo en el pago
-      res.status(400).json({
-        message: 'Error al procesar el pago. Intente nuevamente.',
-        error: 'payment_failed',
-        contratoId: contratoId
-      });
-    }
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
-  }
-}
-
 async function cancelarContrato(req: Request, res: Response) {
   try {
     const { contratoId } = req.params;
@@ -518,7 +466,6 @@ export {
   update, 
   remove,
   contratarMembresia,
-  simularPago,
   cancelarContrato,
   verificarVencimientos,
   obtenerContratosUsuario,

@@ -43,6 +43,7 @@
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.10",
-    "reflect-metadata": "0.1.13"
+    "reflect-metadata": "0.1.13",
+    "stripe": "^20.0.0"
   }
 }
