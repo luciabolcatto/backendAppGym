@@ -202,13 +202,11 @@ async function cancelarContrato(req: Request, res: Response) {
       return res.status(404).json({ message: 'Contrato no encontrado' });
     }
     
-    // Verificar que el contrato no esté ya cancelado o vencido
-    if (contrato.estado === EstadoContrato.CANCELADO) {
-      return res.status(400).json({ message: 'El contrato ya está cancelado' });
-    }
-    
-    if (contrato.estado === EstadoContrato.VENCIDO) {
-      return res.status(400).json({ message: 'No se puede cancelar un contrato vencido' });
+    // Solo se permite cancelar contratos pendientes
+    if (contrato.estado !== EstadoContrato.PENDIENTE) {
+      return res.status(400).json({
+        message: `Solo se pueden cancelar contratos pendientes. Estado actual: ${contrato.estado}`
+      });
     }
     
     // Cancelar el contrato y registrar fecha de cancelación
