@@ -116,7 +116,7 @@ async function add(req: Request, res: Response) {
       });
     }
 
-    // 5. Crear la reserva
+    //  Crear la reserva
     const reserva = em.create(Reserva, req.body)
     await em.flush()
     res
