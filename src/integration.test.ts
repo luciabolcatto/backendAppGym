@@ -389,4 +389,46 @@ describe('Integración - Flujo real', () => {
     expect(claseDespues?.cupo_disp).toBe(cupoAntes);
   });
 
+  it('debe rechazar la reserva cuando el contrato sigue pendiente (sin pago)', async () => {
+    const loginResponse = await requestHttp(`${baseUrl}/api/Usuarios/login`, {
+      method: 'POST',
+      body: {
+        mail: 'test@example.com',
+        contrasena: '123456',
+      },
+    });
+
+    expect(loginResponse.status).toBe(200);
+    const token = loginResponse.body.token as string;
+    expect(token).toBeDefined();
+
+    const contratarResponse = await requestHttp(`${baseUrl}/api/Contratos/contratar`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: {
+        usuarioId: 'u1',
+        membresiaId: 'm1',
+      },
+    });
+
+    expect(contratarResponse.status).toBe(201);
+    expect(contratarResponse.body.data.contrato.estado).toBe('pendiente');
+
+    const reservasAntes = db.reservas.length;
+    const reservaResponse = await requestHttp(`${baseUrl}/api/Reservas`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: {
+        clase: 'cl1',
+        usuario: 'u1',
+      },
+    });
+
+    expect(reservaResponse.status).toBe(400);
+    expect(reservaResponse.body.message).toBe(
+      'No tienes un contrato vigente y pagado para la fecha de esta clase.'
+    );
+    expect(db.reservas).toHaveLength(reservasAntes);
+  });
+
 });

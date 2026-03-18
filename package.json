@@ -5,7 +5,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --config jest.config.cjs --runInBand",
+    "test:unit": "jest --config jest.config.cjs --runInBand src/middleware/auth.test.ts src/usuario/usuario.controler.test.ts src/contrato/contrato.controler.test.ts src/reserva/reserva.controler.test.ts",
+    "test:auth": "jest --config jest.config.cjs --runInBand src/middleware/auth.test.ts",
+    "test:usuario": "jest --config jest.config.cjs --runInBand src/usuario/usuario.controler.test.ts",
+    "test:contrato": "jest --config jest.config.cjs --runInBand src/contrato/contrato.controler.test.ts",
+    "test:reserva": "jest --config jest.config.cjs --runInBand src/reserva/reserva.controler.test.ts",
+    "test:integration": "jest --config jest.config.cjs --runInBand src/integration.test.ts",
     "build": "tsc -p ./tsconfig.json",
     "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/app.js\"",
     "seed": "tsc && node ./dist/shared/seed/run-seed.js"
