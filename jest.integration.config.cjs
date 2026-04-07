@@ -1,8 +1,9 @@
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
-  testMatch: ['**/*.test.ts'],
+  testMatch: ['**/integration*.test.ts'],
+  extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
@@ -10,14 +11,15 @@ module.exports = {
     '^.+\\.ts$': [
       'ts-jest',
       {
+        useESM: true,
         tsconfig: {
-          module: 'commonjs',
+          module: 'nodenext',
+          moduleResolution: 'nodenext',
           target: 'es2020',
           esModuleInterop: true,
         },
       },
     ],
   },
-  testPathIgnorePatterns: ['<rootDir>/src/integration.test.ts'],
   clearMocks: true,
 };

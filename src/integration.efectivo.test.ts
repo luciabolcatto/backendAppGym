@@ -1,14 +1,14 @@
 import 'reflect-metadata';
-import express, { Request, Response } from 'express';
+import express from 'express';
 import http from 'http';
 import bcrypt from 'bcrypt';
 import { RequestContext } from '@mikro-orm/core';
-import Stripe from 'stripe';
 
 import { orm } from './shared/db/orm.js';
 import { UsuarioRouter } from './usuario/usuario.routes.js';
 import { ContratoRouter } from './contrato/contrato.routes.js';
 import { ReservaRouter } from './reserva/reserva.routes.js';
+import { StripeRouter } from './stripe/stripe.routes.js';
 
 import { Usuario } from './usuario/usuario.entity.js';
 import { Membresia } from './membresia/membresia.entity.js';
@@ -26,10 +26,11 @@ type SeedData = {
   clase: Clase;
 };
 
-const INTEGRATION_PORT = Number(process.env.INTEGRATION_PORT || '5500');
+const INTEGRATION_PORT_EFECTIVO = Number(process.env.INTEGRATION_PORT_EFECTIVO || '5501');
 
-let StripeRouter: any;
-let handleWebhook: (req: Request, res: Response) => Promise<unknown>;
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function requestHttp(
   url: string,
@@ -74,46 +75,6 @@ function requestHttp(
   });
 }
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function waitForPaidSession(
-  stripe: Stripe,
-  sessionId: string,
-  timeoutMs: number
-) {
-  const deadline = Date.now() + timeoutMs;
-
-  while (Date.now() < deadline) {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    if (session.payment_status === 'paid') {
-      return session;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-  }
-
-  throw new Error('No se detecto pago en Stripe dentro del tiempo limite.');
-}
-
-async function waitForContratoPagado(contratoId: string, timeoutMs: number) {
-  const deadline = Date.now() + timeoutMs;
-
-  while (Date.now() < deadline) {
-    const em = orm.em.fork();
-    const contrato = await em.findOne(Contrato, { id: contratoId });
-    if (contrato?.estado === EstadoContrato.PAGADO) {
-      return;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  }
-
-  throw new Error(
-    'Stripe cobro la sesion, pero no llego webhook real para marcar el contrato como pagado.'
-  );
-}
-
 async function clearCollections() {
   const em = orm.em.fork();
   await em.nativeDelete(Reserva, {});
@@ -132,7 +93,7 @@ async function seedBaseData(): Promise<SeedData> {
     nombre: 'Juan',
     apellido: 'Perez',
     tel: 12345678,
-    mail: 'test.integration@example.com',
+    mail: 'test.integration.cash@example.com',
     contrasena: await bcrypt.hash('123456', 10),
   });
 
@@ -144,8 +105,8 @@ async function seedBaseData(): Promise<SeedData> {
   });
 
   const actividad = em.create(Actividad, {
-    nombre: `Actividad Test ${Date.now()}`,
-    descripcion: 'Actividad para test real',
+    nombre: `Actividad Test Cash ${Date.now()}`,
+    descripcion: 'Actividad para test real efectivo',
     cupo: 10,
   });
 
@@ -153,7 +114,7 @@ async function seedBaseData(): Promise<SeedData> {
     nombre: 'Ana',
     apellido: 'Coach',
     tel: 12345679,
-    mail: `coach.${Date.now()}@example.com`,
+    mail: `coach.cash.${Date.now()}@example.com`,
     frase: 'Vamos',
     fotoUrl: 'https://example.com/foto.jpg',
   });
@@ -172,42 +133,16 @@ async function seedBaseData(): Promise<SeedData> {
   return { usuario, membresia, clase };
 }
 
-describe('Integracion real - flujo backend', () => {
+describe('Integracion real - flujo backend pago efectivo', () => {
   let app: express.Application;
   let server: http.Server;
   let baseUrl: string;
 
   beforeAll(async () => {
-    if (!process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_')) {
-      throw new Error(
-        'Defini STRIPE_SECRET_KEY con una clave real de test (sk_test_...) antes de ejecutar test:integration.'
-      );
-    }
-    if (!process.env.STRIPE_WEBHOOK_SECRET) {
-      throw new Error(
-        'Defini STRIPE_WEBHOOK_SECRET real para firmar el webhook local en test:integration.'
-      );
-    }
-
     process.env.JWT_SECRET = process.env.JWT_SECRET || 'secret_test';
     process.env.FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-    const stripeRoutesModule = await import('./stripe/stripe.routes.js');
-    const stripeControllerModule = await import('./stripe/stripe.controller.js');
-    StripeRouter = stripeRoutesModule.StripeRouter;
-    handleWebhook = stripeControllerModule.handleWebhook;
-
     app = express();
-
-    app.post(
-      '/api/stripe/webhook',
-      express.raw({ type: 'application/json' }),
-      (req: Request, res: Response) => {
-        RequestContext.create(orm.em, () => {
-          void handleWebhook(req, res);
-        });
-      }
-    );
 
     app.use(express.json());
     app.use((req, res, next) => {
@@ -220,21 +155,20 @@ describe('Integracion real - flujo backend', () => {
     app.use('/api/stripe', StripeRouter);
 
     await new Promise<void>((resolve, reject) => {
-      server = app.listen(INTEGRATION_PORT, () => {
+      server = app.listen(INTEGRATION_PORT_EFECTIVO, () => {
         const address = server.address();
         if (!address || typeof address === 'string') {
-          reject(new Error('No se pudo inicializar servidor de integracion'));
+          reject(new Error('No se pudo inicializar servidor de integracion efectivo'));
           return;
         }
-        baseUrl = `http://127.0.0.1:${INTEGRATION_PORT}`;
+        baseUrl = `http://127.0.0.1:${INTEGRATION_PORT_EFECTIVO}`;
         resolve();
       });
     });
   });
 
   afterAll(async () => {
-    // Espera corta para que Stripe CLI entregue eventos en vuelo antes del cierre.
-    await sleep(3000);
+    await sleep(500);
 
     await new Promise<void>((resolve, reject) => {
       server.close((error) => {
@@ -254,11 +188,8 @@ describe('Integracion real - flujo backend', () => {
     await clearCollections();
   });
 
-  it('login -> contratar pendiente -> pagar con tarjeta Stripe real -> reservar', async () => {
+  it('login -> contratar pendiente -> pagar efectivo -> reservar', async () => {
     const { usuario, membresia, clase } = await seedBaseData();
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2025-11-17.clover',
-    });
 
     const loginResponse = await requestHttp(`${baseUrl}/api/Usuarios/login`, {
       method: 'POST',
@@ -287,29 +218,12 @@ describe('Integracion real - flujo backend', () => {
     expect(contratarBody.data.contrato.estado).toBe(EstadoContrato.PENDIENTE);
 
     const contratoId = contratarBody.data.contrato.id;
-    const checkoutResponse = await requestHttp(`${baseUrl}/api/stripe/create-checkout-session`, {
+    const pagoEfectivoResponse = await requestHttp(`${baseUrl}/api/stripe/pagar-efectivo`, {
       method: 'POST',
       body: { contratoId },
     });
 
-    expect(checkoutResponse.status).toBe(200);
-    const checkoutBody = checkoutResponse.body as {
-      checkoutUrl: string;
-      sessionId: string;
-    };
-
-    expect(checkoutBody.checkoutUrl.includes('stripe')).toBe(true);
-    expect(checkoutBody.sessionId.startsWith('cs_')).toBe(true);
-
-    console.log('\n=== PAGO REAL REQUERIDO ===');
-    console.log(`Backend test escuchando webhook en: http://127.0.0.1:${INTEGRATION_PORT}/api/stripe/webhook`);
-    console.log(`En otra terminal ejecutar: stripe listen --events checkout.session.completed --forward-to http://127.0.0.1:${INTEGRATION_PORT}/api/stripe/webhook`);
-    console.log(`Abrir URL: ${checkoutBody.checkoutUrl}`);
-    console.log('Tarjeta test sugerida: 4000000320000021');
-    console.log('Completar pago antes de 4 minutos para continuar el test.\n');
-
-    await waitForPaidSession(stripe, checkoutBody.sessionId, 240000);
-    await waitForContratoPagado(contratoId, 120000);
+    expect(pagoEfectivoResponse.status).toBe(200);
 
     const reservaResponse = await requestHttp(`${baseUrl}/api/Reservas`, {
       method: 'POST',

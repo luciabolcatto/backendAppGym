@@ -11,7 +11,8 @@
     "test:usuario": "jest --config jest.config.cjs --runInBand src/usuario/usuario.controler.test.ts",
     "test:contrato": "jest --config jest.config.cjs --runInBand src/contrato/contrato.controler.test.ts",
     "test:reserva": "jest --config jest.config.cjs --runInBand src/reserva/reserva.controler.test.ts",
-    "test:integration": "jest --config jest.config.cjs --runInBand src/integration.test.ts",
+    "test:integration": "set NODE_ENV=test&& set TEST_DB_NAME=gym_test&& set NODE_OPTIONS=--experimental-vm-modules&& jest --config jest.integration.config.cjs --runInBand src/integration.test.ts",
+    "test:integration:efectivo": "set NODE_ENV=test&& set TEST_DB_NAME=gym_test&& set NODE_OPTIONS=--experimental-vm-modules&& jest --config jest.integration.config.cjs --runInBand src/integration.efectivo.test.ts",
     "build": "tsc -p ./tsconfig.json",
     "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/app.js\"",
     "seed": "tsc && node ./dist/shared/seed/run-seed.js"
