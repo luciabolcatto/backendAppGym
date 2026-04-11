@@ -22,6 +22,9 @@ import { actualizarReservas } from './reserva/reserva.controler.js';
 
 dotenv.config();
 const app = express();
+const port = Number(process.env.PORT || 5500);
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+const allowedOrigins = [frontendUrl, 'http://localhost:5173'];
 console.log("✅ BACKEND APP.TS CARGADO - TEST LU");
 
 // Webhook de Stripe - DEBE ir ANTES de express.json()
@@ -34,7 +37,14 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS bloqueado para el origen: ${origin}`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], //se pueden agregar mas metodos aca
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -71,8 +81,8 @@ app.use((_, res, __) => {
   res.status(404).send({ message: 'Resource not found' });
 });
 
-app.listen(5500, async () => {
-  console.log('Server runnning on http://localhost:5500/');
+app.listen(port, async () => {
+  console.log(`Server runnning on http://localhost:${port}/`);
   
   // Actualizar contratos y reservas al iniciar el servidor
   console.log(' Actualizando datos al iniciar...');
