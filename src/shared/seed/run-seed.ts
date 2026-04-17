@@ -1,4 +1,5 @@
 
+import 'dotenv/config';
 import 'reflect-metadata';
 import { seedCompleto } from './complete.seed.js';
 

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { MikroORM } from '@mikro-orm/core';
 import { MongoDriver } from '@mikro-orm/mongodb';
 

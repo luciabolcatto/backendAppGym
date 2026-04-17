@@ -23,8 +23,12 @@ import { actualizarReservas } from './reserva/reserva.controler.js';
 dotenv.config();
 const app = express();
 const port = Number(process.env.PORT || 5500);
-const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-const allowedOrigins = [frontendUrl, 'http://localhost:5173'];
+const configuredOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.CORS_ORIGIN,
+  'http://localhost:5173',
+].filter((origin): origin is string => Boolean(origin));
+const allowedOrigins = new Set(configuredOrigins);
 console.log("✅ BACKEND APP.TS CARGADO - TEST LU");
 
 // Webhook de Stripe - DEBE ir ANTES de express.json()
@@ -38,7 +42,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.has(origin)) {
         callback(null, true);
         return;
       }
