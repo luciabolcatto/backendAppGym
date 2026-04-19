@@ -13,7 +13,6 @@
     "test:reserva": "jest --config jest.config.cjs --runInBand src/reserva/reserva.controler.test.ts",
     "test:integration": "cross-env NODE_ENV=test TEST_DB_NAME=gym_test NODE_OPTIONS=--experimental-vm-modules jest --config jest.integration.config.cjs --runInBand src/integration.test.ts",
     "test:integration:efectivo": "cross-env NODE_ENV=test TEST_DB_NAME=gym_test NODE_OPTIONS=--experimental-vm-modules jest --config jest.integration.config.cjs --runInBand src/integration.efectivo.test.ts",
-    "render:predeploy": "pnpm test:unit && pnpm test:integration:efectivo && pnpm seed",
     "build": "tsc -p ./tsconfig.json",
     "start": "node ./dist/app.js",
     "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/app.js\"",
