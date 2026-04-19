@@ -61,17 +61,19 @@ pnpm build
 pnpm start
 ```
 
+## Scripts útiles
+
+- `pnpm seed` - compila y ejecuta el seed de datos
+- `pnpm render:predeploy` - corre tests y seed antes del deploy
+- `pnpm test:unit` - tests unitarios
+- `pnpm test:integration` - tests de integración
+- `pnpm test:integration:efectivo` - integración para el flujo de efectivo
+
 ## Tests
 
 ```bash
 pnpm test
 ```
-
-Atajos útiles:
-
-- `pnpm test:unit`
-- `pnpm test:integration`
-- `pnpm test:integration:efectivo`
 
 ## Deploy
 
