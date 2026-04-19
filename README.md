@@ -1,21 +1,83 @@
-# backendAppGym
+# Backend App Gym
 
-Repositorio del backend de la app fullstack de la materia desarrollo de software, UTN FRRO ISI COM 304.
+Backend de la aplicación App Gym, construido con Node.js, TypeScript, Express y MongoDB.
 
-## Deploy en Render
+## Requisitos
 
-1. Crear un Web Service desde este repositorio.
-2. Usar como build command: `pnpm install && pnpm build`.
-3. Usar como start command: `pnpm start`.
-4. Configurar estas variables de entorno:
-   - `MONGO_URL`
-   - `JWT_SECRET`
-   - `ADMIN_PASSWORD`
-   - `ADMIN_SECRET`
-   - `EMAIL_USER`
-   - `EMAIL_PASS`
-   - `STRIPE_SECRET_KEY`
-   - `STRIPE_WEBHOOK_SECRET`
-   - `FRONTEND_URL`
-   - `NODE_ENV=production`
-5. Si usas Stripe, registrar el webhook en la URL pública del backend: `/api/stripe/webhook`.
+- Node.js 18+
+- pnpm
+- MongoDB accesible (Atlas o local)
+
+## Desarrollo local
+
+1. Instalar dependencias:
+
+   ```bash
+   pnpm install
+   ```
+
+2. Configurar variables de entorno en `.env`(las claves no son las reales):
+
+   ```env
+   # Entorno
+   NODE_ENV=production
+   PORT=5500
+   FRONTEND_URL=http://localhost:5173
+   CORS_ORIGIN=http://localhost:5173
+
+   # Base de datos
+   MONGO_URL=mongodb+srv://<usuario>:<password>@<cluster>/<db>
+   DB_DEBUG=false
+
+   # Auth
+   JWT_SECRET=<jwt_secret>
+   ADMIN_PASSWORD=<admin_password>
+   ADMIN_SECRET=<admin_secret>
+
+   # Email
+   EMAIL_USER=<email_user>
+   EMAIL_PASS=<email_pass>
+
+   # Stripe
+   STRIPE_SECRET_KEY=<stripe_secret_key>
+   STRIPE_WEBHOOK_SECRET=<stripe_webhook_secret>
+   ```
+
+3. Ejecutar backend en modo desarrollo:
+
+   ```bash
+   pnpm start:dev
+   ```
+
+## Build de producción
+
+```bash
+pnpm build
+```
+
+## Ejecutar en producción
+
+```bash
+pnpm start
+```
+
+## Tests
+
+```bash
+pnpm test
+```
+
+Atajos útiles:
+
+- `pnpm test:unit`
+- `pnpm test:integration`
+- `pnpm test:integration:efectivo`
+
+## Deploy
+
+El backend está desplegado en Render.
+
+## Notas
+
+- El backend permite CORS para `FRONTEND_URL`, `CORS_ORIGIN` y `http://localhost:5173`.
+- Se sirven archivos estáticos en `/public`.
