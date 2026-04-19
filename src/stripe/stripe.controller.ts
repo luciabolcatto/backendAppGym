@@ -71,14 +71,16 @@ async function createCheckoutSession(req: Request, res: Response) {
 
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-        // Nota: Usamos USD para el entorno de prueba porque ARS tiene restricciones
-        // en modo test de Stripe. En producción se puede cambiar a 'ars'.
-        const currency = process.env.NODE_ENV === 'production' ? 'ars' : 'usd';
-        
-        // Para USD en modo test, convertimos el precio (asumiendo 1 USD = 1000 ARS aprox para demo)
-        // En producción con ARS, se usa el precio real
-        const unitAmount = currency === 'ars' 
-            ? Math.round(contrato.membresia.precio * 100 / 1000) // Convertir ARS a USD para test
+        // Si se usa clave de prueba de Stripe, mantenemos USD para evitar restricciones
+        // de algunas cuentas/regiones con monedas locales en modo test.
+        const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
+        const isTestMode = stripeSecretKey.startsWith('sk_test_');
+        const currency = isTestMode ? 'usd' : 'ars';
+
+        // Stripe usa la unidad mínima de la moneda (centavos).
+        // En test convertimos el precio de demo a USD para mantener montos razonables.
+        const unitAmount = isTestMode
+            ? Math.round((contrato.membresia.precio / 1000) * 100)
             : Math.round(contrato.membresia.precio * 100);
 
         // Crear la sesión de Stripe Checkout
@@ -88,7 +90,7 @@ async function createCheckoutSession(req: Request, res: Response) {
             line_items: [
                 {
                     price_data: {
-                        currency: 'ars',
+                        currency,
                         product_data: {
                             name: contrato.membresia.nombre,
                             description: `${contrato.membresia.descripcion} - Duración: ${contrato.membresia.meses} mes(es)`,
