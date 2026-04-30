@@ -21,7 +21,7 @@ Organizado por módulos de dominio para escalabilidad:
 1. **Instalar dependencias:**
    ```bash
    pnpm install
-2. **Configurar variables de entorno en **`.env` (ejemplo para producción):
+2. **Configurar variables de entorno en** `.env` (ejemplo para producción):
 
    ```env
    # Configuración del entorno
