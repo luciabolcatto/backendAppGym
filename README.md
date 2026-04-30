@@ -21,9 +21,38 @@ Organizado por módulos de dominio para escalabilidad:
 1. **Instalar dependencias:**
    ```bash
    pnpm install
-2. **Configurar el entorno:** <br>
-  FRONTEND_URL=[https://frontend-app-gym.vercel.app]
-   
+2. **Configurar variables de entorno en `.env` ** (ejemplo para producción):
+
+   ```env
+   # Configuración del entorno
+   NODE_ENV=production
+   PORT=5500
+   CORS_ORIGIN=https://frontend-app-gym.vercel.app
+   FRONTEND_URL=https://frontend-app-gym.vercel.app
+
+   # Configuración de conexión a MongoDB
+   MONGO_URL=mongodb+srv://<usuario>:<password>@<cluster>/<db>?appName=Cluster0
+
+   # Activar logs de MikroORM (true o false)
+   DB_DEBUG=false
+
+   # JWT
+   JWT_SECRET=<jwt_secret>
+
+   # Admin
+   ADMIN_PASSWORD=<admin_password>
+   ADMIN_SECRET=<admin_secret>
+
+   # Email (nodemailer con Gmail)
+   EMAIL_USER=<email_user>
+   EMAIL_PASS=<email_pass>
+
+   # Stripe
+   STRIPE_SECRET_KEY=<stripe_secret_key>
+   STRIPE_WEBHOOK_SECRET=<stripe_webhook_secret>
+   ```
+
+3. Ejecutar backend en modo desarrollo:
 4. **Poblar Base de Datos:**
    ```bash
    pnpm run seed
@@ -46,4 +75,6 @@ El proyecto implementa pruebas automatizadas para garantizar la integridad de la
 1. **Build:** `pnpm run build` (Genera la carpeta `/dist`).
 2. **Start:** `pnpm start`.
 
+## Deploy
+El backend se encuentra desplegado y operativo en la plataforma Render (onrender.com).
 
