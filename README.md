@@ -79,8 +79,9 @@ Organizado por módulos de dominio para escalabilidad:
 El proyecto implementa pruebas automatizadas para garantizar la integridad de la lógica de negocio:
 
 - `pnpm test` (Ejecuta todas las suites).
-- `pnpm test:unit` (Valida middlewares y controladores principales).
+- `pnpm test:unit` (Ejecuta todos los test unitarios).
 - `pnpm test:auth`: Pruebas de seguridad y JWT.
+- `pnpm test:usuario`: Pruebas del controlador de usuarios.
 - `pnpm test:contrato`: Lógica de creación y estados de membresías.
 - `pnpm test:reserva`: Validación de cupos y horarios.
 - `pnpm test:integration`: Pruebas de flujo completo con base de datos de test (`gym_test`).
