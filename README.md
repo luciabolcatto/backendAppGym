@@ -1,26 +1,37 @@
-# Gym App - Backend API 
+# Gym App - Backend API
 
 Servidor para la gestión de gimnasios, construido con **Node.js**, **TypeScript**, **Express** y **MikroORM** con persistencia en **MongoDB**.
 
 ## Stack Tecnológico
+
 - **Core:** Node.js (ES Modules) & TypeScript.
 - **Framework:** Express 5.
 - **ORM:** MikroORM v5 (MongoDB).
+- **Autenticación y seguridad:** JSON Web Tokens (JWT) y bcrypt.
+- **Subida de imágenes:** Multer.
+- **Carga de variables de entorno:** dotenv.
+- **Control de acceso entre frontend y backend:** cors.
+- **Soporte de metadatos para decoradores:** reflect-metadata.
+- **Manejo de fechas y horas:** luxon.
 - **Pagos:** Stripe API.
 - **Mailing:** Nodemailer (Gmail).
 - **Tareas Programadas:** Node-cron (Automatización de vencimientos).
 
-## Estructura de Proyecto 
+## Estructura de Proyecto
+
 Organizado por módulos de dominio para escalabilidad:
+
 - `actividad/`, `clase/`, `contrato/`, `reserva/`, `usuario/`, `valoracion/`, `membresia/`: Entidades, controladores y lógica de negocio.
 - `middleware/`: Seguridad y validaciones (Auth JWT).
 - `shared/`: Configuración de base de datos y scripts de `seed`.
 - `stripe/`: Integración de pasarela de pagos y Webhooks.
-  
+
 ## Instalación y Desarrollo Local
+
 1. **Instalar dependencias:**
    ```bash
    pnpm install
+   ```
 2. **Configurar variables de entorno en** `.env` (ejemplo para producción):
 
    ```env
@@ -52,15 +63,19 @@ Organizado por módulos de dominio para escalabilidad:
    STRIPE_WEBHOOK_SECRET=<stripe_webhook_secret>
    ```
 
-3. Ejecutar backend en modo desarrollo:
-4. **Poblar Base de Datos:**
+3. **Poblar Base de Datos:**
    ```bash
    pnpm run seed
-5. **Iniciar en modo desarrollo:**
-    ```bash
+   ```
+4. **Iniciar en modo desarrollo:**
+
+   ```bash
    pnpm run start:dev
-   
-## Testing 
+
+   ```
+
+## Testing
+
 El proyecto implementa pruebas automatizadas para garantizar la integridad de la lógica de negocio:
 
 - `pnpm test` (Ejecuta todas las suites).
@@ -72,9 +87,10 @@ El proyecto implementa pruebas automatizadas para garantizar la integridad de la
 - `pnpm test:integration:efectivo`: Simulación del flujo de pago manual y activación de servicios.
 
 ## Producción
+
 1. **Build:** `pnpm run build` (Genera la carpeta `/dist`).
 2. **Start:** `pnpm start`.
 
 ## Deploy
-El backend se encuentra desplegado y operativo en la plataforma Render (onrender.com).
 
+El backend se encuentra desplegado y operativo en la plataforma Render (https://backendappgym.onrender.com/).
