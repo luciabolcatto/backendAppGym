@@ -78,14 +78,14 @@ Organizado por módulos de dominio para escalabilidad:
 
 El proyecto implementa pruebas automatizadas para garantizar la integridad de la lógica de negocio:
 
-- `pnpm test` (Ejecuta todas las suites).
+- `pnpm test`: Ejecuta todas las suites(menos el test:integration que requiere que realices el pago manual con stripe).
 - `pnpm test:unit` (Ejecuta todos los test unitarios).
 - `pnpm test:auth`: Pruebas de seguridad y JWT.
 - `pnpm test:usuario`: Pruebas del controlador de usuarios.
 - `pnpm test:contrato`: Lógica de creación y estados de membresías.
 - `pnpm test:reserva`: Validación de cupos y horarios.
-- `pnpm test:integration`: Pruebas de flujo completo con base de datos de test (`gym_test`).
-- `pnpm test:integration:efectivo`: Simulación del flujo de pago manual y activación de servicios.
+- `pnpm test:integration`: Pruebas de flujo completo (pago manual con stripe) con base de datos de test (`gym_test`).
+- `pnpm test:integration:efectivo`: Simulación del flujo de pago automatico.
 
 ## Producción
 

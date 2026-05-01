@@ -1,36 +1,19 @@
-import 'reflect-metadata';
-import express from 'express';
+import 'dotenv/config';
 import http from 'http';
-import bcrypt from 'bcrypt';
-import { RequestContext } from '@mikro-orm/core';
-
-import { orm } from './shared/db/orm.js';
-import { UsuarioRouter } from './usuario/usuario.routes.js';
-import { ContratoRouter } from './contrato/contrato.routes.js';
-import { ReservaRouter } from './reserva/reserva.routes.js';
-import { StripeRouter } from './stripe/stripe.routes.js';
-
-import { Usuario } from './usuario/usuario.entity.js';
-import { Membresia } from './membresia/membresia.entity.js';
-import { Contrato, EstadoContrato } from './contrato/contrato.entity.js';
-import { Reserva } from './reserva/reserva.entity.js';
-import { Clase } from './clase/clase.entity.js';
-import { Actividad } from './actividad/actividad.entity.js';
-import { Entrenador } from './entrenador/entrenador.entity.js';
+import https from 'https';
 
 type HttpResult = { status: number; body: unknown };
 
+type CreatedEntity = { id: string };
+
 type SeedData = {
-  usuario: Usuario;
-  membresia: Membresia;
-  clase: Clase;
+  usuario: CreatedEntity & { mail: string; contrasena: string };
+  membresia: CreatedEntity;
+  clase: CreatedEntity;
 };
 
-const INTEGRATION_PORT_EFECTIVO = Number(process.env.INTEGRATION_PORT_EFECTIVO || '5501');
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const REMOTE_BASE_URL =
+  process.env.INTEGRATION_BASE_URL || 'https://backendappgym.onrender.com';
 
 function requestHttp(
   url: string,
@@ -42,7 +25,9 @@ function requestHttp(
 ): Promise<HttpResult> {
   return new Promise((resolve, reject) => {
     const payload = options.body ? JSON.stringify(options.body) : '';
-    const req = http.request(
+    const client = url.startsWith('https:') ? https : http;
+
+    const req = client.request(
       url,
       {
         method: options.method,
@@ -75,127 +60,169 @@ function requestHttp(
   });
 }
 
-async function clearCollections() {
-  const em = orm.em.fork();
-  await em.nativeDelete(Reserva, {});
-  await em.nativeDelete(Contrato, {});
-  await em.nativeDelete(Clase, {});
-  await em.nativeDelete(Entrenador, {});
-  await em.nativeDelete(Actividad, {});
-  await em.nativeDelete(Membresia, {});
-  await em.nativeDelete(Usuario, {});
+function randomTag() {
+  return `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 }
 
-async function seedBaseData(): Promise<SeedData> {
-  const em = orm.em.fork();
+function extractId(body: unknown): string {
+  const candidate = body as { data?: { id?: string }; id?: string };
+  const id = candidate?.data?.id || candidate?.id;
+  if (!id) {
+    throw new Error(`No se pudo leer id de la respuesta: ${JSON.stringify(body)}`);
+  }
+  return id;
+}
 
-  const usuario = em.create(Usuario, {
+async function seedBaseData(baseUrl: string): Promise<SeedData> {
+  const tag = randomTag();
+
+  const usuarioPayload = {
     nombre: 'Juan',
     apellido: 'Perez',
     tel: 12345678,
-    mail: 'test.integration.cash@example.com',
-    contrasena: await bcrypt.hash('123456', 10),
+    mail: `test.integration.cash.${tag}@example.com`,
+    contrasena: '123456',
+  };
+
+  const usuarioResponse = await requestHttp(`${baseUrl}/api/Usuarios`, {
+    method: 'POST',
+    body: usuarioPayload,
   });
 
-  const membresia = em.create(Membresia, {
-    nombre: 'Mensual',
-    descripcion: 'Plan mensual',
-    precio: 10000,
-    meses: 1,
+  if (usuarioResponse.status !== 201) {
+    throw new Error(`No se pudo crear usuario en remoto: ${JSON.stringify(usuarioResponse.body)}`);
+  }
+
+  const actividadResponse = await requestHttp(`${baseUrl}/api/actividad`, {
+    method: 'POST',
+    body: {
+      nombre: `Actividad Cash ${tag}`,
+      descripcion: 'Actividad para test real efectivo remoto',
+      cupo: 10,
+    },
   });
 
-  const actividad = em.create(Actividad, {
-    nombre: `Actividad Test Cash ${Date.now()}`,
-    descripcion: 'Actividad para test real efectivo',
-    cupo: 10,
+  if (actividadResponse.status !== 201) {
+    throw new Error(`No se pudo crear actividad en remoto: ${JSON.stringify(actividadResponse.body)}`);
+  }
+
+  const actividadId = extractId(actividadResponse.body);
+
+  const entrenadorResponse = await requestHttp(`${baseUrl}/api/entrenadores`, {
+    method: 'POST',
+    body: {
+      nombre: 'Ana',
+      apellido: 'Coach',
+      tel: 12345679,
+      mail: `coach.cash.${tag}@example.com`,
+      actividades: [actividadId],
+    },
   });
 
-  const entrenador = em.create(Entrenador, {
-    nombre: 'Ana',
-    apellido: 'Coach',
-    tel: 12345679,
-    mail: `coach.cash.${Date.now()}@example.com`,
-    frase: 'Vamos',
-    fotoUrl: 'https://example.com/foto.jpg',
-  });
+  if (entrenadorResponse.status !== 201) {
+    throw new Error(`No se pudo crear entrenador en remoto: ${JSON.stringify(entrenadorResponse.body)}`);
+  }
+
+  const entrenadorId = extractId(entrenadorResponse.body);
 
   const fechaInicio = new Date(Date.now() + 2 * 60 * 60 * 1000);
   const fechaFin = new Date(Date.now() + 3 * 60 * 60 * 1000);
-  const clase = em.create(Clase, {
-    fecha_hora_ini: fechaInicio,
-    fecha_hora_fin: fechaFin,
-    cupo_disp: 5,
-    actividad,
-    entrenador,
+
+  const claseResponse = await requestHttp(`${baseUrl}/api/clases`, {
+    method: 'POST',
+    body: {
+      fecha_hora_ini: fechaInicio.toISOString(),
+      fecha_hora_fin: fechaFin.toISOString(),
+      cupo_disp: 5,
+      entrenador: entrenadorId,
+      actividad: actividadId,
+    },
   });
 
-  await em.flush();
-  return { usuario, membresia, clase };
+  if (claseResponse.status !== 201) {
+    throw new Error(`No se pudo crear clase en remoto: ${JSON.stringify(claseResponse.body)}`);
+  }
+
+  const membresiaResponse = await requestHttp(`${baseUrl}/api/membresias`, {
+    method: 'POST',
+    body: {
+      nombre: `Mensual Cash ${tag}`,
+      descripcion: 'Plan mensual test efectivo remoto',
+      precio: 10000,
+      meses: 1,
+    },
+  });
+
+  if (membresiaResponse.status !== 201) {
+    throw new Error(`No se pudo crear membresia en remoto: ${JSON.stringify(membresiaResponse.body)}`);
+  }
+
+  return {
+    usuario: {
+      id: extractId(usuarioResponse.body),
+      mail: usuarioPayload.mail,
+      contrasena: usuarioPayload.contrasena,
+    },
+    membresia: { id: extractId(membresiaResponse.body) },
+    clase: { id: extractId(claseResponse.body) },
+  };
 }
 
-describe('Integracion real - flujo backend pago efectivo', () => {
-  let app: express.Application;
-  let server: http.Server;
+async function waitForContratoPagado(
+  baseUrl: string,
+  contratoId: string,
+  token: string,
+  timeoutMs: number
+) {
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const response = await requestHttp(`${baseUrl}/api/Contratos/${contratoId}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (response.status === 200) {
+      const body = response.body as {
+        data?: { estado?: string };
+      };
+
+      if (body?.data?.estado === 'pagado') {
+        return;
+      }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+
+  throw new Error('El contrato no paso a pagado luego del pago en efectivo remoto.');
+}
+
+describe('Integracion real - flujo backend pago efectivo remoto', () => {
   let baseUrl: string;
 
   beforeAll(async () => {
-    process.env.JWT_SECRET = process.env.JWT_SECRET || 'secret_test';
-    process.env.FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+    baseUrl = REMOTE_BASE_URL;
 
-    app = express();
-
-    app.use(express.json());
-    app.use((req, res, next) => {
-      RequestContext.create(orm.em, next);
+    const health = await requestHttp(`${baseUrl}/api/clases`, {
+      method: 'GET',
     });
 
-    app.use('/api/Usuarios', UsuarioRouter);
-    app.use('/api/Contratos', ContratoRouter);
-    app.use('/api/Reservas', ReservaRouter);
-    app.use('/api/stripe', StripeRouter);
-
-    await new Promise<void>((resolve, reject) => {
-      server = app.listen(INTEGRATION_PORT_EFECTIVO, () => {
-        const address = server.address();
-        if (!address || typeof address === 'string') {
-          reject(new Error('No se pudo inicializar servidor de integracion efectivo'));
-          return;
-        }
-        baseUrl = `http://127.0.0.1:${INTEGRATION_PORT_EFECTIVO}`;
-        resolve();
-      });
-    });
+    if (health.status < 200 || health.status >= 500) {
+      throw new Error(
+        `No se pudo alcanzar el backend remoto en ${baseUrl}. Status: ${health.status}`
+      );
+    }
   });
 
-  afterAll(async () => {
-    await sleep(500);
-
-    await new Promise<void>((resolve, reject) => {
-      server.close((error) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        resolve();
-      });
-    });
-
-    await clearCollections();
-    await orm.close(true);
-  });
-
-  beforeEach(async () => {
-    await clearCollections();
-  });
-
-  it('login -> contratar pendiente -> pagar efectivo -> reservar', async () => {
-    const { usuario, membresia, clase } = await seedBaseData();
+  it('login -> contratar pendiente -> pagar efectivo -> reservar (backend remoto)', async () => {
+    const { usuario, membresia, clase } = await seedBaseData(baseUrl);
 
     const loginResponse = await requestHttp(`${baseUrl}/api/Usuarios/login`, {
       method: 'POST',
       body: {
         mail: usuario.mail,
-        contrasena: '123456',
+        contrasena: usuario.contrasena,
       },
     });
 
@@ -215,7 +242,8 @@ describe('Integracion real - flujo backend pago efectivo', () => {
     const contratarBody = contratarResponse.body as {
       data: { contrato: { id: string; estado: string } };
     };
-    expect(contratarBody.data.contrato.estado).toBe(EstadoContrato.PENDIENTE);
+
+    expect(contratarBody.data.contrato.estado).toBe('pendiente');
 
     const contratoId = contratarBody.data.contrato.id;
     const pagoEfectivoResponse = await requestHttp(`${baseUrl}/api/stripe/pagar-efectivo`, {
@@ -224,6 +252,8 @@ describe('Integracion real - flujo backend pago efectivo', () => {
     });
 
     expect(pagoEfectivoResponse.status).toBe(200);
+
+    await waitForContratoPagado(baseUrl, contratoId, loginBody.token, 20000);
 
     const reservaResponse = await requestHttp(`${baseUrl}/api/Reservas`, {
       method: 'POST',
@@ -236,13 +266,22 @@ describe('Integracion real - flujo backend pago efectivo', () => {
 
     expect(reservaResponse.status).toBe(201);
 
-    const em = orm.em.fork();
-    const contratoPersistido = await em.findOne(Contrato, { id: contratoId });
-    const reservasUsuario = await em.find(Reserva, { usuario: usuario.id }, { populate: ['clase', 'usuario'] });
+    const reservasResponse = await requestHttp(
+      `${baseUrl}/api/Reservas?usuario=${usuario.id}`,
+      {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${loginBody.token}` },
+      }
+    );
 
-    expect(contratoPersistido?.estado).toBe(EstadoContrato.PAGADO);
-    expect(reservasUsuario.length).toBe(1);
-    expect(reservasUsuario[0].clase.id).toBe(clase.id);
-    expect(reservasUsuario[0].usuario.id).toBe(usuario.id);
-  });
+    expect(reservasResponse.status).toBe(200);
+    const reservasBody = reservasResponse.body as {
+      data?: Array<{ clase?: { id?: string }; usuario?: { id?: string } }>;
+    };
+
+    const reservaCreada = reservasBody.data?.find(
+      (r) => r?.clase?.id === clase.id && r?.usuario?.id === usuario.id
+    );
+    expect(Boolean(reservaCreada)).toBe(true);
+  }, 120000);
 });
