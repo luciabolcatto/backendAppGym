@@ -31,9 +31,8 @@ export const orm = await MikroORM.init({
   ],
   dbName,
   clientUrl,
-  debug: true,
+  debug: process.env.NODE_ENV !== 'production',
   schemaGenerator: {
-    //never in production
     disableForeignKeys: true,
     createForeignKeyConstraints: true,
     ignoreSchema: [],
@@ -41,10 +40,11 @@ export const orm = await MikroORM.init({
 });
 
 export const syncSchema = async () => {
+  // Si estamos en Render (production), salimos de la función sin hacer nada.
+  if (process.env.NODE_ENV === 'production') return;
+
   const generator = orm.getSchemaGenerator();
-  /*   
-  await generator.dropSchema()
-  await generator.createSchema()
-  */
+
+  
   await generator.updateSchema();
 };
