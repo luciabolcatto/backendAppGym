@@ -59,11 +59,15 @@ app.use(
 // Ej: http://localhost:5500/public/uploads/<clase>/<id>/<archivo>
 app.use('/public', express.static('public'));
 
-//luego de los middlewares base
+
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
 });
-//antes de las rutas y middlewares de negocio
+
+
+app.get('/', (req, res) => {
+  res.send('🏋️‍♂️ Backend de Gym App corriendo exitosamente...');
+});
 
 app.use('/api/Usuarios', UsuarioRouter);
 app.use('/api/Contratos', ContratoRouter);
