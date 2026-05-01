@@ -58,7 +58,7 @@ function sanitizeUsuarioInput(
       : req.body.fotoPerfil,
   };
 
-  //more checks here
+ 
 
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
