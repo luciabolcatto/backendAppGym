@@ -29,6 +29,8 @@ const configuredOrigins = [
   'http://localhost:5173',
 ].filter((origin): origin is string => Boolean(origin));
 const allowedOrigins = new Set(configuredOrigins);
+const isAllowedOrigin = (origin: string) =>
+  allowedOrigins.has(origin) || /^https:\/\/.*\.vercel\.app$/i.test(origin);
 console.log("✅ BACKEND APP.TS CARGADO - TEST LU");
 
 // Webhook de Stripe - DEBE ir ANTES de express.json()
@@ -42,7 +44,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.has(origin)) {
+      if (!origin || isAllowedOrigin(origin)) {
         callback(null, true);
         return;
       }
