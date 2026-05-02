@@ -18,6 +18,6 @@ module.exports = {
       },
     ],
   },
-  testPathIgnorePatterns: ['<rootDir>/src/integration.test.ts'],
+  testPathIgnorePatterns: ['<rootDir>/src/integration.*.test.ts'],
   clearMocks: true,
 };

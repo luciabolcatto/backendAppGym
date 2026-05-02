@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --config jest.config.cjs --runInBand",
+    "test": "pnpm test:unit && pnpm test:integration:efectivo",
     "test:unit": "jest --config jest.config.cjs --runInBand src/middleware/auth.test.ts src/usuario/usuario.controler.test.ts src/contrato/contrato.controler.test.ts src/reserva/reserva.controler.test.ts",
     "test:auth": "jest --config jest.config.cjs --runInBand src/middleware/auth.test.ts",
     "test:usuario": "jest --config jest.config.cjs --runInBand src/usuario/usuario.controler.test.ts",
