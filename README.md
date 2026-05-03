@@ -33,7 +33,7 @@ Organizado por módulos de dominio para escalabilidad:
    pnpm install
    ```
 2. **Configurar variables de entorno en** `.env`
-   (ejemplo para desarrollo):
+   -(ejemplo para desarrollo):
 
    ```env
    # Configuración del entorno
@@ -63,10 +63,10 @@ Organizado por módulos de dominio para escalabilidad:
    
    #stripe 
    STRIPE_SECRET_KEY=sk_test_51SVcSpIIoJE8DL7Ne81uae4Id6R3fvbLm49w8uWXRWyYWJ6SQabWXH3ZQqgJV7jzRKucjF11mQyKX38LCuctSz8w007zM7Q7bi
-   STRIPE_WEBHOOK_SECRET= whsec_d4ce2f1a52d731cbc65795289c13f3f5f118238d6a445068592a8b4e041c9d66 //debe abrir  listen --events checkout.session.completed --forward-to http://127.0.0.1:5500/api/stripe/webhook y poner el codigo que aparece.
+   STRIPE_WEBHOOK_SECRET= whsec_d4ce2f1a52d731cbc65795289c13f3f5f118238d6a445068592a8b4e041c9d66  /*debe abrir  listen --events checkout.session.completed --forward-to http://127.0.0.1:5500/api/stripe/webhook y poner el codigo que aparece.*/
    
 
-(ejemplo para produccion):
+-(ejemplo para produccion):
 
    ```env
    # Configuración del entorno
@@ -95,7 +95,7 @@ Organizado por módulos de dominio para escalabilidad:
    #stripe 
    STRIPE_SECRET_KEY=sk_test_51SVcSpIIoJE8DL7Ne81uae4Id6R3fvbLm49w8uWXRWyYWJ6SQabWXH3ZQqgJV7jzRKucjF11mQyKX38LCuctSz8w007zM7Q7bi
    STRIPE_WEBHOOK_SECRET= whsec_PuB4EO7Viy8ShfecQigebc9woDUc9plY
-
+```
 
 4. **Poblar Base de Datos:**
    ```bash
