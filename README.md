@@ -32,42 +32,76 @@ Organizado por módulos de dominio para escalabilidad:
    ```bash
    pnpm install
    ```
-2. **Configurar variables de entorno en** `.env` (ejemplo para producción):
+2. **Configurar variables de entorno en** `.env`
+   (ejemplo para desarrollo):
 
    ```env
    # Configuración del entorno
-   NODE_ENV=production
+   NODE_ENV=development
    PORT=5500
-   CORS_ORIGIN=https://frontend-app-gym.vercel.app
-   FRONTEND_URL=https://frontend-app-gym.vercel.app
-
+   CORS_ORIGIN=http://localhost:5173
+   
    # Configuración de conexión a MongoDB
-   MONGO_URL=mongodb+srv://<usuario>:<password>@<cluster>/<db>?appName=Cluster0
-
+   DB_HOST=localhost
+   DB_PORT=27017
+   DB_NAME=gym
+   
    # Activar logs de MikroORM (true o false)
-   DB_DEBUG=false
-
+   DB_DEBUG=true
+   
    # JWT
-   JWT_SECRET=<jwt_secret>
-
+   JWT_SECRET=mi_clave
+   
    # Admin
-   ADMIN_PASSWORD=<admin_password>
-   ADMIN_SECRET=<admin_secret>
+   ADMIN_PASSWORD=miclavesegura
+   ADMIN_SECRET=claveunicaadmin
+   
 
    # Email (nodemailer con Gmail)
-   EMAIL_USER=<email_user>
-   EMAIL_PASS=<email_pass>
+   EMAIL_USER=fitnessprimeok@gmail.com
+   EMAIL_PASS=ihklojlxpyxznxnz
+   
+   #stripe 
+   STRIPE_SECRET_KEY=sk_test_51SVcSpIIoJE8DL7Ne81uae4Id6R3fvbLm49w8uWXRWyYWJ6SQabWXH3ZQqgJV7jzRKucjF11mQyKX38LCuctSz8w007zM7Q7bi
+   STRIPE_WEBHOOK_SECRET= whsec_d4ce2f1a52d731cbc65795289c13f3f5f118238d6a445068592a8b4e041c9d66 //debe abrir  listen --events checkout.session.completed --forward-to http://127.0.0.1:5500/api/stripe/webhook y poner el codigo que aparece.
+   
 
-   # Stripe
-   STRIPE_SECRET_KEY=<stripe_secret_key>
-   STRIPE_WEBHOOK_SECRET=<stripe_webhook_secret>
-   ```
+(ejemplo para produccion):
 
-3. **Poblar Base de Datos:**
+   ```env
+   # Configuración del entorno
+   NODE_ENV=development
+   PORT=5500
+   CORS_ORIGIN=http://localhost:5173
+   FRONTEND_URL=http://localhost:5173
+   
+   # Configuración de conexión a MongoDB
+   MONGO_URL=mongodb+srv://gym_user:fitness@cluster0.6m6zi3w.mongodb.net/?appName=Cluster0
+   
+   # Activar logs de MikroORM (true o false)
+   DB_DEBUG=false
+   
+   # JWT
+   JWT_SECRET=mi_clave
+   
+   # Admin
+   ADMIN_PASSWORD=miclavesegura
+   ADMIN_SECRET=claveunicaadmin
+   
+   # Email (nodemailer con Gmail)
+   EMAIL_USER=fitnessprimeok@gmail.com
+   EMAIL_PASS=ihklojlxpyxznxnz
+   
+   #stripe 
+   STRIPE_SECRET_KEY=sk_test_51SVcSpIIoJE8DL7Ne81uae4Id6R3fvbLm49w8uWXRWyYWJ6SQabWXH3ZQqgJV7jzRKucjF11mQyKX38LCuctSz8w007zM7Q7bi
+   STRIPE_WEBHOOK_SECRET= whsec_PuB4EO7Viy8ShfecQigebc9woDUc9plY
+
+
+4. **Poblar Base de Datos:**
    ```bash
    pnpm run seed
    ```
-4. **Iniciar en modo desarrollo:**
+5. **Iniciar en modo desarrollo:**
 
    ```bash
    pnpm run start:dev
