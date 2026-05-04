@@ -14,7 +14,7 @@ Servidor para la gestión de gimnasios, construido con **Node.js**, **TypeScript
 - **Soporte de metadatos para decoradores:** reflect-metadata.
 - **Manejo de fechas y horas:** luxon.
 - **Pagos:** Stripe API.
-- **Mailing:** Nodemailer (Gmail).
+- **Mailing:** Brevo.
 - **Tareas Programadas:** Node-cron (Automatización de vencimientos).
 
 ## Estructura de Proyecto
@@ -58,9 +58,8 @@ Organizado por módulos de dominio para escalabilidad:
    ADMIN_SECRET=claveunicaadmin
    
 
-   # Email (nodemailer con Gmail)
-   EMAIL_USER=fitnessprimeok@gmail.com
-   EMAIL_PASS=esbalbjvzrbtqrfo
+   # Brevo
+   BREVO_API_KEY=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
    
    #stripe 
    STRIPE_SECRET_KEY=sk_test_51SVcSpIIoJE8DL7Ne81uae4Id6R3fvbLm49w8uWXRWyYWJ6SQabWXH3ZQqgJV7jzRKucjF11mQyKX38LCuctSz8w007zM7Q7bi
@@ -89,9 +88,8 @@ Organizado por módulos de dominio para escalabilidad:
    ADMIN_PASSWORD=miclavesegura
    ADMIN_SECRET=claveunicaadmin
    
-   # Email (nodemailer con Gmail)
-   EMAIL_USER=fitnessprimeok@gmail.com
-   EMAIL_PASS=esbalbjvzrbtqrfo
+   # Brevo
+   BREVO_API_KEY=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
    
    #stripe 
    STRIPE_SECRET_KEY=sk_test_51SVcSpIIoJE8DL7Ne81uae4Id6R3fvbLm49w8uWXRWyYWJ6SQabWXH3ZQqgJV7jzRKucjF11mQyKX38LCuctSz8w007zM7Q7bi
