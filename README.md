@@ -59,7 +59,8 @@ Organizado por módulos de dominio para escalabilidad:
    
 
    # Brevo
-   BREVO_API_KEY=.... /*no podemos exponer esta clave ya que nos bajan la API de Brevo*/
+   BREVO_API_KEY=....
+   /*no podemos exponer esta clave ya que nos bajan la API de Brevo*/
    
    #stripe 
    STRIPE_SECRET_KEY=sk_test_51SVcSpIIoJE8DL7Ne81uae4Id6R3fvbLm49w8uWXRWyYWJ6SQabWXH3ZQqgJV7jzRKucjF11mQyKX38LCuctSz8w007zM7Q7bi
@@ -89,7 +90,8 @@ Organizado por módulos de dominio para escalabilidad:
    ADMIN_SECRET=claveunicaadmin
    
    # Brevo
-   BREVO_API_KEY=.... /*no podemos exponer esta clave ya que nos bajan la API de Brevo*/
+   BREVO_API_KEY=....
+   /*no podemos exponer esta clave ya que nos bajan la API de Brevo*/
    
    #stripe 
    STRIPE_SECRET_KEY=sk_test_51SVcSpIIoJE8DL7Ne81uae4Id6R3fvbLm49w8uWXRWyYWJ6SQabWXH3ZQqgJV7jzRKucjF11mQyKX38LCuctSz8w007zM7Q7bi
