@@ -71,11 +71,10 @@ Organizado por módulos de dominio para escalabilidad:
 
    ```env
    # Configuración del entorno
-   NODE_ENV=development
+   NODE_ENV=production
    PORT=5500
-   CORS_ORIGIN=http://localhost:5173
-   FRONTEND_URL=http://localhost:5173
-   
+   CORS_ORIGIN=https://frontend-app-gym.vercel.app
+   FRONTEND_URL=https://frontend-app-gym.vercel.app
    # Configuración de conexión a MongoDB
    MONGO_URL=mongodb+srv://gym_user:fitness@cluster0.6m6zi3w.mongodb.net/?appName=Cluster0
    
