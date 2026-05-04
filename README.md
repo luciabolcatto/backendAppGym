@@ -60,7 +60,7 @@ Organizado por módulos de dominio para escalabilidad:
 
    # Email (nodemailer con Gmail)
    EMAIL_USER=fitnessprimeok@gmail.com
-   EMAIL_PASS=ihklojlxpyxznxnz
+   EMAIL_PASS=esbalbjvzrbtqrfo
    
    #stripe 
    STRIPE_SECRET_KEY=sk_test_51SVcSpIIoJE8DL7Ne81uae4Id6R3fvbLm49w8uWXRWyYWJ6SQabWXH3ZQqgJV7jzRKucjF11mQyKX38LCuctSz8w007zM7Q7bi
@@ -91,7 +91,7 @@ Organizado por módulos de dominio para escalabilidad:
    
    # Email (nodemailer con Gmail)
    EMAIL_USER=fitnessprimeok@gmail.com
-   EMAIL_PASS=ihklojlxpyxznxnz
+   EMAIL_PASS=esbalbjvzrbtqrfo
    
    #stripe 
    STRIPE_SECRET_KEY=sk_test_51SVcSpIIoJE8DL7Ne81uae4Id6R3fvbLm49w8uWXRWyYWJ6SQabWXH3ZQqgJV7jzRKucjF11mQyKX38LCuctSz8w007zM7Q7bi
