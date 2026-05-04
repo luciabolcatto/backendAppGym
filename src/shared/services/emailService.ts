@@ -1,19 +1,8 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-// Configuración del transportador de email
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, 
-  auth: {
-    user: process.env.EMAIL_USER || 'fitnessprimeok@gmail.com',
-    pass: process.env.EMAIL_PASS || 'esbalbjvzrbtqrfo', // Acordate: sin espacios
-  },
-  tls: { 
-    rejectUnauthorized: false 
-  },
-  family: 4 // Fuerza IPv4 para evitar el timeout de Render
-} as any);
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 /**
  * Envía un código de recuperación de contraseña por email
  * @param email Email del destinatario
@@ -25,86 +14,85 @@ export async function sendRecoveryCode(
   code: string,
   nombre: string
 ): Promise<void> {
-  const mailOptions = {
-    from: process.env.EMAIL_USER || 'fitnessprimeok@gmail.com',
-    to: email,
-    subject: 'Código de Recuperación de Contraseña - Fitness App',
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-          }
-          .container {
-            background-color: #f4f4f4;
-            padding: 30px;
-            border-radius: 10px;
-          }
-          .code-box {
-            background-color: #fff;
-            padding: 20px;
-            text-align: center;
-            border-radius: 5px;
-            margin: 20px 0;
-            border: 2px solid #4CAF50;
-          }
-          .code {
-            font-size: 32px;
-            font-weight: bold;
-            letter-spacing: 5px;
-            color: #4CAF50;
-          }
-          .warning {
-            color: #d32f2f;
-            font-size: 14px;
-            margin-top: 15px;
-          }
-          .footer {
-            margin-top: 30px;
-            font-size: 12px;
-            color: #666;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h2>Hola ${nombre},</h2>
-          <p>Recibimos una solicitud para restablecer tu contraseña en Fitness App</p>
-          <p>Tu código de recuperación es:</p>
-          
-          <div class="code-box">
-            <div class="code">${code}</div>
-          </div>
-          
-          <p>Este código es válido por <strong>15 minutos</strong>.</p>
-          
-          <p class="warning">
-            ⚠️ Si no solicitaste este código, ignora este mensaje. 
-            Tu contraseña permanecerá segura.
-          </p>
-          
-          <div class="footer">
-            <p>Este es un mensaje automático, por favor no respondas a este email.</p>
-            <p>&copy; ${new Date().getFullYear()} Fitness App- Sistema de Gestión de Gimnasio</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `,
-  };
-
   try {
-    await transporter.sendMail(mailOptions);
-    console.log(`✉️ Código de recuperación enviado a ${email}`);
+    await resend.emails.send({
+      from: 'fitness prime <onboarding@resend.dev>', 
+      to: email,
+      subject: 'Código de Recuperación de Contraseña - Fitness App',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .container {
+              background-color: #f4f4f4;
+              padding: 30px;
+              border-radius: 10px;
+            }
+            .code-box {
+              background-color: #fff;
+              padding: 20px;
+              text-align: center;
+              border-radius: 5px;
+              margin: 20px 0;
+              border: 2px solid #4CAF50;
+            }
+            .code {
+              font-size: 32px;
+              font-weight: bold;
+              letter-spacing: 5px;
+              color: #4CAF50;
+            }
+            .warning {
+              color: #d32f2f;
+              font-size: 14px;
+              margin-top: 15px;
+            }
+            .footer {
+              margin-top: 30px;
+              font-size: 12px;
+              color: #666;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>Hola ${nombre},</h2>
+            <p>Recibimos una solicitud para restablecer tu contraseña en Fitness App</p>
+            <p>Tu código de recuperación es:</p>
+            
+            <div class="code-box">
+              <div class="code">${code}</div>
+            </div>
+            
+            <p>Este código es válido por <strong>15 minutos</strong>.</p>
+            
+            <p class="warning">
+              ⚠️ Si no solicitaste este código, ignora este mensaje. 
+              Tu contraseña permanecerá segura.
+            </p>
+            
+            <div class="footer">
+              <p>Este es un mensaje automático, por favor no respondas a este email.</p>
+              <p>&copy; ${new Date().getFullYear()} Fitness App - Sistema de Gestión de Gimnasio</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    });
+
+    console.log(`✅ Código de recuperación enviado a ${email} vía Resend`);
   } catch (error) {
-    console.error('❌ Error enviando email:', error);
+    console.error('❌ Error enviando email con Resend:', error);
     throw new Error('No se pudo enviar el código por email');
   }
 }
