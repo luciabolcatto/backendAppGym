@@ -22,18 +22,18 @@ export const ContratoRouter = Router()
 
 ContratoRouter.get('/filtrado', adminAuth, findFiltered)
 
-ContratoRouter.get('/', findAll)
+ContratoRouter.get('/', adminAuth, findAll)
 ContratoRouter.get('/:id', authMiddleware, findOne)
-ContratoRouter.post('/', sanitizeContratoInput, add)
-ContratoRouter.put('/:id', sanitizeContratoInput, update)
-ContratoRouter.patch('/:id', sanitizeContratoInput, update)
-ContratoRouter.delete('/:id', remove)
+ContratoRouter.post('/', adminAuth, sanitizeContratoInput, add)
+ContratoRouter.put('/:id', adminAuth, sanitizeContratoInput, update)
+ContratoRouter.patch('/:id', adminAuth, sanitizeContratoInput, update)
+ContratoRouter.delete('/:id', adminAuth, remove)
 
 // Nuevas rutas para el caso de uso "Contratar Plan"
-ContratoRouter.post('/contratar', contratarMembresia)
-ContratoRouter.patch('/cancelar/:contratoId', cancelarContrato)
+ContratoRouter.post('/contratar', authMiddleware, contratarMembresia)
+ContratoRouter.patch('/cancelar/:contratoId', authMiddleware, cancelarContrato)
 ContratoRouter.post('/verificar-vencimientos', verificarVencimientos)
 
 // Rutas para gestión de múltiples contratos
 ContratoRouter.get('/usuario/:usuarioId', authMiddleware, obtenerContratosUsuario)
-ContratoRouter.get('/admin/estadisticas', obtenerEstadisticasContrato)
+ContratoRouter.get('/admin/estadisticas', adminAuth, obtenerEstadisticasContrato)

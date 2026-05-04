@@ -7,6 +7,7 @@ import {
     pagarConTransferencia,
     pagarConEfectivo
 } from './stripe.controller.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 export const StripeRouter = Router();
 
@@ -14,14 +15,14 @@ export const StripeRouter = Router();
 StripeRouter.get('/metodos-pago', getMetodosPago);
 
 // Stripe Checkout (tarjeta de crédito/débito)
-StripeRouter.post('/create-checkout-session', createCheckoutSession);
+StripeRouter.post('/create-checkout-session', authMiddleware, createCheckoutSession);
 
 // Verificar estado de una sesión de pago
-StripeRouter.get('/session/:sessionId', getSessionStatus);
+StripeRouter.get('/session/:sessionId', authMiddleware, getSessionStatus);
 
 // Pagos simulados (transferencia y efectivo)
-StripeRouter.post('/pagar-transferencia', pagarConTransferencia);
-StripeRouter.post('/pagar-efectivo', pagarConEfectivo);
+StripeRouter.post('/pagar-transferencia', authMiddleware, pagarConTransferencia);
+StripeRouter.post('/pagar-efectivo', authMiddleware, pagarConEfectivo);
 
 // Nota: El webhook se configura directamente en app.ts con express.raw()
 // para que el body no sea parseado como JSON
