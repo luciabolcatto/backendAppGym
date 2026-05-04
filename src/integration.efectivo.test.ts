@@ -205,6 +205,7 @@ describe('Integracion real - flujo backend pago efectivo', () => {
 
     const contratarResponse = await requestHttp(`${baseUrl}/api/Contratos/contratar`, {
       method: 'POST',
+      headers: { Authorization: `Bearer ${loginBody.token}` },
       body: {
         usuarioId: usuario.id,
         membresiaId: membresia.id,
@@ -220,6 +221,7 @@ describe('Integracion real - flujo backend pago efectivo', () => {
     const contratoId = contratarBody.data.contrato.id;
     const pagoEfectivoResponse = await requestHttp(`${baseUrl}/api/stripe/pagar-efectivo`, {
       method: 'POST',
+      headers: { Authorization: `Bearer ${loginBody.token}` },
       body: { contratoId },
     });
 

@@ -274,6 +274,7 @@ describe('Integracion real - flujo backend', () => {
 
     const contratarResponse = await requestHttp(`${baseUrl}/api/Contratos/contratar`, {
       method: 'POST',
+      headers: { Authorization: `Bearer ${loginBody.token}` },
       body: {
         usuarioId: usuario.id,
         membresiaId: membresia.id,
@@ -289,6 +290,7 @@ describe('Integracion real - flujo backend', () => {
     const contratoId = contratarBody.data.contrato.id;
     const checkoutResponse = await requestHttp(`${baseUrl}/api/stripe/create-checkout-session`, {
       method: 'POST',
+      headers: { Authorization: `Bearer ${loginBody.token}` },
       body: { contratoId },
     });
 
