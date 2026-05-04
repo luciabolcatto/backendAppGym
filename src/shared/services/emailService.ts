@@ -1,21 +1,19 @@
 import nodemailer from 'nodemailer';
 
 // Configuración del transportador de email
-
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
-  secure: false,
+  secure: false, 
   auth: {
     user: process.env.EMAIL_USER || 'fitnessprimeok@gmail.com',
-    pass: process.env.EMAIL_PASS || 'ihklojlxpyxznxnz',
+    pass: process.env.EMAIL_PASS || 'esbalbjvzrbtqrfo', // Acordate: sin espacios
   },
-  tls: {
-    
-    rejectUnauthorized: false
-  }
-});
-
+  tls: { 
+    rejectUnauthorized: false 
+  },
+  family: 4 // Fuerza IPv4 para evitar el timeout de Render
+} as any);
 /**
  * Envía un código de recuperación de contraseña por email
  * @param email Email del destinatario
