@@ -11,6 +11,7 @@ import {
   findAllWithUserReservas,
 } from './clase.controler.js';
 import { adminAuth } from '../admin/adminauth.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 export const ClaseRouter = Router();
 
@@ -23,4 +24,4 @@ ClaseRouter.post('/', adminAuth, sanitizeClaseInput, add);
 ClaseRouter.put('/:id', adminAuth, sanitizeClaseInput, update);
 ClaseRouter.patch('/:id', adminAuth, sanitizeClaseInput, update);
 ClaseRouter.delete('/:id', adminAuth, remove);
-ClaseRouter.patch('/:id/actualizar-cupo', adminAuth, actualizarCupo);
+ClaseRouter.patch('/:id/actualizar-cupo', authMiddleware, actualizarCupo);
