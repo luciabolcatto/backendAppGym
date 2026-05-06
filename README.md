@@ -17,6 +17,14 @@ Servidor para la gestión de gimnasios, construido con **Node.js**, **TypeScript
 - **Mailing:** Brevo.
 - **Tareas Programadas:** Node-cron (Automatización de vencimientos).
 
+## Requisitos
+
+- **Node.js**: v22.15.0 (recomendado)
+- **pnpm** (se recomienda) — instalar: `npm i -g pnpm`
+- **MongoDB**: local o remoto (ver sección de variables de entorno)
+- **Docker** (opcional) para ejecutar MongoDB vía `docker-compose`
+- **TypeScript**: v5.9.2
+
 ## Estructura de Proyecto
 
 Organizado por módulos de dominio para escalabilidad:
@@ -37,71 +45,71 @@ Organizado por módulos de dominio para escalabilidad:
    Ejemplo para desarrollo:
 
    ```env
-   # Configuración del entorno
+   # Entorno
    NODE_ENV=development
    PORT=5500
    CORS_ORIGIN=http://localhost:5173
-   
+
    # Configuración de conexión a MongoDB
    DB_HOST=localhost
    DB_PORT=27017
    DB_NAME=gym
-   
-   # Activar logs de MikroORM (true o false)
-   DB_DEBUG=true
-   
-   # JWT
-   JWT_SECRET=mi_clave
-   
-   # Admin
-   ADMIN_PASSWORD=miclavesegura
-   ADMIN_SECRET=claveunicaadmin
-   
 
-   # Brevo
-   BREVO_API_KEY=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
-   
-   #stripe 
-   STRIPE_SECRET_KEY=sk_test_51SVcSpIIoJE8DL7Ne81uae4Id6R3fvbLm49w8uWXRWyYWJ6SQabWXH3ZQqgJV7jzRKucjF11mQyKX38LCuctSz8w007zM7Q7bi
-   STRIPE_WEBHOOK_SECRET= whsec_d4ce2f1a52d731cbc65795289c13f3f5f118238d6a445068592a8b4e041c9d66
-    /*En una terminal ejecutar: stripe listen --events checkout.session.completed --forward-to http://127.0.0.1:5500/api/stripe/webhook  eso le dara su webhook secret local */
-     ```
+   # Logs de MikroORM
+   DB_DEBUG=true
+
+   # Seguridad
+   JWT_SECRET=your_jwt_secret
+   ADMIN_PASSWORD=your_admin_password
+   ADMIN_SECRET=your_admin_secret
+
+   # Integraciones (use placeholders)
+   BREVO_API_KEY=your_brevo_api_key
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+   ```
+
+   Para obtener el `STRIPE_WEBHOOK_SECRET` en local ejecutar:
+
+   ```bash
+   stripe listen --events checkout.session.completed --forward-to http://127.0.0.1:5500/api/stripe/webhook
+   ```
+
+   y copiar el valor `whsec_...` que imprime Stripe.
 
    Ejemplo para produccion:
 
    ```env
-   # Configuración del entorno
+   # Entorno
    NODE_ENV=production
    PORT=5500
    CORS_ORIGIN=https://frontend-app-gym.vercel.app
    FRONTEND_URL=https://frontend-app-gym.vercel.app
-   # Configuración de conexión a MongoDB
-   MONGO_URL=mongodb+srv://gym_user:fitness@cluster0.6m6zi3w.mongodb.net/?appName=Cluster0
-   
-   # Activar logs de MikroORM (true o false)
+
+   # Usar MONGO_URL para conexión remota
+   MONGO_URL=mongodb+srv://<user>:<password>@cluster0.mongodb.net/gym?retryWrites=true&w=majority
+
    DB_DEBUG=false
-   
-   # JWT
-   JWT_SECRET=mi_clave
-   
-   # Admin
-   ADMIN_PASSWORD=miclavesegura
-   ADMIN_SECRET=claveunicaadmin
-   
-   # Brevo
-   BREVO_API_KEY=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
-   
-   #stripe 
-   STRIPE_SECRET_KEY=sk_test_51SVcSpIIoJE8DL7Ne81uae4Id6R3fvbLm49w8uWXRWyYWJ6SQabWXH3ZQqgJV7jzRKucjF11mQyKX38LCuctSz8w007zM7Q7bi
-   STRIPE_WEBHOOK_SECRET= whsec_PuB4EO7Viy8ShfecQigebc9woDUc9plY
+
+   JWT_SECRET=your_jwt_secret
+   ADMIN_PASSWORD=your_admin_password
+   ADMIN_SECRET=your_admin_secret
+
+   BREVO_API_KEY=your_brevo_api_key
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 
    ```
 
-4. **Poblar Base de Datos:**
+3. **Poblar Base de Datos:**
+
    ```bash
    pnpm run seed
    ```
-5. **Iniciar en modo desarrollo:**
+
+   Nota: el script de `seed` borra datos existentes antes de ejecutarlo.
+
+4. **Iniciar en modo desarrollo:**
 
    ```bash
    pnpm run start:dev
