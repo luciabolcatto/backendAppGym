@@ -16,6 +16,7 @@ Servidor para la gestión de gimnasios, construido con **Node.js**, **TypeScript
 - **Pagos:** Stripe API.
 - **Mailing:** Brevo.
 - **Tareas Programadas:** Node-cron (Automatización de vencimientos).
+- **Testing:** Jest.
 
 ## Requisitos
 
