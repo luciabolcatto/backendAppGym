@@ -108,7 +108,7 @@ Organizado por módulos de dominio para escalabilidad:
    pnpm run seed
    ```
 
-   Nota: el script de `seed` borra datos existentes antes de ejecutarlo.
+   Nota: El script de `seed` " genera datos realistas y concistentes en la base de datos (MongoDB). Los registros cuentan con fechas actualizadas para permitir       una evaluación precisa de los flujos de trabajo y la gestión de turnos/pagos en tiempo real.Ademas borra datos existentes antes de ejecutarlo.
 
 4. **Iniciar en modo desarrollo:**
 
