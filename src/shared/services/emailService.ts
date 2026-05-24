@@ -15,15 +15,15 @@ export async function sendRecoveryCode(
     throw new Error('Falta configurar BREVO_API_KEY');
   }
 
-  // Armamos el cuerpo de la petición para Brevo
+  
   const payload = {
     sender: {
       name: 'Fitness App',
-      email: process.env.EMAIL_USER || 'fitnessprimeok@gmail.com', // El email que verificaste en Brevo
+      email: process.env.EMAIL_USER || 'fitnessprimeok@gmail.com', 
     },
     to: [
       {
-        email: email, // ¡Ahora sí puede ser cualquier correo!
+        email: email, 
       },
     ],
     subject: 'Código de Recuperación de Contraseña - Fitness App',

@@ -31,7 +31,7 @@ const configuredOrigins = [
 const allowedOrigins = new Set(configuredOrigins);
 const isAllowedOrigin = (origin: string) =>
   allowedOrigins.has(origin) || /^https:\/\/.*\.vercel\.app$/i.test(origin);
-console.log("✅ BACKEND APP.TS CARGADO - TEST LU");
+console.log("✅ BACKEND APP.TS CARGADO ");
 
 // Webhook de Stripe - DEBE ir ANTES de express.json()
 // Stripe requiere el body raw para verificar la firma
